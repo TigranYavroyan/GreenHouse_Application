@@ -10,15 +10,29 @@ const path = require('path');
 class GreenhouseBackend {
     constructor() {
         this.app = express();
-        this.redisClient = redis.createClient();
+        
+        // Use environment variables with Docker fallbacks
+        this.redisHost = process.env.REDIS_HOST || 'redis';
+        this.redisPort = process.env.REDIS_PORT || 6379;
+        this.rabbitmqHost = process.env.RABBITMQ_HOST || 'rabbitmq';
+        this.rabbitmqPort = process.env.RABBITMQ_PORT || 5672;
+        
+        // Redis client with proper Docker configuration
+        this.redisClient = redis.createClient({
+            socket: {
+                host: this.redisHost,
+                port: this.redisPort
+            }
+        });
+        
         this.sessions = new Map();
         this.sessionCounter = 1;
         
-        // Initialize logs directory FIRST
+        // Initialize logs directory
         this.logsDir = path.join(__dirname, 'logs');
         this.ensureLogsDirectory();
         
-        // Create main system logger AFTER logs directory is initialized
+        // Create main system logger
         this.systemLogger = this.createSystemLogger();
         
         this.setupMiddleware();
@@ -32,6 +46,8 @@ class GreenhouseBackend {
         };
         
         this.systemLogger.info(`Backend started - Logs: ${this.logsDir}`);
+        this.systemLogger.info(`Redis: ${this.redisHost}:${this.redisPort}`);
+        this.systemLogger.info(`RabbitMQ: ${this.rabbitmqHost}:${this.rabbitmqPort}`);
     }
 
     ensureLogsDirectory() {
@@ -79,6 +95,8 @@ Started: ${new Date().toISOString()}
 Node.js: ${process.version}
 Platform: ${os.platform()}/${os.arch()}
 Logs Directory: ${this.logsDir}
+Redis: ${this.redisHost}:${this.redisPort}
+RabbitMQ: ${this.rabbitmqHost}:${this.rabbitmqPort}
 ==============================================
 
 `;
@@ -184,7 +202,9 @@ Log File: ${logFileName}
                 platform: os.platform(),
                 logsDirectory: this.logsDir,
                 totalSessions: this.sessionCounter - 1,
-                stats: this.commandStats
+                stats: this.commandStats,
+                redisHost: this.redisHost,
+                rabbitmqHost: this.rabbitmqHost
             });
         });
 
@@ -358,7 +378,10 @@ Log File: ${logFileName}
 
     async setupRabbitMQ() {
         try {
-            this.connection = await amqp.connect('amqp://localhost');
+            const rabbitmqUrl = `amqp://${this.rabbitmqHost}:${this.rabbitmqPort}`;
+            this.systemLogger.info(`Connecting to RabbitMQ at: ${rabbitmqUrl}`);
+            
+            this.connection = await amqp.connect(rabbitmqUrl);
             this.channel = await this.connection.createChannel();
             
             // Use simpler queue declaration without complex arguments
@@ -681,6 +704,19 @@ Log File: ${logFileName}
 
     async start(port = 3000) {
         try {
+            // Add Redis connection error handling
+            this.redisClient.on('error', (err) => {
+                this.systemLogger.error(`Redis Client Error: ${err.message}`);
+            });
+            
+            this.redisClient.on('connect', () => {
+                this.systemLogger.info('Redis Client Connected');
+            });
+            
+            this.redisClient.on('ready', () => {
+                this.systemLogger.info('Redis Client Ready');
+            });
+            
             await this.redisClient.connect();
             this.systemLogger.info('Redis connected successfully');
             

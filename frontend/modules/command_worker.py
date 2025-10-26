@@ -3,6 +3,7 @@ import json
 import uuid
 import logging
 import time
+import os
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 
 class CommandWorker(QObject):
@@ -12,6 +13,13 @@ class CommandWorker(QObject):
     
     def __init__(self):
         super().__init__()
+        
+        # Use environment variables with Docker fallbacks
+        self.host = os.getenv('RABBITMQ_HOST', 'rabbitmq')
+        self.port = int(os.getenv('RABBITMQ_PORT', '5672'))
+        self.username = os.getenv('RABBITMQ_USER', 'guest')
+        self.password = os.getenv('RABBITMQ_PASS', 'guest')
+        
         self.connection = None
         self.channel = None
         self.consuming = False
@@ -26,17 +34,26 @@ class CommandWorker(QObject):
         self.consumer_timer.timeout.connect(self._check_for_messages)
         self.consumer_timer.setInterval(100)  # Check every 100ms
         
+        self.logger.info(f"Initializing CommandWorker for RabbitMQ at {self.host}:{self.port}")
+        
     def setup_rabbitmq(self):
         try:
             # Clean up existing connection
             self.disconnect()
             
-            self.logger.info("Creating new RabbitMQ connection...")
+            self.logger.info(f"Creating new RabbitMQ connection to {self.host}:{self.port}...")
             
-            # Create connection with simpler parameters
-            self.connection = pika.BlockingConnection(
-                pika.ConnectionParameters('localhost')
+            # Create connection with environment variables
+            credentials = pika.PlainCredentials(self.username, self.password)
+            parameters = pika.ConnectionParameters(
+                host=self.host,
+                port=self.port,
+                credentials=credentials,
+                heartbeat=600,
+                blocked_connection_timeout=300
             )
+            
+            self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
             
             # Declare queues (let server handle arguments)
@@ -56,7 +73,7 @@ class CommandWorker(QObject):
             return True
             
         except Exception as e:
-            self.logger.error(f"Failed to connect to RabbitMQ: {str(e)}")
+            self.logger.error(f"Failed to connect to RabbitMQ at {self.host}:{self.port}: {str(e)}")
             self.connection_status.emit(False)
             return False
     

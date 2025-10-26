@@ -3,6 +3,7 @@ import json
 import uuid
 import logging
 import requests
+import os
 from PyQt5.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout, 
                              QWidget, QPushButton, QTextEdit, QLineEdit, QTabWidget,
                              QLabel, QGroupBox, QGridLayout, QMessageBox, QCheckBox,
@@ -10,7 +11,7 @@ from PyQt5.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout,
 from PyQt5.QtCore import QDateTime, Qt, QTimer
 
 from modules.command_worker import CommandWorker
-from modules.styles import GreenhouseTheme, StyleSheetGenerator  # Import the new styling system
+from modules.styles import GreenhouseTheme, StyleSheetGenerator
 
 def setup_logging():
     logging.basicConfig(
@@ -26,11 +27,13 @@ class GreenhouseDesktop(QMainWindow):
     def __init__(self):
         super().__init__()
         self.pending_commands = {}
-        self.session_id = str(uuid.uuid4())  # Persistent session ID
+        self.session_id = str(uuid.uuid4())
         self.current_path = "/"
         self.rabbitmq_connected = False
         self.command_worker = None
-        self.backend_url = "http://localhost:3000"  # Backend URL for status checks
+        
+        # Use environment variable for backend URL with Docker fallback
+        self.backend_url = os.getenv('BACKEND_URL', 'http://localhost:3000')
         
         # Initialize styling
         self.theme = GreenhouseTheme()
@@ -38,6 +41,7 @@ class GreenhouseDesktop(QMainWindow):
         
         self.logger = logging.getLogger('GreenhouseDesktop')
         self.logger.info(f"Starting application with session ID: {self.session_id}")
+        self.logger.info(f"Backend URL: {self.backend_url}")
         
         self.init_ui()
         self.setup_command_worker()
@@ -45,15 +49,11 @@ class GreenhouseDesktop(QMainWindow):
         
     def apply_styles(self):
         """Apply modern styles to all widgets"""
-        # Set main window style
         self.setStyleSheet(self.styler.generate_main_window_style())
-        
-        # Apply styles to specific widgets
         self.apply_widget_styles()
         
     def apply_widget_styles(self):
         """Apply styles to individual widget groups"""
-        # Find and style all buttons
         buttons = self.findChildren(QPushButton)
         for button in buttons:
             text = button.text().lower()
@@ -66,32 +66,26 @@ class GreenhouseDesktop(QMainWindow):
             else:
                 button.setStyleSheet(self.styler.generate_button_style("default"))
         
-        # Style group boxes
         group_boxes = self.findChildren(QGroupBox)
         for group_box in group_boxes:
             group_box.setStyleSheet(self.styler.generate_group_box_style())
         
-        # Style text edits
         text_edits = self.findChildren(QTextEdit)
         for text_edit in text_edits:
             text_edit.setStyleSheet(self.styler.generate_text_edit_style())
         
-        # Style line edits
         line_edits = self.findChildren(QLineEdit)
         for line_edit in line_edits:
             line_edit.setStyleSheet(self.styler.generate_line_edit_style())
         
-        # Style tab widget
         tab_widgets = self.findChildren(QTabWidget)
         for tab_widget in tab_widgets:
             tab_widget.setStyleSheet(self.styler.generate_tab_widget_style())
         
-        # Style checkboxes
         checkboxes = self.findChildren(QCheckBox)
         for checkbox in checkboxes:
             checkbox.setStyleSheet(self.styler.generate_checkbox_style())
         
-        # Apply specific label styles
         self.apply_label_styles()
         
     def apply_label_styles(self):
@@ -102,7 +96,6 @@ class GreenhouseDesktop(QMainWindow):
             if any(word in text for word in ['session', 'current path']):
                 label.setStyleSheet(self.styler.generate_label_style("caption"))
             elif label == self.connection_status:
-                # Connection status will be updated dynamically
                 pass
             elif label == self.status_label:
                 label.setStyleSheet(self.styler.generate_label_style("body"))
@@ -111,13 +104,13 @@ class GreenhouseDesktop(QMainWindow):
         
     def init_ui(self):
         self.setWindowTitle("🌿 Greenhouse Automation Control System")
-        self.setGeometry(100, 100, 1200, 800)  # Reduced height for better proportions
+        self.setGeometry(100, 100, 1200, 800)
         
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
-        layout.setSpacing(8)  # Reduced spacing
-        layout.setContentsMargins(12, 12, 12, 12)  # Reduced margins
+        layout.setSpacing(8)
+        layout.setContentsMargins(12, 12, 12, 12)
         
         # Session info
         session_layout = QHBoxLayout()
@@ -193,13 +186,11 @@ class GreenhouseDesktop(QMainWindow):
         layout.setSpacing(8)
         layout.setContentsMargins(8, 8, 8, 8)
         
-        # Control buttons group
         control_group = QGroupBox("🌱 Greenhouse Controls")
         control_layout = QGridLayout(control_group)
         control_layout.setSpacing(6)
         control_layout.setContentsMargins(10, 16, 10, 10)
         
-        # Create buttons with appropriate sizing
         buttons = [
             ("🌡️ Temperature", 0, 0),
             ("💧 Humidity", 0, 1),
@@ -212,19 +203,17 @@ class GreenhouseDesktop(QMainWindow):
             btn = QPushButton(text)
             btn.clicked.connect(lambda checked, cmd="read_sensor": self.send_user_command(cmd))
             btn.setStyleSheet(self.styler.generate_button_style("primary"))
-            btn.setMinimumHeight(32)  # Set consistent button height
+            btn.setMinimumHeight(32)
             control_layout.addWidget(btn, row, col)
         
-        # Output display
         output_label = QLabel("Command Output:")
         output_label.setStyleSheet(self.styler.generate_label_style("subtitle"))
         
         self.user_output = QTextEdit()
         self.user_output.setReadOnly(True)
         self.user_output.setPlaceholderText("Command results will appear here...")
-        self.user_output.setMinimumHeight(300)  # Set minimum height
+        self.user_output.setMinimumHeight(300)
         
-        # Clear button
         btn_clear_user = QPushButton("🗑️ Clear Output")
         btn_clear_user.clicked.connect(self.user_output.clear)
         btn_clear_user.setStyleSheet(self.styler.generate_button_style("secondary"))
@@ -243,7 +232,6 @@ class GreenhouseDesktop(QMainWindow):
         layout.setSpacing(8)
         layout.setContentsMargins(8, 8, 8, 8)
         
-        # Current path display
         path_layout = QHBoxLayout()
         path_label = QLabel("Current Path:")
         path_label.setStyleSheet(self.styler.generate_label_style("caption"))
@@ -262,13 +250,11 @@ class GreenhouseDesktop(QMainWindow):
         path_layout.addWidget(self.path_label)
         path_layout.addStretch()
         
-        # Quick commands
         history_layout = QHBoxLayout()
         history_label = QLabel("Quick Commands:")
         history_label.setStyleSheet(self.styler.generate_label_style("subtitle"))
         history_layout.addWidget(history_label)
         
-        # Create quick command buttons
         quick_commands = [
             ("📁 ls", "ls"),
             ("📂 pwd", "pwd"),
@@ -285,7 +271,6 @@ class GreenhouseDesktop(QMainWindow):
         
         history_layout.addStretch()
         
-        # Command input
         input_layout = QHBoxLayout()
         self.command_input = QLineEdit()
         self.command_input.setPlaceholderText("Enter shell command...")
@@ -306,7 +291,6 @@ class GreenhouseDesktop(QMainWindow):
         input_layout.addWidget(btn_send)
         input_layout.addWidget(btn_cancel)
         
-        # Output display
         output_label = QLabel("Terminal Output:")
         output_label.setStyleSheet(self.styler.generate_label_style("subtitle"))
         
@@ -315,7 +299,6 @@ class GreenhouseDesktop(QMainWindow):
         self.dev_output.setPlaceholderText("Terminal output will appear here...")
         self.dev_output.setMinimumHeight(300)
         
-        # Clear button
         btn_clear_dev = QPushButton("🗑️ Clear Output")
         btn_clear_dev.clicked.connect(self.dev_output.clear)
         btn_clear_dev.setStyleSheet(self.styler.generate_button_style("secondary"))
@@ -336,13 +319,11 @@ class GreenhouseDesktop(QMainWindow):
         layout.setSpacing(12)
         layout.setContentsMargins(12, 12, 12, 12)
         
-        # Server controls group
         server_group = QGroupBox("🖥️ Server Monitoring & Management")
         server_layout = QGridLayout(server_group)
         server_layout.setSpacing(8)
         server_layout.setContentsMargins(12, 20, 12, 12)
         
-        # Server control buttons
         server_buttons = [
             ("❤️ Check Health", self.check_server_health),
             ("📈 View Statistics", self.view_server_stats),
@@ -372,7 +353,6 @@ class GreenhouseDesktop(QMainWindow):
                 col = 0
                 row += 1
         
-        # Session log selection
         log_selection_layout = QHBoxLayout()
         log_selection_layout.addWidget(QLabel("Session ID:"))
         self.session_log_input = QLineEdit()
@@ -380,7 +360,6 @@ class GreenhouseDesktop(QMainWindow):
         log_selection_layout.addWidget(self.session_log_input)
         log_selection_layout.addStretch()
         
-        # Server info display
         info_group = QGroupBox("📊 Server Information")
         info_layout = QVBoxLayout(info_group)
         
@@ -388,7 +367,6 @@ class GreenhouseDesktop(QMainWindow):
         self.server_info.setReadOnly(True)
         self.server_info.setPlaceholderText("Server information will appear here...")
         
-        # Auto-refresh checkbox
         refresh_layout = QHBoxLayout()
         self.auto_refresh = QCheckBox("🔄 Auto-refresh every 10 seconds")
         self.auto_refresh.toggled.connect(self.toggle_auto_refresh)
@@ -406,7 +384,6 @@ class GreenhouseDesktop(QMainWindow):
         layout.addLayout(log_selection_layout)
         layout.addWidget(info_group)
         
-        # Setup auto-refresh timer
         self.auto_refresh_timer = QTimer()
         self.auto_refresh_timer.timeout.connect(self.refresh_all_status)
         
@@ -470,7 +447,7 @@ class GreenhouseDesktop(QMainWindow):
                 return None
                 
         except requests.exceptions.ConnectionError:
-            self.server_info.append("Error: Cannot connect to backend server. Make sure it's running on localhost:3000\n")
+            self.server_info.append(f"Error: Cannot connect to backend server at {self.backend_url}. Make sure it's running.\n")
             return None
         except requests.exceptions.Timeout:
             self.server_info.append("Error: Request timeout - server is not responding\n")
@@ -550,12 +527,12 @@ class GreenhouseDesktop(QMainWindow):
         # Setup connection check timer
         self.connection_timer = QTimer()
         self.connection_timer.timeout.connect(self.check_connection)
-        self.connection_timer.start(10000)  # Check every 10 seconds
+        self.connection_timer.start(10000)
         
     def update_connection_status(self, connected):
         self.rabbitmq_connected = connected
         if connected:
-            self.connection_status.setText("✅ Connected")
+            self.connection_status.setText("✅ Connected to RabbitMQ")
             self.connection_status.setStyleSheet(f"""
                 color: {self.theme.colors.success}; 
                 font-weight: {self.theme.typography.medium};
@@ -566,7 +543,7 @@ class GreenhouseDesktop(QMainWindow):
                 border-left: 2px solid {self.theme.colors.success};
             """)
         else:
-            self.connection_status.setText("❌ Disconnected")
+            self.connection_status.setText("❌ Disconnected from RabbitMQ")
             self.connection_status.setStyleSheet(f"""
                 color: {self.theme.colors.error}; 
                 font-weight: {self.theme.typography.medium};
@@ -593,7 +570,6 @@ class GreenhouseDesktop(QMainWindow):
             'sessionId': self.session_id
         }
         
-        # STORE THE COMMAND IN PENDING_COMMANDS - THIS WAS MISSING!
         self.pending_commands[command_id] = {
             "type": "user",
             "command": command,
@@ -602,11 +578,9 @@ class GreenhouseDesktop(QMainWindow):
         
         self.logger.info(f"Sending user command {command_id}: {command}")
         
-        # Add a small delay between commands to prevent overwhelming the connection
         import time
         time.sleep(0.1)
         
-        # Try to send the command
         if self.command_worker.send_command(command_data):
             timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
             self.user_output.append(f"[{timestamp}] Sent: {command}")
@@ -614,7 +588,6 @@ class GreenhouseDesktop(QMainWindow):
         else:
             self.logger.warning("First send attempt failed, attempting reconnect...")
             if self.command_worker.attempt_reconnect():
-                # Retry after reconnect
                 time.sleep(0.1)
                 if self.command_worker.send_command(command_data):
                     self.logger.info("Command sent successfully after reconnect")
@@ -638,17 +611,14 @@ class GreenhouseDesktop(QMainWindow):
             self.show_error("Not connected to RabbitMQ", "Please check if RabbitMQ server is running")
             return
             
-        # Clear input if it came from the text field
         if hasattr(self, 'command_input') and self.command_input.text().strip() == command_text:
             self.command_input.clear()
         
-        # Parse command type
         if command_text.startswith('cd '):
             path = command_text[3:].strip()
             command = "change_directory"
             parameters = {"path": path}
         else:
-            # Use execute_raw for all other commands to preserve session state
             command = "execute_raw"
             parameters = {"raw_command": command_text}
         

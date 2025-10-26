@@ -1,6 +1,7 @@
 import pika
 import json
 import logging
+import os
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer, QMutex, QMutexLocker
 
 class RabbitMQClient(QObject):
@@ -9,12 +10,14 @@ class RabbitMQClient(QObject):
     connection_status_changed = pyqtSignal(bool)
     message_received = pyqtSignal(dict)
     
-    def __init__(self, host='localhost', port=5672, username='guest', password='guest'):
+    def __init__(self):
         super().__init__()
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
+        
+        # Use environment variables with Docker fallbacks
+        self.host = os.getenv('RABBITMQ_HOST', 'rabbitmq')  # Docker service name
+        self.port = int(os.getenv('RABBITMQ_PORT', '5672'))
+        self.username = os.getenv('RABBITMQ_USER', 'guest')
+        self.password = os.getenv('RABBITMQ_PASS', 'guest')
         
         self.connection = None
         self.channel = None
@@ -33,6 +36,7 @@ class RabbitMQClient(QObject):
         self.maintenance_timer.start(100)  # Process every 100ms
         
         self.logger = logging.getLogger('RabbitMQClient')
+        self.logger.info(f"Initializing RabbitMQ client for {self.host}:{self.port}")
         
     def connect(self):
         """Establish connection to RabbitMQ server"""
@@ -48,7 +52,7 @@ class RabbitMQClient(QObject):
                     credentials=credentials,
                     heartbeat=600,
                     blocked_connection_timeout=300,
-                    # Add these parameters for better stability
+                    # Add these parameters for better Docker compatibility
                     socket_timeout=5,
                     retry_delay=5,
                     connection_attempts=3
@@ -62,12 +66,12 @@ class RabbitMQClient(QObject):
                 self.channel.queue_declare(queue=self.response_queue, durable=True)
                 
                 self.is_connected = True
-                self.logger.info("Successfully connected to RabbitMQ")
+                self.logger.info(f"Successfully connected to RabbitMQ at {self.host}:{self.port}")
                 self.connection_status_changed.emit(True)
                 return True
                 
             except Exception as e:
-                self.logger.error(f"Failed to connect to RabbitMQ: {e}")
+                self.logger.error(f"Failed to connect to RabbitMQ at {self.host}:{self.port}: {e}")
                 self.is_connected = False
                 self.connection_status_changed.emit(False)
                 return False
