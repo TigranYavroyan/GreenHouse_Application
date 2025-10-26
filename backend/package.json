@@ -1,0 +1,10 @@
+{
+  "name": "greenhouse-backend",
+  "version": "1.0.0",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "express": "^4.18.2",
+    "redis": "^4.6.7",
+    "uuid": "^8.3.2"
+  }
+}
