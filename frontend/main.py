@@ -6,7 +6,7 @@ import argparse
 import uuid
 import os
 
-from modules.greephouse import GreenhouseDesktop, setup_logging
+from frontend.modules.greenhouse import GreenhouseDesktop, setup_logging
 from modules.command_worker import CommandWorker
 
 def run_headless():

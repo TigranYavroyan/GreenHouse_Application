@@ -1,0 +1,24 @@
+=== Greenhouse Backend System Log ===
+Started: 2025-10-29T16:17:41.462Z
+Node.js: v22.11.0
+Platform: linux/x64
+Logs Directory: /home/tigran/Desktop/diplomayin/backend/logs
+Redis: redis:6379
+RabbitMQ: rabbitmq:5672
+==============================================
+
+[2025-10-29T16:17:41.464Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-10-29T16:17:41.472Z] INFO: Backend started - Logs: /home/tigran/Desktop/diplomayin/backend/logs
+[2025-10-29T16:17:41.472Z] INFO: Redis: redis:6379
+[2025-10-29T16:17:41.472Z] INFO: RabbitMQ: rabbitmq:5672
+[2025-10-29T16:17:41.474Z] ERROR: RabbitMQ setup failed: getaddrinfo EAI_AGAIN rabbitmq
+[2025-10-29T16:17:41.474Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:41.477Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:41.528Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:41.631Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:41.784Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:41.986Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:42.239Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:42.542Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:42.896Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
+[2025-10-29T16:17:43.297Z] ERROR: Redis Client Error: getaddrinfo EAI_AGAIN redis
