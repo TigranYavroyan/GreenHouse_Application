@@ -4,6 +4,10 @@ WORKDIR /app
 
 # Install system dependencies for PyQt5 and X11
 RUN apt-get update && apt-get install -y \
+    locales \
+    fonts-dejavu \
+    fonts-noto \
+    fonts-freefont-ttf \
     python3-pyqt5 \
     x11-apps \
     xvfb \

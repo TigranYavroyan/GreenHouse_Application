@@ -9,7 +9,7 @@ if [ "$(uname)" == "Linux" ]; then
 fi
 
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 echo "Services starting..."
 echo "Backend API: http://localhost:3000"
@@ -23,5 +23,5 @@ sleep 10
 # Check health
 curl -f http://localhost:3000/health && echo "Backend is healthy!" || echo "Backend health check failed"
 
-echo "Use 'docker-compose logs -f' to view logs"
-echo "Use 'docker-compose down' to stop services"
+echo "Use 'docker compose logs -f' to view logs"
+echo "Use 'docker compose down' to stop services"
