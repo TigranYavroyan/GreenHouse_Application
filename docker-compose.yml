@@ -42,12 +42,8 @@ services:
     container_name: greenhouse-backend
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
+    env_file:
+      - ./backend/.env
     depends_on:
       - redis
       - rabbitmq
@@ -70,9 +66,9 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       - XAUTHORITY=${XAUTHORITY}
-      - BACKEND_URL=http://backend:3000
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
+      - ENVIRONMENT=production
+    env_file:
+      - ./frontend/.env
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ${XAUTHORITY}:${XAUTHORITY}

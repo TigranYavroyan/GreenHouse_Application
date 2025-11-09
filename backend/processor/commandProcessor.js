@@ -17,7 +17,12 @@ class CommandProcessor {
   }
 
   generateCacheKey(command, parameters, currentPath, sessionId) {
-    return `cmd:${sessionId}:${command}:${currentPath}:${JSON.stringify(parameters || {})}`;
+    // Ensure parameters are sorted for consistent cache keys
+    const sortedParams = parameters ? Object.keys(parameters).sort().reduce((obj, key) => {
+      obj[key] = parameters[key];
+      return obj;
+    }, {}) : {};
+    return `cmd:${sessionId}:${command}:${currentPath}:${JSON.stringify(sortedParams)}`;
   }
 
   getTTLForCommand(command) {
@@ -50,21 +55,33 @@ class CommandProcessor {
     // queue per-session sequential execution
     session.commandQueue = session.commandQueue.then(async () => {
       try {
-        // cache lookup for non-stateful
+        // cache lookup for non-stateful commands
         if (!this.isStateful(command) && this.redis && this.redis.isOpen) {
           const cacheKey = this.generateCacheKey(command, parameters, session.currentPath, session.sessionId);
           const cached = await this.redis.get(cacheKey);
           if (cached) {
-            this.commandStats.cacheHits++;
-            session.logger.command(commandId, 'CACHE_HIT');
-            return {
-              commandId,
-              result: JSON.parse(cached),
-              cached: true,
-              sessionId: session.sessionId,
-              currentPath: session.currentPath,
-              timestamp: new Date().toISOString()
-            };
+            try {
+              const cachedResult = JSON.parse(cached);
+              this.commandStats.cacheHits++;
+              session.logger.command(commandId, 'CACHE_HIT');
+              return {
+                commandId,
+                result: cachedResult,
+                cached: true,
+                sessionId: session.sessionId,
+                currentPath: session.currentPath,
+                timestamp: new Date().toISOString()
+              };
+            } catch (parseError) {
+              // If we can't parse the cached value, delete it and continue
+              SystemLogger.warn(`Failed to parse cached result for ${command}, deleting corrupted cache entry: ${cacheKey}`);
+              try {
+                await this.redis.del([cacheKey]);
+              } catch (e) {
+                SystemLogger.warn(`Failed to delete corrupted cache entry: ${e.message}`);
+              }
+              // Continue with fresh execution
+            }
           }
         }
 
@@ -81,8 +98,8 @@ class CommandProcessor {
           }
         }
 
-        // caching
-        if (!this.isStateful(command) && this.redis && this.redis.isOpen) {
+        // caching - only cache successful results (no errors)
+        if (!this.isStateful(command) && !result.error && this.redis && this.redis.isOpen) {
           const cacheKey = this.generateCacheKey(command, parameters, session.currentPath, session.sessionId);
           const ttl = this.getTTLForCommand(command);
           try {
@@ -94,7 +111,9 @@ class CommandProcessor {
         }
 
         session.logger.command(commandId, 'COMPLETED');
-        return {
+        
+        // If result contains an error, move it to top level for consistent error handling
+        const response = {
           commandId,
           result,
           cached: false,
@@ -102,6 +121,14 @@ class CommandProcessor {
           currentPath: session.currentPath,
           timestamp: new Date().toISOString()
         };
+        
+        // Move error from result.error to top-level error if present
+        if (result && result.error) {
+          response.error = result.error;
+          // Optionally keep error in result for backward compatibility
+        }
+        
+        return response;
 
       } catch (err) {
         this.commandStats.errors++;

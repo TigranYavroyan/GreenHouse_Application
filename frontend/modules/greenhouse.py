@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout,
                              QLabel, QGroupBox, QGridLayout, QMessageBox, QCheckBox,
                             )
 from PyQt5.QtCore import QDateTime, Qt, QTimer
+from PyQt5 import uic
 
 from modules.command_worker import CommandWorker
 from modules.styles import GreenhouseTheme, StyleSheetGenerator
@@ -32,8 +33,9 @@ class GreenhouseDesktop(QMainWindow):
         self.rabbitmq_connected = False
         self.command_worker = None
         
-        # Use environment variable for backend URL with Docker fallback
-        self.backend_url = os.getenv('BACKEND_URL', 'http://localhost:3000')
+        # Import config after it's initialized
+        from modules.config import config
+        self.backend_url = config.BACKEND_URL
         
         # Initialize styling
         self.theme = GreenhouseTheme()
@@ -43,351 +45,93 @@ class GreenhouseDesktop(QMainWindow):
         self.logger.info(f"Starting application with session ID: {self.session_id}")
         self.logger.info(f"Backend URL: {self.backend_url}")
         
-        self.init_ui()
+        # Load UI from .ui file
+        self.setupUI()
+        
+        # Setup functionality and signal connections
+        self.add_functions()
+        
+        # Setup command worker
         self.setup_command_worker()
+        
+        # Apply custom styles (UI file already has styles, but we can override if needed)
         self.apply_styles()
         
-    def apply_styles(self):
-        """Apply modern styles to all widgets"""
-        self.setStyleSheet(self.styler.generate_main_window_style())
-        self.apply_widget_styles()
+    def setupUI(self):
+        """Load UI from .ui file in frontend directory"""
+        # UI file is always in the frontend directory (same level as modules/)
+        # From frontend/modules/greenhouse.py -> frontend/front.ui
+        frontend_dir = os.path.dirname(os.path.dirname(__file__))
+        ui_path = os.path.join(frontend_dir, 'front.ui')
         
-    def apply_widget_styles(self):
-        """Apply styles to individual widget groups"""
-        buttons = self.findChildren(QPushButton)
-        for button in buttons:
-            text = button.text().lower()
-            if any(word in text for word in ['read', 'status', 'list', 'show', 'send']):
-                button.setStyleSheet(self.styler.generate_button_style("primary"))
-            elif any(word in text for word in ['clear', 'cancel', 'test']):
-                button.setStyleSheet(self.styler.generate_button_style("secondary"))
-            elif any(word in text for word in ['refresh', 'check', 'view']):
-                button.setStyleSheet(self.styler.generate_button_style("outline"))
-            else:
-                button.setStyleSheet(self.styler.generate_button_style("default"))
+        if not os.path.exists(ui_path):
+            error_msg = f"UI file not found at: {ui_path}"
+            self.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
         
-        group_boxes = self.findChildren(QGroupBox)
-        for group_box in group_boxes:
-            group_box.setStyleSheet(self.styler.generate_group_box_style())
+        self.logger.info(f"Loading UI from: {ui_path}")
+        uic.loadUi(ui_path, self)
         
-        text_edits = self.findChildren(QTextEdit)
-        for text_edit in text_edits:
-            text_edit.setStyleSheet(self.styler.generate_text_edit_style())
-        
-        line_edits = self.findChildren(QLineEdit)
-        for line_edit in line_edits:
-            line_edit.setStyleSheet(self.styler.generate_line_edit_style())
-        
-        tab_widgets = self.findChildren(QTabWidget)
-        for tab_widget in tab_widgets:
-            tab_widget.setStyleSheet(self.styler.generate_tab_widget_style())
-        
-        checkboxes = self.findChildren(QCheckBox)
-        for checkbox in checkboxes:
-            checkbox.setStyleSheet(self.styler.generate_checkbox_style())
-        
-        self.apply_label_styles()
-        
-    def apply_label_styles(self):
-        """Apply specific styles to labels based on their content and role"""
-        labels = self.findChildren(QLabel)
-        for label in labels:
-            text = label.text().lower()
-            if any(word in text for word in ['session', 'current path']):
-                label.setStyleSheet(self.styler.generate_label_style("caption"))
-            elif label == self.connection_status:
-                pass
-            elif label == self.status_label:
-                label.setStyleSheet(self.styler.generate_label_style("body"))
-            else:
-                label.setStyleSheet(self.styler.generate_label_style("body"))
-        
-    def init_ui(self):
-        self.setWindowTitle("🌿 Greenhouse Automation Control System")
-        self.setGeometry(100, 100, 1200, 800)
-        
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        layout = QVBoxLayout(central_widget)
-        layout.setSpacing(8)
-        layout.setContentsMargins(12, 12, 12, 12)
-        
-        # Session info
-        session_layout = QHBoxLayout()
-        session_label = QLabel("Session:")
-        session_label.setStyleSheet(self.styler.generate_label_style("caption"))
-        session_layout.addWidget(session_label)
-        
-        self.session_label = QLabel(self.session_id[:8] + "...")
-        self.session_label.setStyleSheet(f"""
-            font-family: {self.theme.typography.font_family_mono}; 
-            color: {self.theme.colors.primary}; 
-            background-color: {self.theme.colors.grey_100};
-            padding: 2px 6px;
-            border-radius: {self.theme.borderRadius.sm};
-            font-weight: {self.theme.typography.medium};
-            border: 1px solid {self.theme.colors.grey_300};
-        """)
+        # Update session label with actual session ID
+        self.session_label.setText(self.session_id[:8] + "...")
         self.session_label.setToolTip(f"Full Session ID: {self.session_id}")
-        session_layout.addWidget(self.session_label)
-        session_layout.addStretch()
         
-        # Connection status
-        self.connection_status = QLabel("Connecting to RabbitMQ...")
-        self.connection_status.setStyleSheet(f"""
-            color: {self.theme.colors.warning}; 
-            font-weight: {self.theme.typography.medium};
-            background-color: {self.theme.colors.grey_100};
-            padding: 2px 6px;
-            border-radius: {self.theme.borderRadius.sm};
-            border: 1px solid {self.theme.colors.grey_300};
-        """)
-        session_layout.addWidget(self.connection_status)
+        # Initialize path label
+        self.path_label.setText(self.current_path)
         
-        layout.addLayout(session_layout)
-        
-        # Create tabs
-        tabs = QTabWidget()
-        tabs.setDocumentMode(True)
-        layout.addWidget(tabs)
-        
-        # Create all tabs
-        user_tab = self.create_user_tab()
-        dev_tab = self.create_developer_tab()
-        server_tab = self.create_server_tab()
-        
-        tabs.addTab(user_tab, "🏠 Control")
-        tabs.addTab(dev_tab, "💻 Terminal")
-        tabs.addTab(server_tab, "📊 Server")
-        
-        # Status area
-        status_layout = QHBoxLayout()
-        status_label = QLabel("Status:")
-        status_label.setStyleSheet(self.styler.generate_label_style("caption"))
-        status_layout.addWidget(status_label)
-        
-        self.status_label = QLabel("Ready")
-        self.status_label.setStyleSheet(f"""
-            color: {self.theme.colors.success};
-            font-weight: {self.theme.typography.medium};
-            background-color: {self.theme.colors.grey_50};
-            padding: 4px 8px;
-            border-radius: {self.theme.borderRadius.md};
-            border-left: 2px solid {self.theme.colors.success};
-        """)
-        status_layout.addWidget(self.status_label)
-        status_layout.addStretch()
-        
-        layout.addLayout(status_layout)
-        
-    def create_user_tab(self):
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(8)
-        layout.setContentsMargins(8, 8, 8, 8)
-        
-        control_group = QGroupBox("🌱 Greenhouse Controls")
-        control_layout = QGridLayout(control_group)
-        control_layout.setSpacing(6)
-        control_layout.setContentsMargins(10, 16, 10, 10)
-        
-        buttons = [
-            ("🌡️ Temperature", 0, 0),
-            ("💧 Humidity", 0, 1),
-            ("📊 System Status", 1, 0),
-            ("📁 List Files", 1, 1),
-            ("📂 Current Path", 2, 0)
-        ]
-        
-        for text, row, col in buttons:
-            btn = QPushButton(text)
-            btn.clicked.connect(lambda checked, cmd="read_sensor": self.send_user_command(cmd))
-            btn.setStyleSheet(self.styler.generate_button_style("primary"))
-            btn.setMinimumHeight(32)
-            control_layout.addWidget(btn, row, col)
-        
-        output_label = QLabel("Command Output:")
-        output_label.setStyleSheet(self.styler.generate_label_style("subtitle"))
-        
-        self.user_output = QTextEdit()
-        self.user_output.setReadOnly(True)
-        self.user_output.setPlaceholderText("Command results will appear here...")
-        self.user_output.setMinimumHeight(300)
-        
-        btn_clear_user = QPushButton("🗑️ Clear Output")
-        btn_clear_user.clicked.connect(self.user_output.clear)
-        btn_clear_user.setStyleSheet(self.styler.generate_button_style("secondary"))
-        btn_clear_user.setMinimumHeight(28)
-        
-        layout.addWidget(control_group)
-        layout.addWidget(output_label)
-        layout.addWidget(self.user_output)
-        layout.addWidget(btn_clear_user)
-        
-        return widget
-        
-    def create_developer_tab(self):
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(8)
-        layout.setContentsMargins(8, 8, 8, 8)
-        
-        path_layout = QHBoxLayout()
-        path_label = QLabel("Current Path:")
-        path_label.setStyleSheet(self.styler.generate_label_style("caption"))
-        path_layout.addWidget(path_label)
-        
-        self.path_label = QLabel("/")
-        self.path_label.setStyleSheet(f"""
-            font-family: {self.theme.typography.font_family_mono}; 
-            background-color: {self.theme.colors.grey_100}; 
-            padding: 4px 8px;
-            border-radius: {self.theme.borderRadius.md};
-            border: 1px solid {self.theme.colors.grey_300};
-            color: {self.theme.colors.text_primary};
-            font-weight: {self.theme.typography.medium};
-        """)
-        path_layout.addWidget(self.path_label)
-        path_layout.addStretch()
-        
-        history_layout = QHBoxLayout()
-        history_label = QLabel("Quick Commands:")
-        history_label.setStyleSheet(self.styler.generate_label_style("subtitle"))
-        history_layout.addWidget(history_label)
-        
-        quick_commands = [
-            ("📁 ls", "ls"),
-            ("📂 pwd", "pwd"),
-            ("💾 df", "df -H"),
-            ("🔍 ps", "ps aux")
-        ]
-        
-        for icon_text, command in quick_commands:
-            btn = QPushButton(icon_text)
-            btn.clicked.connect(lambda checked, cmd=command: self.send_developer_command(cmd))
-            btn.setStyleSheet(self.styler.generate_button_style("outline"))
-            btn.setMinimumHeight(28)
-            history_layout.addWidget(btn)
-        
-        history_layout.addStretch()
-        
-        input_layout = QHBoxLayout()
-        self.command_input = QLineEdit()
-        self.command_input.setPlaceholderText("Enter shell command...")
-        self.command_input.returnPressed.connect(self.send_developer_command)
-        self.command_input.setMinimumHeight(30)
-        
-        btn_send = QPushButton("🚀 Send")
-        btn_send.clicked.connect(self.send_developer_command)
-        btn_send.setStyleSheet(self.styler.generate_button_style("primary"))
-        btn_send.setMinimumHeight(30)
-        
-        btn_cancel = QPushButton("❌ Cancel")
-        btn_cancel.clicked.connect(self.cancel_last_command)
-        btn_cancel.setStyleSheet(self.styler.generate_button_style("secondary"))
-        btn_cancel.setMinimumHeight(30)
-        
-        input_layout.addWidget(self.command_input)
-        input_layout.addWidget(btn_send)
-        input_layout.addWidget(btn_cancel)
-        
-        output_label = QLabel("Terminal Output:")
-        output_label.setStyleSheet(self.styler.generate_label_style("subtitle"))
-        
-        self.dev_output = QTextEdit()
-        self.dev_output.setReadOnly(True)
-        self.dev_output.setPlaceholderText("Terminal output will appear here...")
-        self.dev_output.setMinimumHeight(300)
-        
-        btn_clear_dev = QPushButton("🗑️ Clear Output")
-        btn_clear_dev.clicked.connect(self.dev_output.clear)
-        btn_clear_dev.setStyleSheet(self.styler.generate_button_style("secondary"))
-        btn_clear_dev.setMinimumHeight(28)
-        
-        layout.addLayout(path_layout)
-        layout.addLayout(history_layout)
-        layout.addLayout(input_layout)
-        layout.addWidget(output_label)
-        layout.addWidget(self.dev_output)
-        layout.addWidget(btn_clear_dev)
-        
-        return widget
-
-    def create_server_tab(self):
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(12)
-        layout.setContentsMargins(12, 12, 12, 12)
-        
-        server_group = QGroupBox("🖥️ Server Monitoring & Management")
-        server_layout = QGridLayout(server_group)
-        server_layout.setSpacing(8)
-        server_layout.setContentsMargins(12, 20, 12, 12)
-        
-        server_buttons = [
-            ("❤️ Check Health", self.check_server_health),
-            ("📈 View Statistics", self.view_server_stats),
-            ("👥 List Sessions", self.list_sessions),
-            ("🔑 List Cache Keys", self.list_cache_keys),
-            ("🧹 Clear All Cache", self.clear_all_cache),
-            ("📨 Check Queues", self.check_queues),
-            ("⚡ Test Command", self.test_server_command),
-            ("🔄 Refresh All", self.refresh_all_status),
-            ("📋 List Log Files", self.list_log_files),
-            ("📖 View Session Log", self.view_session_log)
-        ]
-        
-        row, col = 0, 0
-        for text, callback in server_buttons:
-            btn = QPushButton(text)
-            btn.clicked.connect(callback)
-            if "Clear" in text:
-                btn.setStyleSheet(self.styler.generate_button_style("secondary"))
-            elif "Refresh" in text or "Test" in text:
-                btn.setStyleSheet(self.styler.generate_button_style("outline"))
-            else:
-                btn.setStyleSheet(self.styler.generate_button_style("primary"))
-            server_layout.addWidget(btn, row, col)
-            col += 1
-            if col > 2:
-                col = 0
-                row += 1
-        
-        log_selection_layout = QHBoxLayout()
-        log_selection_layout.addWidget(QLabel("Session ID:"))
-        self.session_log_input = QLineEdit()
-        self.session_log_input.setPlaceholderText("Enter session ID to view log...")
-        log_selection_layout.addWidget(self.session_log_input)
-        log_selection_layout.addStretch()
-        
-        info_group = QGroupBox("📊 Server Information")
-        info_layout = QVBoxLayout(info_group)
-        
-        self.server_info = QTextEdit()
-        self.server_info.setReadOnly(True)
-        self.server_info.setPlaceholderText("Server information will appear here...")
-        
-        refresh_layout = QHBoxLayout()
-        self.auto_refresh = QCheckBox("🔄 Auto-refresh every 10 seconds")
-        self.auto_refresh.toggled.connect(self.toggle_auto_refresh)
-        refresh_layout.addWidget(self.auto_refresh)
-        refresh_layout.addStretch()
-        
-        btn_clear_server = QPushButton("🗑️ Clear Output")
-        btn_clear_server.clicked.connect(self.server_info.clear)
-        refresh_layout.addWidget(btn_clear_server)
-        
-        info_layout.addWidget(self.server_info)
-        info_layout.addLayout(refresh_layout)
-        
-        layout.addWidget(server_group)
-        layout.addLayout(log_selection_layout)
-        layout.addWidget(info_group)
-        
+        # Initialize auto-refresh timer
         self.auto_refresh_timer = QTimer()
         self.auto_refresh_timer.timeout.connect(self.refresh_all_status)
         
-        return widget
+    def add_functions(self):
+        """Setup signal connections and functionality"""
+        # User Tab - Control buttons
+        self.tempButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "temperature"}))
+        self.humidityButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "humidity"}))
+        self.statusButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "status"}))
+        self.listFilesButton.clicked.connect(lambda: self.send_user_command("list_directory"))
+        self.pathButton.clicked.connect(lambda: self.send_user_command("get_current_path"))
+        
+        # User Tab - Clear button
+        self.btn_clear_user.clicked.connect(self.user_output.clear)
+        
+        # Developer Tab - Quick command buttons
+        self.lsButton.clicked.connect(lambda: self.send_developer_command("ls"))
+        self.pwdButton.clicked.connect(lambda: self.send_developer_command("pwd"))
+        self.dfButton.clicked.connect(lambda: self.send_developer_command("df -H"))
+        self.psButton.clicked.connect(lambda: self.send_developer_command("ps aux"))
+        
+        # Developer Tab - Command input
+        self.command_input.returnPressed.connect(self.send_developer_command)
+        self.btn_send.clicked.connect(self.send_developer_command)
+        self.btn_cancel.clicked.connect(self.cancel_last_command)
+        
+        # Developer Tab - Clear button
+        self.btn_clear_dev.clicked.connect(self.dev_output.clear)
+        
+        # Server Tab - Server management buttons
+        self.healthButton.clicked.connect(self.check_server_health)
+        self.statsButton.clicked.connect(self.view_server_stats)
+        self.sessionsButton.clicked.connect(self.list_sessions)
+        self.cacheKeysButton.clicked.connect(self.list_cache_keys)
+        self.clearCacheButton.clicked.connect(self.clear_all_cache)
+        self.queuesButton.clicked.connect(self.check_queues)
+        self.testCommandButton.clicked.connect(self.test_server_command)
+        self.refreshButton.clicked.connect(self.refresh_all_status)
+        self.logFilesButton.clicked.connect(self.list_log_files)
+        self.viewLogButton.clicked.connect(self.view_session_log)
+        
+        # Server Tab - Auto-refresh checkbox
+        self.auto_refresh.toggled.connect(self.toggle_auto_refresh)
+        
+        # Server Tab - Clear button
+        self.btn_clear_server.clicked.connect(self.server_info.clear)
+        
+    def apply_styles(self):
+        """Apply custom styles if needed (UI file already has styles)"""
+        # The UI file already contains styles, but we can override specific widgets if needed
+        # For example, update connection status and status label styles dynamically
+        pass
 
     def list_log_files(self):
         """List all session log files"""

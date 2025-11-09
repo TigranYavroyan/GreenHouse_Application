@@ -116,6 +116,36 @@ function createRoutes({ sessionManager, redisClient, rabbitClient, commandStats,
     }
   });
 
+  // Clear only error entries from cache
+  router.delete('/cache/clear-errors', async (req, res) => {
+    try {
+      if (!redisClient) return res.status(503).json({ error: 'Redis not available' });
+      const keys = await redisClient.keys('cmd:*');
+      let deletedCount = 0;
+      
+      for (const key of keys) {
+        try {
+          const cached = await redisClient.get(key);
+          if (cached) {
+            const result = JSON.parse(cached);
+            if (result && result.error) {
+              await redisClient.del([key]);
+              deletedCount++;
+            }
+          }
+        } catch (e) {
+          // If we can't parse it, delete it as it's likely corrupted
+          await redisClient.del([key]);
+          deletedCount++;
+        }
+      }
+      
+      res.json({ message: `Cleared ${deletedCount} error cache entries` });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Stats
   router.get('/stats', (req, res) => {
     res.json(commandStats);

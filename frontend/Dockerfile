@@ -41,4 +41,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Environment variables will be provided by docker-compose via env_file
 CMD ["python3", "main.py"]

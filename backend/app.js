@@ -6,7 +6,7 @@ import RabbitMQClient from './clients/rabbitmqClient.js';
 import SessionManager from './sessions/sessionManager.js';
 import CommandExecutor from './executor/commandExecutor.js';
 import CommandProcessor from './processor/commandProcessor.js';
-import createRoutes from './routes/routes.js';
+import createRoutes from './router/routes.js';
 import config from './config/index.js';
 
 class App {

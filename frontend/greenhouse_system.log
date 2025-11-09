@@ -1,0 +1,99 @@
+2025-11-09 18:10:38,793 - GreenhouseDesktop - INFO - Starting application with session ID: 28bf3eb3-6c0f-40dc-9cac-0212f290fdfd
+2025-11-09 18:10:38,793 - GreenhouseDesktop - INFO - Backend URL: http://localhost:3000
+2025-11-09 18:10:38,793 - GreenhouseDesktop - INFO - Loading UI from: /home/tigran/Desktop/GreenHouse_Application/ui/front_test.ui
+2025-11-09 18:10:38,841 - GreenhouseDesktop - INFO - Setting up command worker
+2025-11-09 18:10:38,841 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at localhost:5672
+2025-11-09 18:10:38,841 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-11-09 18:10:38,841 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-11-09 18:10:38,841 - CommandWorker - INFO - Creating new RabbitMQ connection to localhost:5672...
+2025-11-09 18:10:38,842 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('127.0.0.1', 5672)
+2025-11-09 18:10:38,843 - pika.adapters.utils.io_services_utils - INFO - Socket connected: <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
+2025-11-09 18:10:38,843 - pika.adapters.utils.connection_workflow - INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>).
+2025-11-09 18:10:38,853 - pika.adapters.utils.connection_workflow - INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>
+2025-11-09 18:10:38,853 - pika.adapters.utils.connection_workflow - INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>
+2025-11-09 18:10:38,853 - pika.adapters.blocking_connection - INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>
+2025-11-09 18:10:38,853 - pika.adapters.blocking_connection - INFO - Created channel=1
+2025-11-09 18:10:38,854 - CommandWorker - INFO - Successfully connected to RabbitMQ
+2025-11-09 18:10:46,100 - GreenhouseDesktop - WARNING - Showing error dialog: Session ID Required - Please enter a session ID
+2025-11-09 18:10:53,907 - CommandWorker - INFO - Command e19a2a4f-034c-4562-80eb-ed612016b445 sent successfully: execute_raw
+2025-11-09 18:10:53,907 - GreenhouseDesktop - INFO - Developer command e19a2a4f-034c-4562-80eb-ed612016b445 sent: ls
+2025-11-09 18:10:54,351 - CommandWorker - INFO - Received response for command: e19a2a4f-034c-4562-80eb-ed612016b445
+2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Received response for command e19a2a4f-034c-4562-80eb-ed612016b445, cached: False, error: False
+2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Pending commands: ['e19a2a4f-034c-4562-80eb-ed612016b445']
+2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Found command info: type=developer, command=ls
+2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
+2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Appending to DEV output: app.js
+clients
+config
+Dockerfile
+executor
+index.js
+logger
+logs
+node_modules
+package.json
+package-loc...
+2025-11-09 18:10:55,551 - CommandWorker - INFO - Command 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4 sent successfully: execute_raw
+2025-11-09 18:10:55,551 - GreenhouseDesktop - INFO - Developer command 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4 sent: pwd
+2025-11-09 18:10:55,652 - CommandWorker - INFO - Received response for command: 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4
+2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Received response for command 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4, cached: False, error: False
+2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Pending commands: ['5c2e1e7f-4ca2-4abd-b141-4880b390e3a4']
+2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Found command info: type=developer, command=pwd
+2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
+2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Appending to DEV output: /home/tigran/Desktop/GreenHouse_Application/backend...
+2025-11-09 18:10:57,312 - CommandWorker - INFO - Command 7634f436-12e1-471c-a194-856a458a71a6 sent successfully: execute_raw
+2025-11-09 18:10:57,312 - GreenhouseDesktop - INFO - Developer command 7634f436-12e1-471c-a194-856a458a71a6 sent: df -H
+2025-11-09 18:10:57,351 - CommandWorker - INFO - Received response for command: 7634f436-12e1-471c-a194-856a458a71a6
+2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Received response for command 7634f436-12e1-471c-a194-856a458a71a6, cached: False, error: False
+2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Pending commands: ['7634f436-12e1-471c-a194-856a458a71a6']
+2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Found command info: type=developer, command=df -H
+2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
+2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Appending to DEV output: Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           1.7G  2.7M  1.7G   1% /run
+/dev/sda...
+2025-11-09 18:10:58,477 - CommandWorker - INFO - Command 71e9182d-3e0e-4046-b56e-61900c5eed61 sent successfully: execute_raw
+2025-11-09 18:10:58,477 - GreenhouseDesktop - INFO - Developer command 71e9182d-3e0e-4046-b56e-61900c5eed61 sent: ps aux
+2025-11-09 18:10:58,551 - CommandWorker - INFO - Received response for command: 71e9182d-3e0e-4046-b56e-61900c5eed61
+2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Received response for command 71e9182d-3e0e-4046-b56e-61900c5eed61, cached: False, error: False
+2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Pending commands: ['71e9182d-3e0e-4046-b56e-61900c5eed61']
+2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Found command info: type=developer, command=ps aux
+2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
+2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Appending to DEV output: USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.1  0....
+2025-11-09 18:11:02,590 - GreenhouseDesktop - INFO - Sending user command bc951122-72a3-4804-873d-889ddb429d80: read_sensor
+2025-11-09 18:11:02,690 - CommandWorker - INFO - Command bc951122-72a3-4804-873d-889ddb429d80 sent successfully: read_sensor
+2025-11-09 18:11:02,950 - CommandWorker - INFO - Received response for command: bc951122-72a3-4804-873d-889ddb429d80
+2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Received response for command bc951122-72a3-4804-873d-889ddb429d80, cached: False, error: False
+2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Pending commands: ['bc951122-72a3-4804-873d-889ddb429d80']
+2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
+2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Appending to USER output: {
+  "temperature": 31.688023084747176,
+  "humidity": 14.939271671402965,
+  "light": 84.3564917822798...
+2025-11-09 18:11:03,838 - GreenhouseDesktop - INFO - Sending user command 8c39a7c4-1b8b-4829-8669-9c2d80913b71: read_sensor
+2025-11-09 18:11:03,938 - CommandWorker - INFO - Command 8c39a7c4-1b8b-4829-8669-9c2d80913b71 sent successfully: read_sensor
+2025-11-09 18:11:03,951 - CommandWorker - INFO - Received response for command: 8c39a7c4-1b8b-4829-8669-9c2d80913b71
+2025-11-09 18:11:03,951 - GreenhouseDesktop - INFO - Received response for command 8c39a7c4-1b8b-4829-8669-9c2d80913b71, cached: False, error: False
+2025-11-09 18:11:03,951 - GreenhouseDesktop - INFO - Pending commands: ['8c39a7c4-1b8b-4829-8669-9c2d80913b71']
+2025-11-09 18:11:03,951 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-11-09 18:11:03,952 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
+2025-11-09 18:11:03,952 - GreenhouseDesktop - INFO - Appending to USER output: {
+  "temperature": 20.935932755913022,
+  "humidity": 99.37319414104367,
+  "light": 899.799260044692,...
+2025-11-09 18:11:12,141 - GreenhouseDesktop - WARNING - Showing error dialog: Session ID Required - Please enter a session ID
+2025-11-09 18:11:21,044 - GreenhouseDesktop - INFO - Application shutting down
+2025-11-09 18:11:21,045 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-11-09 18:11:21,045 - pika.channel - INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>>
+2025-11-09 18:11:21,045 - pika.channel - INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>>
+2025-11-09 18:11:21,045 - pika.adapters.blocking_connection - INFO - Closing connection (200): Normal shutdown
+2025-11-09 18:11:21,045 - pika.connection - INFO - Closing connection (200): 'Normal shutdown'
+2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - Aborting transport connection: state=1; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
+2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
+2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - Deactivating transport: state=1; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
+2025-11-09 18:11:21,046 - pika.connection - INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-11-09 18:11:21,046 - pika.connection - INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
+2025-11-09 18:11:21,046 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
+2025-11-09 18:11:21,046 - CommandWorker - INFO - Disconnected from RabbitMQ

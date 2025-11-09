@@ -6,6 +6,9 @@ import argparse
 import uuid
 import os
 
+# Load configuration first (this loads .env files based on ENVIRONMENT)
+from modules.config import config
+
 from modules.greenhouse import GreenhouseDesktop, setup_logging
 from modules.command_worker import CommandWorker
 

@@ -3,8 +3,8 @@ import json
 import uuid
 import logging
 import time
-import os
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
+from modules.config import config
 
 class CommandWorker(QObject):
     response_received = pyqtSignal(dict)
@@ -14,11 +14,11 @@ class CommandWorker(QObject):
     def __init__(self):
         super().__init__()
         
-        # Use environment variables with Docker fallbacks
-        self.host = os.getenv('RABBITMQ_HOST', 'rabbitmq')
-        self.port = int(os.getenv('RABBITMQ_PORT', '5672'))
-        self.username = os.getenv('RABBITMQ_USER', 'guest')
-        self.password = os.getenv('RABBITMQ_PASS', 'guest')
+        # Use configuration from config module
+        self.host = config.RABBITMQ_HOST
+        self.port = config.RABBITMQ_PORT
+        self.username = config.RABBITMQ_USER
+        self.password = config.RABBITMQ_PASS
         
         self.connection = None
         self.channel = None

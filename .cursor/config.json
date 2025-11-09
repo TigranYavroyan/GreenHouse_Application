@@ -1,0 +1,20 @@
+{
+    "includes": [
+        ".cursor/**",
+        "backend/**",
+        "frontend/**",
+        "docker-compose.yml",
+        "start.sh",
+        "README.md",
+        "LICENSE",
+        "package.json",
+        "package-lock.json",
+        "requirements.txt"
+    ],
+    "excludes": [
+        "backend/node_modules/**"
+    ],
+    "ignore": [
+        "backend/node_modules/**"
+    ]
+}

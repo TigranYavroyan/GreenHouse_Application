@@ -72,7 +72,8 @@ class CommandExecutor {
           return sensorData;
         }
       default:
-        throw new Error(`Unknown command: ${commandName}`);
+        // Return error in result object instead of throwing
+        return { error: `Unknown command: ${commandName}`, command: commandName };
     }
   }
 }
