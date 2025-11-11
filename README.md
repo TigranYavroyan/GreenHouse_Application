@@ -1,5 +1,6 @@
 # Greenhouse Automation Application
 
+
 A distributed greenhouse automation system with a PyQt5 desktop frontend and Node.js backend, communicating via RabbitMQ message queues and using Redis for caching.
 
 ## Table of Contents
