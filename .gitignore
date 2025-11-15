@@ -1,2 +1,15 @@
 *node_modules*
 *__pycache__*
+
+# Log files (keep directory structure)
+*.log
+*.log.*
+backend/logs/*.log
+backend/logs/*.log.*
+sim/logs/*.log
+sim/logs/*.log.*
+frontend/*.log
+frontend/*.log.*
+
+# But keep .gitkeep files to preserve directory structure
+!**/.gitkeep

@@ -166,6 +166,161 @@ function createRoutes({ sessionManager, redisClient, rabbitClient, commandStats,
     }
   });
 
+  // Aggregated data endpoints (Edge-to-Fog sync)
+  router.post('/fog/aggregated', async (req, res) => {
+    try {
+      if (!redisClient || !redisClient.isOpen) {
+        return res.status(503).json({ error: 'Redis not available' });
+      }
+      
+      const { sensorType, location, timeframe, data } = req.body;
+      if (!sensorType || !location || !timeframe || !data) {
+        return res.status(400).json({ error: 'Missing required fields: sensorType, location, timeframe, data' });
+      }
+      
+      // Store aggregated data in Redis with namespace
+      const cacheKey = `fog:agg:${sensorType}:${location}:${timeframe}`;
+      const ttl = timeframe === '1min' ? 300 : timeframe === '5min' ? 600 : timeframe === '15min' ? 1800 : 3600;
+      
+      await redisClient.setEx(cacheKey, ttl, JSON.stringify({
+        ...data,
+        sensorType,
+        location,
+        timeframe,
+        receivedAt: new Date().toISOString()
+      }));
+      
+      systemLogger.info(`Stored aggregated data: ${cacheKey}`);
+      res.json({ success: true, key: cacheKey });
+    } catch (err) {
+      systemLogger.error(`Failed to store aggregated data: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.get('/fog/aggregated', async (req, res) => {
+    try {
+      if (!redisClient || !redisClient.isOpen) {
+        return res.status(503).json({ error: 'Redis not available' });
+      }
+      
+      const { sensorType, location, timeframe } = req.query;
+      let pattern = 'fog:agg:*';
+      
+      if (sensorType && location && timeframe) {
+        pattern = `fog:agg:${sensorType}:${location}:${timeframe}`;
+      } else if (sensorType && location) {
+        pattern = `fog:agg:${sensorType}:${location}:*`;
+      } else if (sensorType) {
+        pattern = `fog:agg:${sensorType}:*`;
+      }
+      
+      const keys = await redisClient.keys(pattern);
+      const results = [];
+      
+      for (const key of keys) {
+        const value = await redisClient.get(key);
+        if (value) {
+          try {
+            const data = JSON.parse(value);
+            results.push(data);
+          } catch (e) {
+            systemLogger.warn(`Failed to parse aggregated data for key: ${key}`);
+          }
+        }
+      }
+      
+      res.json({ count: results.length, data: results });
+    } catch (err) {
+      systemLogger.error(`Failed to get aggregated data: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.get('/fog/devices', async (req, res) => {
+    try {
+      if (!redisClient || !redisClient.isOpen) {
+        return res.status(503).json({ error: 'Redis not available' });
+      }
+      
+      const keys = await redisClient.keys('fog:device:*');
+      const devices = [];
+      
+      for (const key of keys) {
+        const value = await redisClient.get(key);
+        if (value) {
+          try {
+            const device = JSON.parse(value);
+            devices.push(device);
+          } catch (e) {
+            systemLogger.warn(`Failed to parse device data for key: ${key}`);
+          }
+        }
+      }
+      
+      res.json({ count: devices.length, devices });
+    } catch (err) {
+      systemLogger.error(`Failed to get devices: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.post('/fog/anomalies', async (req, res) => {
+    try {
+      if (!redisClient || !redisClient.isOpen) {
+        return res.status(503).json({ error: 'Redis not available' });
+      }
+      
+      const anomaly = req.body;
+      if (!anomaly.anomaly_id || !anomaly.sensor_type || !anomaly.location) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+      
+      // Store anomaly in Redis
+      const cacheKey = `fog:anomaly:${anomaly.anomaly_id}`;
+      await redisClient.setEx(cacheKey, 86400, JSON.stringify({
+        ...anomaly,
+        receivedAt: new Date().toISOString()
+      }));
+      
+      // Also add to list of recent anomalies
+      const listKey = 'fog:anomalies:recent';
+      const recentAnomalies = await redisClient.get(listKey);
+      let anomalies = recentAnomalies ? JSON.parse(recentAnomalies) : [];
+      anomalies.unshift(anomaly);
+      anomalies = anomalies.slice(0, 100); // Keep only last 100
+      await redisClient.setEx(listKey, 86400, JSON.stringify(anomalies));
+      
+      systemLogger.warn(`Anomaly received: ${anomaly.message}`);
+      res.json({ success: true, key: cacheKey });
+    } catch (err) {
+      systemLogger.error(`Failed to store anomaly: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.get('/fog/anomalies', async (req, res) => {
+    try {
+      if (!redisClient || !redisClient.isOpen) {
+        return res.status(503).json({ error: 'Redis not available' });
+      }
+      
+      const limit = parseInt(req.query.limit) || 10;
+      const listKey = 'fog:anomalies:recent';
+      const recentAnomalies = await redisClient.get(listKey);
+      
+      if (recentAnomalies) {
+        const anomalies = JSON.parse(recentAnomalies);
+        res.json({ count: Math.min(limit, anomalies.length), anomalies: anomalies.slice(0, limit) });
+      } else {
+        res.json({ count: 0, anomalies: [] });
+      }
+    } catch (err) {
+      systemLogger.error(`Failed to get anomalies: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // root
   router.get('/', (req, res) => {
     res.json({
@@ -182,7 +337,12 @@ function createRoutes({ sessionManager, redisClient, rabbitClient, commandStats,
         'GET  /cache/keys',
         'DELETE /cache/clear',
         'GET  /stats',
-        'GET  /queues'
+        'GET  /queues',
+        'POST /fog/aggregated',
+        'GET  /fog/aggregated',
+        'GET  /fog/devices',
+        'POST /fog/anomalies',
+        'GET  /fog/anomalies'
       ]
     });
   });

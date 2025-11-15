@@ -1,99 +1,338 @@
-2025-11-09 18:10:38,793 - GreenhouseDesktop - INFO - Starting application with session ID: 28bf3eb3-6c0f-40dc-9cac-0212f290fdfd
-2025-11-09 18:10:38,793 - GreenhouseDesktop - INFO - Backend URL: http://localhost:3000
-2025-11-09 18:10:38,793 - GreenhouseDesktop - INFO - Loading UI from: /home/tigran/Desktop/GreenHouse_Application/ui/front_test.ui
-2025-11-09 18:10:38,841 - GreenhouseDesktop - INFO - Setting up command worker
-2025-11-09 18:10:38,841 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at localhost:5672
-2025-11-09 18:10:38,841 - CommandWorker - INFO - Disconnecting from RabbitMQ...
-2025-11-09 18:10:38,841 - CommandWorker - INFO - Disconnected from RabbitMQ
-2025-11-09 18:10:38,841 - CommandWorker - INFO - Creating new RabbitMQ connection to localhost:5672...
-2025-11-09 18:10:38,842 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('127.0.0.1', 5672)
-2025-11-09 18:10:38,843 - pika.adapters.utils.io_services_utils - INFO - Socket connected: <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
-2025-11-09 18:10:38,843 - pika.adapters.utils.connection_workflow - INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>).
-2025-11-09 18:10:38,853 - pika.adapters.utils.connection_workflow - INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>
-2025-11-09 18:10:38,853 - pika.adapters.utils.connection_workflow - INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>
-2025-11-09 18:10:38,853 - pika.adapters.blocking_connection - INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>
-2025-11-09 18:10:38,853 - pika.adapters.blocking_connection - INFO - Created channel=1
-2025-11-09 18:10:38,854 - CommandWorker - INFO - Successfully connected to RabbitMQ
-2025-11-09 18:10:46,100 - GreenhouseDesktop - WARNING - Showing error dialog: Session ID Required - Please enter a session ID
-2025-11-09 18:10:53,907 - CommandWorker - INFO - Command e19a2a4f-034c-4562-80eb-ed612016b445 sent successfully: execute_raw
-2025-11-09 18:10:53,907 - GreenhouseDesktop - INFO - Developer command e19a2a4f-034c-4562-80eb-ed612016b445 sent: ls
-2025-11-09 18:10:54,351 - CommandWorker - INFO - Received response for command: e19a2a4f-034c-4562-80eb-ed612016b445
-2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Received response for command e19a2a4f-034c-4562-80eb-ed612016b445, cached: False, error: False
-2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Pending commands: ['e19a2a4f-034c-4562-80eb-ed612016b445']
-2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Found command info: type=developer, command=ls
-2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
-2025-11-09 18:10:54,352 - GreenhouseDesktop - INFO - Appending to DEV output: app.js
-clients
-config
-Dockerfile
-executor
-index.js
-logger
-logs
-node_modules
-package.json
-package-loc...
-2025-11-09 18:10:55,551 - CommandWorker - INFO - Command 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4 sent successfully: execute_raw
-2025-11-09 18:10:55,551 - GreenhouseDesktop - INFO - Developer command 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4 sent: pwd
-2025-11-09 18:10:55,652 - CommandWorker - INFO - Received response for command: 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4
-2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Received response for command 5c2e1e7f-4ca2-4abd-b141-4880b390e3a4, cached: False, error: False
-2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Pending commands: ['5c2e1e7f-4ca2-4abd-b141-4880b390e3a4']
-2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Found command info: type=developer, command=pwd
-2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
-2025-11-09 18:10:55,653 - GreenhouseDesktop - INFO - Appending to DEV output: /home/tigran/Desktop/GreenHouse_Application/backend...
-2025-11-09 18:10:57,312 - CommandWorker - INFO - Command 7634f436-12e1-471c-a194-856a458a71a6 sent successfully: execute_raw
-2025-11-09 18:10:57,312 - GreenhouseDesktop - INFO - Developer command 7634f436-12e1-471c-a194-856a458a71a6 sent: df -H
-2025-11-09 18:10:57,351 - CommandWorker - INFO - Received response for command: 7634f436-12e1-471c-a194-856a458a71a6
-2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Received response for command 7634f436-12e1-471c-a194-856a458a71a6, cached: False, error: False
-2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Pending commands: ['7634f436-12e1-471c-a194-856a458a71a6']
-2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Found command info: type=developer, command=df -H
-2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
-2025-11-09 18:10:57,351 - GreenhouseDesktop - INFO - Appending to DEV output: Filesystem      Size  Used Avail Use% Mounted on
-tmpfs           1.7G  2.7M  1.7G   1% /run
-/dev/sda...
-2025-11-09 18:10:58,477 - CommandWorker - INFO - Command 71e9182d-3e0e-4046-b56e-61900c5eed61 sent successfully: execute_raw
-2025-11-09 18:10:58,477 - GreenhouseDesktop - INFO - Developer command 71e9182d-3e0e-4046-b56e-61900c5eed61 sent: ps aux
-2025-11-09 18:10:58,551 - CommandWorker - INFO - Received response for command: 71e9182d-3e0e-4046-b56e-61900c5eed61
-2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Received response for command 71e9182d-3e0e-4046-b56e-61900c5eed61, cached: False, error: False
-2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Pending commands: ['71e9182d-3e0e-4046-b56e-61900c5eed61']
-2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Found command info: type=developer, command=ps aux
-2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
-2025-11-09 18:10:58,551 - GreenhouseDesktop - INFO - Appending to DEV output: USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-root           1  0.1  0....
-2025-11-09 18:11:02,590 - GreenhouseDesktop - INFO - Sending user command bc951122-72a3-4804-873d-889ddb429d80: read_sensor
-2025-11-09 18:11:02,690 - CommandWorker - INFO - Command bc951122-72a3-4804-873d-889ddb429d80 sent successfully: read_sensor
-2025-11-09 18:11:02,950 - CommandWorker - INFO - Received response for command: bc951122-72a3-4804-873d-889ddb429d80
-2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Received response for command bc951122-72a3-4804-873d-889ddb429d80, cached: False, error: False
-2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Pending commands: ['bc951122-72a3-4804-873d-889ddb429d80']
-2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
-2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
-2025-11-09 18:11:02,951 - GreenhouseDesktop - INFO - Appending to USER output: {
-  "temperature": 31.688023084747176,
-  "humidity": 14.939271671402965,
-  "light": 84.3564917822798...
-2025-11-09 18:11:03,838 - GreenhouseDesktop - INFO - Sending user command 8c39a7c4-1b8b-4829-8669-9c2d80913b71: read_sensor
-2025-11-09 18:11:03,938 - CommandWorker - INFO - Command 8c39a7c4-1b8b-4829-8669-9c2d80913b71 sent successfully: read_sensor
-2025-11-09 18:11:03,951 - CommandWorker - INFO - Received response for command: 8c39a7c4-1b8b-4829-8669-9c2d80913b71
-2025-11-09 18:11:03,951 - GreenhouseDesktop - INFO - Received response for command 8c39a7c4-1b8b-4829-8669-9c2d80913b71, cached: False, error: False
-2025-11-09 18:11:03,951 - GreenhouseDesktop - INFO - Pending commands: ['8c39a7c4-1b8b-4829-8669-9c2d80913b71']
-2025-11-09 18:11:03,951 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
-2025-11-09 18:11:03,952 - GreenhouseDesktop - INFO - Current path updated to: /home/tigran/Desktop/GreenHouse_Application/backend
-2025-11-09 18:11:03,952 - GreenhouseDesktop - INFO - Appending to USER output: {
-  "temperature": 20.935932755913022,
-  "humidity": 99.37319414104367,
-  "light": 899.799260044692,...
-2025-11-09 18:11:12,141 - GreenhouseDesktop - WARNING - Showing error dialog: Session ID Required - Please enter a session ID
-2025-11-09 18:11:21,044 - GreenhouseDesktop - INFO - Application shutting down
-2025-11-09 18:11:21,045 - CommandWorker - INFO - Disconnecting from RabbitMQ...
-2025-11-09 18:11:21,045 - pika.channel - INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>>
-2025-11-09 18:11:21,045 - pika.channel - INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x77946e311450> params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>>
-2025-11-09 18:11:21,045 - pika.adapters.blocking_connection - INFO - Closing connection (200): Normal shutdown
-2025-11-09 18:11:21,045 - pika.connection - INFO - Closing connection (200): 'Normal shutdown'
-2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - Aborting transport connection: state=1; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
-2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
-2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - Deactivating transport: state=1; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
-2025-11-09 18:11:21,046 - pika.connection - INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
-2025-11-09 18:11:21,046 - pika.connection - INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
-2025-11-09 18:11:21,046 - pika.adapters.utils.io_services_utils - INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=12, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 55900), raddr=('127.0.0.1', 5672)>
-2025-11-09 18:11:21,046 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=localhost port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
-2025-11-09 18:11:21,046 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-11-15 17:52:34,094 - GreenhouseDesktop - INFO - Starting application with session ID: 59ccc33d-8318-4e00-b521-22ebab869d71
+2025-11-15 17:52:34,095 - GreenhouseDesktop - INFO - Backend URL: http://backend:3000
+2025-11-15 17:52:34,095 - GreenhouseDesktop - INFO - Loading UI from: /app/front.ui
+2025-11-15 17:52:34,482 - GreenhouseDesktop - INFO - Setting up command worker
+2025-11-15 17:52:34,482 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at rabbitmq:5672
+2025-11-15 17:52:34,483 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-11-15 17:52:34,483 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-11-15 17:52:34,483 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-11-15 17:52:34,484 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.2', 5672)
+2025-11-15 17:52:34,484 - pika.adapters.utils.io_services_utils - ERROR - Socket failed to connect: <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 58414)>; error=111 (Connection refused)
+2025-11-15 17:52:34,484 - pika.adapters.utils.connection_workflow - ERROR - TCP Connection attempt failed: ConnectionRefusedError(111, 'Connection refused'); dest=(<AddressFamily.AF_INET: 2>, <SocketKind.SOCK_STREAM: 1>, 6, '', ('172.18.0.2', 5672))
+2025-11-15 17:52:34,484 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnector - reporting failure: AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused')
+2025-11-15 17:52:34,484 - pika.adapters.utils.connection_workflow - ERROR - AMQP connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None.
+2025-11-15 17:52:34,484 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnectionWorkflow - reporting failure: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-11-15 17:52:34,484 - pika.adapters.blocking_connection - ERROR - Connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-11-15 17:52:34,484 - pika.adapters.blocking_connection - ERROR - Error in _create_connection().
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/pika/adapters/blocking_connection.py", line 451, in _create_connection
+    raise self._reap_last_connection_workflow_error(error)
+pika.exceptions.AMQPConnectionError
+2025-11-15 17:52:34,485 - CommandWorker - ERROR - Failed to connect to RabbitMQ at rabbitmq:5672: 
+2025-11-15 17:52:34,485 - GreenhouseDesktop - INFO - Setting up Edge-to-Fog aggregator
+2025-11-15 17:52:34,486 - RedisEdgeClient - WARNING - Redis connection failed: Error 111 connecting to localhost:6379. Connection refused.. Running without cache.
+2025-11-15 17:52:34,486 - GreenhouseDesktop - INFO - Sensor data consumer started (simulation mode)
+2025-11-15 17:52:34,486 - GreenhouseDesktop - INFO - Device status: device_001 - registered
+2025-11-15 17:52:34,486 - EdgeFogAggregator - INFO - Registered edge device: device_001 at Zone_A
+2025-11-15 17:52:34,486 - GreenhouseDesktop - INFO - Device status: device_002 - registered
+2025-11-15 17:52:34,486 - EdgeFogAggregator - INFO - Registered edge device: device_002 at Zone_B
+2025-11-15 17:52:34,486 - GreenhouseDesktop - INFO - Device status: device_003 - registered
+2025-11-15 17:52:34,486 - EdgeFogAggregator - INFO - Registered edge device: device_003 at Zone_C
+2025-11-15 17:52:34,486 - GreenhouseDesktop - INFO - Edge-to-Fog aggregator setup complete
+2025-11-15 17:52:36,224 - GreenhouseDesktop - INFO - Application shutting down
+2025-11-15 17:52:36,224 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-11-15 17:52:36,224 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-11-15 17:52:36,224 - RedisEdgeClient - INFO - Disconnected from Redis
+2025-11-15 17:53:07,007 - GreenhouseDesktop - INFO - Starting application with session ID: 83ec9b9e-5a09-47e6-b47c-79102d31e78a
+2025-11-15 17:53:07,007 - GreenhouseDesktop - INFO - Backend URL: http://backend:3000
+2025-11-15 17:53:07,007 - GreenhouseDesktop - INFO - Loading UI from: /app/front.ui
+2025-11-15 17:53:07,396 - GreenhouseDesktop - INFO - Setting up command worker
+2025-11-15 17:53:07,396 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at rabbitmq:5672
+2025-11-15 17:53:07,396 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-11-15 17:53:07,396 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-11-15 17:53:07,396 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-11-15 17:53:07,397 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.4', 5672)
+2025-11-15 17:53:07,398 - pika.adapters.utils.io_services_utils - ERROR - Socket failed to connect: <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.3', 50452)>; error=111 (Connection refused)
+2025-11-15 17:53:07,398 - pika.adapters.utils.connection_workflow - ERROR - TCP Connection attempt failed: ConnectionRefusedError(111, 'Connection refused'); dest=(<AddressFamily.AF_INET: 2>, <SocketKind.SOCK_STREAM: 1>, 6, '', ('172.18.0.4', 5672))
+2025-11-15 17:53:07,398 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnector - reporting failure: AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused')
+2025-11-15 17:53:07,398 - pika.adapters.utils.connection_workflow - ERROR - AMQP connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None.
+2025-11-15 17:53:07,398 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnectionWorkflow - reporting failure: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-11-15 17:53:07,398 - pika.adapters.blocking_connection - ERROR - Connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-11-15 17:53:07,398 - pika.adapters.blocking_connection - ERROR - Error in _create_connection().
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/pika/adapters/blocking_connection.py", line 451, in _create_connection
+    raise self._reap_last_connection_workflow_error(error)
+pika.exceptions.AMQPConnectionError
+2025-11-15 17:53:07,399 - CommandWorker - ERROR - Failed to connect to RabbitMQ at rabbitmq:5672: 
+2025-11-15 17:53:07,399 - GreenhouseDesktop - INFO - Setting up Edge-to-Fog aggregator
+2025-11-15 17:53:07,399 - RedisEdgeClient - WARNING - Redis connection failed: Error 111 connecting to localhost:6379. Connection refused.. Running without cache.
+2025-11-15 17:53:07,399 - GreenhouseDesktop - INFO - Sensor data consumer started (simulation mode)
+2025-11-15 17:53:07,399 - GreenhouseDesktop - INFO - Device status: device_001 - registered
+2025-11-15 17:53:07,399 - EdgeFogAggregator - INFO - Registered edge device: device_001 at Zone_A
+2025-11-15 17:53:07,399 - GreenhouseDesktop - INFO - Device status: device_002 - registered
+2025-11-15 17:53:07,399 - EdgeFogAggregator - INFO - Registered edge device: device_002 at Zone_B
+2025-11-15 17:53:07,399 - GreenhouseDesktop - INFO - Device status: device_003 - registered
+2025-11-15 17:53:07,399 - EdgeFogAggregator - INFO - Registered edge device: device_003 at Zone_C
+2025-11-15 17:53:07,399 - GreenhouseDesktop - INFO - Edge-to-Fog aggregator setup complete
+2025-11-15 17:53:12,650 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:12,650 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:12,650 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:12,650 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:12,650 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:12,650 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:17,755 - GreenhouseDesktop - INFO - Attempting to reconnect to RabbitMQ...
+2025-11-15 17:53:17,755 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-11-15 17:53:17,755 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-11-15 17:53:17,755 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-11-15 17:53:17,756 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.4', 5672)
+2025-11-15 17:53:17,756 - pika.adapters.utils.io_services_utils - INFO - Socket connected: <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.3', 51374), raddr=('172.18.0.4', 5672)>
+2025-11-15 17:53:17,756 - pika.adapters.utils.connection_workflow - INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x772d4883dbb0>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x772d4883dbb0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+2025-11-15 17:53:17,758 - pika.adapters.utils.connection_workflow - INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x772d4883dbb0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-11-15 17:53:17,758 - pika.adapters.utils.connection_workflow - INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x772d4883dbb0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-11-15 17:53:17,758 - pika.adapters.blocking_connection - INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x772d4883dbb0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-11-15 17:53:17,758 - pika.adapters.blocking_connection - INFO - Created channel=1
+2025-11-15 17:53:17,759 - CommandWorker - INFO - Successfully connected to RabbitMQ
+2025-11-15 17:53:17,760 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:17,760 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:17,760 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:17,760 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:17,760 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:17,760 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:22,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:22,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:22,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:22,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:22,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:22,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:23,729 - GreenhouseDesktop - INFO - Sending user command c4ce9638-919d-43f7-84c9-b1381eb3b516: switch_actuator
+2025-11-15 17:53:23,830 - CommandWorker - INFO - Command c4ce9638-919d-43f7-84c9-b1381eb3b516 sent successfully: switch_actuator
+2025-11-15 17:53:23,854 - CommandWorker - INFO - Received response for command: c4ce9638-919d-43f7-84c9-b1381eb3b516
+2025-11-15 17:53:23,855 - GreenhouseDesktop - INFO - Received response for command c4ce9638-919d-43f7-84c9-b1381eb3b516, cached: False, error: False
+2025-11-15 17:53:23,855 - GreenhouseDesktop - INFO - Pending commands: ['c4ce9638-919d-43f7-84c9-b1381eb3b516']
+2025-11-15 17:53:23,855 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_actuator
+2025-11-15 17:53:23,855 - GreenhouseDesktop - INFO - Appending to USER output: {"actuatorId":"actuator_1","status":"on","previousStatus":"off","timestamp":"2025-11-15T17:53:23.843...
+2025-11-15 17:53:27,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:27,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:27,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:27,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:27,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:27,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:32,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:32,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:32,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:32,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:32,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:32,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:37,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:37,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:37,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:37,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:37,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:37,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:38,705 - GreenhouseDesktop - INFO - Sending user command 53c72469-a192-499c-95f6-f27e4a8b72e7: switch_heater
+2025-11-15 17:53:38,806 - CommandWorker - INFO - Command 53c72469-a192-499c-95f6-f27e4a8b72e7 sent successfully: switch_heater
+2025-11-15 17:53:38,854 - CommandWorker - INFO - Received response for command: 53c72469-a192-499c-95f6-f27e4a8b72e7
+2025-11-15 17:53:38,855 - GreenhouseDesktop - INFO - Received response for command 53c72469-a192-499c-95f6-f27e4a8b72e7, cached: False, error: False
+2025-11-15 17:53:38,855 - GreenhouseDesktop - INFO - Pending commands: ['53c72469-a192-499c-95f6-f27e4a8b72e7']
+2025-11-15 17:53:38,855 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_heater
+2025-11-15 17:53:38,855 - GreenhouseDesktop - INFO - Appending to USER output: {"heaterId":"heater_1","status":"on","temperature":30,"previousStatus":"off","timestamp":"2025-11-15...
+2025-11-15 17:53:42,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:42,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:42,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:42,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:42,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:42,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:47,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:47,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:47,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:47,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:47,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:47,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:52,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:52,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:52,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:52,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:52,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:52,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:57,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:57,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:53:57,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:57,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:53:57,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:53:57,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:02,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:02,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:02,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:02,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:02,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:02,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:07,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:07,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:07,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:07,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:07,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:07,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:12,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:12,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:12,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:12,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:12,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:12,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:17,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:17,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:17,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:17,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:17,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:17,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:22,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:22,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:22,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:22,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:22,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:22,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:27,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:27,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:27,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:27,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:27,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:27,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:32,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:32,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:32,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:32,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:32,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:32,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:37,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:37,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:37,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:37,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:37,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:37,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:42,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:42,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:42,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:42,754 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:42,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:42,754 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:44,918 - GreenhouseDesktop - INFO - Sending user command 2531c5a4-7808-47c1-b523-83ace3c9f0fb: switch_water_canal
+2025-11-15 17:54:45,019 - CommandWorker - INFO - Command 2531c5a4-7808-47c1-b523-83ace3c9f0fb sent successfully: switch_water_canal
+2025-11-15 17:54:45,054 - CommandWorker - INFO - Received response for command: 2531c5a4-7808-47c1-b523-83ace3c9f0fb
+2025-11-15 17:54:45,055 - GreenhouseDesktop - INFO - Received response for command 2531c5a4-7808-47c1-b523-83ace3c9f0fb, cached: False, error: False
+2025-11-15 17:54:45,055 - GreenhouseDesktop - INFO - Pending commands: ['2531c5a4-7808-47c1-b523-83ace3c9f0fb']
+2025-11-15 17:54:45,055 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_water_canal
+2025-11-15 17:54:45,055 - GreenhouseDesktop - INFO - Appending to USER output: {"deviceId":"water_canal_1","status":"on","previousStatus":"off","timestamp":"2025-11-15T17:54:45.02...
+2025-11-15 17:54:47,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:47,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:47,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:47,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:47,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:47,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:52,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:52,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:52,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:52,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:52,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:52,757 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:54,518 - GreenhouseDesktop - INFO - Sending user command d7f31bbc-d230-4721-a069-8a513c9ba915: read_sensor
+2025-11-15 17:54:54,619 - CommandWorker - INFO - Command d7f31bbc-d230-4721-a069-8a513c9ba915 sent successfully: read_sensor
+2025-11-15 17:54:54,656 - CommandWorker - INFO - Received response for command: d7f31bbc-d230-4721-a069-8a513c9ba915
+2025-11-15 17:54:54,657 - GreenhouseDesktop - INFO - Received response for command d7f31bbc-d230-4721-a069-8a513c9ba915, cached: False, error: False
+2025-11-15 17:54:54,657 - GreenhouseDesktop - INFO - Pending commands: ['d7f31bbc-d230-4721-a069-8a513c9ba915']
+2025-11-15 17:54:54,657 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-11-15 17:54:54,657 - GreenhouseDesktop - INFO - Appending to USER output: {"soilPH":6.28,"unit":"pH","timestamp":"2025-11-15T17:54:54.632Z","sensorId":"soil_ph_sensor_1","loc...
+2025-11-15 17:54:57,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:57,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:54:57,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:57,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:54:57,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:54:57,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:02,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:02,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:02,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:02,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:02,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:02,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:06,765 - GreenhouseDesktop - WARNING - Anomaly detected: Rapid change in humidity: 8.1/min
+2025-11-15 17:55:07,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:07,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:07,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:07,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:07,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:07,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:12,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:12,756 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:12,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:12,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:12,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:12,757 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:17,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:17,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:17,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:17,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:17,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:17,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:22,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:22,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:22,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:22,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:22,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:22,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:27,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:27,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:27,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:27,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:27,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:27,757 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:32,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:32,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:32,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:32,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:32,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:32,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:37,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:37,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:37,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:37,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:37,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:37,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:42,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:42,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:42,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:42,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:42,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:42,755 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:47,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:47,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:47,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:47,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:47,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:47,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:52,754 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:52,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:52,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:52,755 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:52,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:52,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:57,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:57,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:55:57,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:57,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:55:57,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:55:57,757 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:56:02,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:56:02,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:56:02,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:56:02,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:56:02,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:56:02,757 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:56:07,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:56:07,755 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-11-15 17:56:07,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:56:07,756 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-11-15 17:56:07,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:56:07,756 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-11-15 17:56:10,416 - GreenhouseDesktop - INFO - Application shutting down
+2025-11-15 17:56:10,416 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-11-15 17:56:10,416 - pika.channel - INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x772d4883dbb0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-11-15 17:56:10,416 - pika.channel - INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x772d4883dbb0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-11-15 17:56:10,417 - pika.adapters.blocking_connection - INFO - Closing connection (200): Normal shutdown
+2025-11-15 17:56:10,417 - pika.connection - INFO - Closing connection (200): 'Normal shutdown'
+2025-11-15 17:56:10,418 - pika.adapters.utils.io_services_utils - INFO - Aborting transport connection: state=1; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.3', 51374), raddr=('172.18.0.4', 5672)>
+2025-11-15 17:56:10,418 - pika.adapters.utils.io_services_utils - INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.3', 51374), raddr=('172.18.0.4', 5672)>
+2025-11-15 17:56:10,418 - pika.adapters.utils.io_services_utils - INFO - Deactivating transport: state=1; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.3', 51374), raddr=('172.18.0.4', 5672)>
+2025-11-15 17:56:10,418 - pika.connection - INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-11-15 17:56:10,418 - pika.connection - INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-11-15 17:56:10,418 - pika.adapters.utils.io_services_utils - INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.3', 51374), raddr=('172.18.0.4', 5672)>
+2025-11-15 17:56:10,418 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
+2025-11-15 17:56:10,418 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-11-15 17:56:10,418 - RedisEdgeClient - INFO - Disconnected from Redis

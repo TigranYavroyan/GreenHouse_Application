@@ -9,10 +9,11 @@
         "LICENSE",
         "package.json",
         "package-lock.json",
-        "requirements.txt"
-    ],
-    "excludes": [
-        "backend/node_modules/**"
+        "requirements.txt",
+        "overall_architecture_description.txt",
+        "backend/README_ENV.md",
+        "frontend/README_ENV.md",
+        "*.env*"
     ],
     "ignore": [
         "backend/node_modules/**"

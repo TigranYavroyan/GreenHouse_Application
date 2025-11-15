@@ -45,10 +45,17 @@ The Greenhouse Automation Application follows a **microservices architecture** w
     ┌────┴────┐
     │         │
     ▼         ▼
-┌────────┐ ┌────────┐
-│ Redis  │ │ Shell  │
-│ Cache  │ │ Exec   │
-└────────┘ └────────┘
+┌────────┐ ┌──────────────────┐
+│ Redis  │ │ Greenhouse Core │
+│ Cache  │ │ (Simulator/Real)│
+└────────┘ └──────────────────┘
+         │
+         │ HTTP API
+         ▼
+┌─────────────────┐
+│ Greenhouse Core │  (Express.js Simulator or Real Core)
+│   Simulator     │
+└─────────────────┘
 ```
 
 ### Step-by-Step Architecture Flow
@@ -62,7 +69,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - User interacts with GUI (Control tab, Terminal tab, or Server tab)
 - Frontend creates command payload with:
   - `commandId` (UUID)
-  - `command` (e.g., "read_sensor", "execute_raw", "list_directory")
+  - `command` (e.g., "read_temperature_data", "switch_water_canal", "read_sensor", "execute_raw", "list_directory")
   - `parameters` (command-specific parameters)
   - `sessionId` (unique session identifier)
   - `type` ("user" or "developer")
@@ -85,15 +92,31 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - Commands are queued per-session to ensure sequential execution
 
 #### 5. **Command Execution**
-- `CommandExecutor` receives the command
-- Executes appropriate shell command or system operation:
+- `CommandExecutor` receives the command and determines if it's a greenhouse command or shell command
+- **Greenhouse Commands** (routed to Greenhouse Core via HTTP):
+  - `read_temperature_data`: Reads temperature sensor data from greenhouse core
+    - Parameters: None
+    - Returns: Temperature value, unit, timestamp, sensor ID, location
+  - `switch_water_canal`: Controls water canal actuator
+    - Parameters: `action` ("on", "off", "toggle")
+    - Returns: Device ID, status, previous status, timestamp
+  - `switch_actuator`: Controls generic actuators
+    - Parameters: `actuatorId` (string), `action` ("on", "off", "toggle")
+    - Returns: Actuator ID, status, previous status, timestamp
+  - `read_sensor`: Legacy command, routes to `read_temperature_data` if core available
+- **Shell Commands** (backward compatibility for development/debugging):
   - `list_directory`: `ls -la` in current session path
   - `navigate`/`change_directory`: `cd` command with path validation
   - `execute_raw`: Executes arbitrary shell command
-  - `read_sensor`: Simulates sensor data (temperature, humidity, light)
   - `system_status`: `ps aux` for system monitoring
   - `get_current_path`: Returns current working directory
-- Results include: `output`, `stderr`, `executionTime`, `error` (if any)
+- **Execution Flow**:
+  1. Greenhouse commands are routed to `GreenhouseCoreClient.executeCommand()`
+  2. Client sends HTTP POST to Greenhouse Core API (`/api/v1/commands/execute`)
+  3. Core processes command and returns JSON response
+  4. Client handles retries, timeouts, and error recovery
+  5. Response is normalized to match shell command format
+- Results include: `output` (JSON string), `data` (parsed object), `executionTime`, `error` (if any)
 
 #### 6. **Session Management**
 - `SessionManager` maintains session state:
@@ -106,11 +129,16 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 
 #### 7. **Caching Strategy**
 - Redis caches command results with TTL:
-  - `list_directory`: 15 seconds
-  - `system_status`: 8 seconds
-  - `read_sensor`: 5 seconds
-  - `get_current_path`: 15 seconds
-  - `execute_raw`: No caching (always fresh)
+  - **Greenhouse Commands**:
+    - `read_temperature_data`: 5 seconds
+    - `read_sensor`: 5 seconds (legacy, routes to read_temperature_data)
+    - `switch_water_canal`: No caching (stateful)
+    - `switch_actuator`: No caching (stateful)
+  - **Shell Commands** (backward compatibility):
+    - `list_directory`: 15 seconds
+    - `system_status`: 8 seconds
+    - `get_current_path`: 15 seconds
+    - `execute_raw`: No caching (always fresh)
 - Cache key format: `cmd:{sessionId}:{command}:{currentPath}:{parameters}`
 
 #### 8. **Response Delivery**
@@ -167,8 +195,35 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 #### **Backend** (`greenhouse-backend`)
 - **Technology**: Node.js 18+ with Express.js
 - **Port**: 3000 (exposed to host)
-- **Dependencies**: Redis, RabbitMQ
+- **Dependencies**: Redis, RabbitMQ, Greenhouse Core Simulator
 - **Health Check**: HTTP GET `/health` every 30 seconds
+- **Greenhouse Core Integration**: Uses `GreenhouseCoreClient` to communicate with greenhouse core via HTTP API
+
+#### **Greenhouse Core Simulator** (`greenhouse-core-sim`)
+- **Technology**: Node.js 18+ with Express.js
+- **Port**: 3001 (exposed to host)
+- **Purpose**: Simulates greenhouse core logic for development and testing
+- **Location**: `sim/` folder
+- **Structure**:
+  - `sim/app.js` - Main Express server
+  - `sim/controllers/commandController.js` - Command handling logic
+  - `sim/services/deviceSimulator.js` - Device and sensor simulation
+- **APIs**:
+  - `POST /api/v1/commands/execute` - Generic command execution endpoint
+    - Body: `{ command, parameters, commandId, sessionId }`
+    - Returns: `{ success, result, error, commandId, timestamp }`
+  - `POST /api/v1/commands/read_temperature_data` - Read temperature sensor data (alternative endpoint)
+  - `POST /api/v1/commands/switch_water_canal` - Control water canal actuator (alternative endpoint)
+  - `POST /api/v1/commands/switch_actuator` - Control generic actuators (alternative endpoint)
+  - `GET /api/v1/health` or `GET /health` - Health check endpoint
+  - `GET /api/v1/devices` - Get current device states (debugging/monitoring)
+- **Simulation Features**:
+  - Temperature sensor with realistic variations (±2°C from base 22.5°C)
+  - Water canal actuator with state tracking (on/off/toggle)
+  - Generic actuators with dynamic registration
+  - Device state persistence during simulator lifetime
+- **Health Check**: HTTP GET `/health` every 30 seconds
+- **Note**: In production, this will be replaced by the real greenhouse core system. The backend's `GreenhouseCoreClient` can be configured to point to the real core by changing `GREENHOUSE_CORE_URL` environment variable.
 
 #### **Frontend** (`greenhouse-frontend`)
 - **Technology**: Python 3 with PyQt5
@@ -199,6 +254,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - Creates and wires all service components:
     - `RedisClientWrapper`
     - `RabbitMQClient`
+    - `GreenhouseCoreClient`
     - `SessionManager`
     - `CommandExecutor`
     - `CommandProcessor`
@@ -227,6 +283,18 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - Queue inspection (`checkQueue`)
   - Automatic reconnection on connection loss
   - Prefetch configuration for load balancing
+
+#### **`clients/greenhouseCoreClient.js`** (`GreenhouseCoreClient`)
+- **Purpose**: Abstract interface for communicating with greenhouse core system
+- **Functionality**:
+  - HTTP client for greenhouse core API communication
+  - Generic `executeCommand()` method for all greenhouse commands
+  - Health check endpoint monitoring
+  - Retry logic with exponential backoff
+  - Timeout handling
+  - Connection status tracking
+  - Configurable via environment variables (URL, timeout, retries)
+- **Note**: Can switch between simulator and real core by changing configuration
 
 ### Core Services
 
@@ -259,19 +327,25 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - Returns structured response with result, cache status, and metadata
 
 #### **`executor/commandExecutor.js`** (`CommandExecutor`)
-- **Purpose**: Executes shell commands and system operations
-- **Supported Commands**:
+- **Purpose**: Executes commands - routes greenhouse commands to core, shell commands for backward compatibility
+- **Greenhouse Commands** (routed to Greenhouse Core):
+  - `read_temperature_data`: Reads temperature sensor data
+  - `switch_water_canal`: Controls water canal actuator
+  - `switch_actuator`: Controls generic actuators
+  - `read_sensor`: Legacy command, routes to `read_temperature_data` if core available
+- **Shell Commands** (backward compatibility for development):
   - `list_directory`: Lists files in current directory (`ls -la`)
   - `navigate`: Changes directory and returns new path (`cd` + `pwd`)
   - `change_directory`: Same as navigate
   - `get_current_path`: Returns current working directory
   - `system_status`: Shows running processes (`ps aux`)
   - `execute_raw`: Executes arbitrary shell command
-  - `read_sensor`: Simulates sensor data (temperature, humidity, light)
 - **Features**:
-  - Executes commands in session's working directory
+  - Routes greenhouse commands to `GreenhouseCoreClient` (HTTP API)
+  - Executes shell commands in session's working directory
   - Configurable timeout (default 15 seconds)
-  - Captures stdout, stderr, and execution time
+  - Captures stdout, stderr, and execution time for shell commands
+  - Normalizes responses from both greenhouse core and shell commands
   - Error handling with structured error objects
   - Max buffer size: 10MB
 
@@ -321,8 +395,15 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - `rabbitmq`: Host and port (default: rabbitmq:5672)
   - `server`: Port (default: 3000)
   - `exec`: Command execution timeout (default: 15000ms)
+  - `greenhouseCore`: Greenhouse core API configuration
+    - `url`: Base URL for greenhouse core API (default: http://localhost:3001)
+    - `timeout`: Request timeout in milliseconds (default: 10000)
+    - `retries`: Number of retry attempts (default: 2)
   - `logsDir`: Logs directory path
 - **Environment Variables**: All values can be overridden via environment variables
+  - `GREENHOUSE_CORE_URL`: Greenhouse core API URL
+  - `GREENHOUSE_CORE_TIMEOUT`: Request timeout in milliseconds
+  - `GREENHOUSE_CORE_RETRIES`: Number of retry attempts
 
 ---
 
@@ -495,6 +576,9 @@ python main.py --debug  # Debug logging
 - `RABBITMQ_HOST`: RabbitMQ hostname (default: rabbitmq)
 - `RABBITMQ_PORT`: RabbitMQ port (default: 5672)
 - `EXEC_TIMEOUT_MS`: Command execution timeout (default: 15000)
+- `GREENHOUSE_CORE_URL`: Greenhouse core API URL (default: http://localhost:3001)
+- `GREENHOUSE_CORE_TIMEOUT`: Request timeout in milliseconds (default: 10000)
+- `GREENHOUSE_CORE_RETRIES`: Number of retry attempts (default: 2)
 
 #### Frontend
 - `BACKEND_URL`: Backend API URL (default: http://localhost:3000)
@@ -537,6 +621,36 @@ python main.py --debug  # Debug logging
 
 ---
 
+## Greenhouse Core Integration
+
+### Abstract Interface Design
+
+The backend uses an abstract `GreenhouseCoreClient` interface that allows seamless switching between the simulator and the real greenhouse core system. This design provides:
+
+1. **Flexibility**: Change core system by updating configuration only
+2. **Testability**: Use simulator for development and testing
+3. **Reliability**: Built-in retry logic, timeout handling, and connection status tracking
+4. **Consistency**: Normalized response format regardless of core implementation
+
+### Command Routing
+
+The `CommandExecutor` automatically routes commands:
+- **Greenhouse commands** (`read_temperature_data`, `switch_water_canal`, `switch_actuator`) → Greenhouse Core via HTTP
+- **Shell commands** (`list_directory`, `execute_raw`, etc.) → Local shell execution (backward compatibility)
+
+### Switching to Real Core
+
+To switch from simulator to real greenhouse core:
+
+1. Update `GREENHOUSE_CORE_URL` environment variable to point to real core API
+2. Ensure real core implements the same API contract:
+   - `POST /api/v1/commands/execute` with `{ command, parameters, commandId, sessionId }`
+   - Returns `{ success, result, error, commandId, timestamp }`
+   - `GET /api/v1/health` for health checks
+3. Restart backend service
+
+No code changes required - the abstract interface handles the communication.
+
 ## Architecture Benefits
 
 1. **Scalability**: RabbitMQ allows multiple frontend instances and backend workers
@@ -545,6 +659,8 @@ python main.py --debug  # Debug logging
 4. **Isolation**: Per-session state prevents command interference
 5. **Observability**: Comprehensive logging at system and session levels
 6. **Flexibility**: Support for both GUI and headless operation modes
+7. **Modularity**: Abstract greenhouse core interface allows easy integration with different core implementations
+8. **Resilience**: Automatic retry and timeout handling for greenhouse core communication
 
 ---
 

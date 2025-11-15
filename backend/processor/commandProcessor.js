@@ -27,17 +27,32 @@ class CommandProcessor {
 
   getTTLForCommand(command) {
     const ttlConfig = {
-      list_directory: 15,
-      system_status: 8,
-      read_sensor: 5,
-      get_current_path: 15,
-      execute_raw: 0
+      // Greenhouse core sensor reading commands (cacheable)
+      read_temperature_data: 5,
+      read_humidity_data: 5,
+      read_light_data: 5,
+      read_co2_data: 5,
+      read_soil_moisture_data: 5,
+      read_soil_ph_data: 5,
+      read_sensor: 5, // Legacy, routes to appropriate sensor
+      // Device control commands (stateful - don't cache)
+      switch_water_canal: 0,
+      switch_actuator: 0,
+      switch_fan: 0,
+      switch_heater: 0
     };
     return ttlConfig[command] || 8;
   }
 
   isStateful(command) {
-    return command === 'navigate' || command === 'change_directory' || command === 'execute_raw';
+    // Commands that change state and should not be cached
+    const statefulCommands = [
+      'switch_water_canal',
+      'switch_actuator',
+      'switch_fan',
+      'switch_heater'
+    ];
+    return statefulCommands.includes(command);
   }
 
   /**
@@ -87,16 +102,9 @@ class CommandProcessor {
 
         this.commandStats.cacheMisses++;
         session.logger.command(commandId, 'EXECUTING');
+        // Store commandId in session temporarily for executor to use
+        session.lastCommandId = commandId;
         const result = await this.executor.runCommand(command, parameters, session);
-
-        // update session path if navigate/change_directory succeeded and returned output pwd
-        if ((command === 'navigate' || command === 'change_directory') && result.output && !result.error) {
-          const newPath = (result.output || '').trim();
-          if (newPath) {
-            session.previousPath = session.currentPath;
-            session.currentPath = newPath;
-          }
-        }
 
         // caching - only cache successful results (no errors)
         if (!this.isStateful(command) && !result.error && this.redis && this.redis.isOpen) {

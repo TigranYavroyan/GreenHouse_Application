@@ -44,7 +44,9 @@ export default {
   server: {
     port: process.env.PORT ? Number(process.env.PORT) : 3000
   },
-  exec: {
-    timeout: Number(process.env.EXEC_TIMEOUT_MS) || 15000
+  greenhouseCore: {
+    url: process.env.GREENHOUSE_CORE_URL || 'http://localhost:3001',
+    timeout: Number(process.env.GREENHOUSE_CORE_TIMEOUT) || 10000,
+    retries: Number(process.env.GREENHOUSE_CORE_RETRIES) || 2
   }
 };

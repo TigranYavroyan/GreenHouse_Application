@@ -1,0 +1,66 @@
+I am implementing desktop application for the green house automation system, where i am using pyqt5 as desktop application framework, using express.js for the backend application, which responsible for the caching system and sending commands to the greenhouse automation system as ready command to execute
+
+My desktop application code use rabbitmq as a message queue system , redis for the backend as a cache and edge-to-edge fog data aggregation system for the clear abstraction layering and responsibility segregation mechanism
+
+## Edge-to-Fog Data Aggregation System
+
+The system implements a complete Edge-to-Fog data aggregation architecture:
+
+### Frontend (PyQt5 Desktop Application)
+- **EdgeToFogAggregator**: Aggregates sensor data from edge devices
+  - Receives raw sensor readings (temperature, humidity, soil moisture, light, CO2, pH)
+  - Performs time-windowed aggregation (1min, 5min, 15min, 1h)
+  - Detects anomalies (out-of-range, high variance, rapid changes, trends)
+  - Manages edge device registration and status
+  - Emits Qt signals for UI updates (aggregated data, anomalies, device status)
+
+- **RedisEdgeClient**: Local edge caching
+  - Cache-aside pattern for aggregated data
+  - TTL-based expiration
+  - Namespace-based key organization
+
+- **Sensor Data Flow**:
+  - Simulated sensor readings (for testing) or RabbitMQ consumer (production)
+  - Data flows: Edge Devices → Aggregator → Local Redis Cache → Backend Sync
+
+- **Backend Sync**:
+  - Aggregated data synced to backend via HTTP POST /fog/aggregated
+  - Anomalies synced to backend via HTTP POST /fog/anomalies
+  - Non-blocking async sync (threading) to avoid UI blocking
+
+### Backend (Express.js)
+- **Fog Data Endpoints**:
+  - POST /fog/aggregated: Store aggregated sensor data
+  - GET /fog/aggregated: Retrieve aggregated data (with filtering by sensorType, location, timeframe)
+  - GET /fog/devices: List registered edge devices
+  - POST /fog/anomalies: Store detected anomalies
+  - GET /fog/anomalies: Retrieve recent anomalies (with limit)
+
+- **Redis Storage**:
+  - Aggregated data stored with namespace: `fog:agg:{sensorType}:{location}:{timeframe}`
+  - Anomalies stored with namespace: `fog:anomaly:{anomaly_id}`
+  - Devices stored with namespace: `fog:device:{device_id}`
+  - TTL-based expiration for automatic cleanup
+
+### Data Flow Architecture
+1. **Edge Layer**: Sensor devices collect raw readings
+2. **Fog Layer (Desktop App)**: 
+   - Receives raw sensor data
+   - Aggregates data in time windows
+   - Detects anomalies
+   - Caches locally in Redis
+   - Syncs to backend
+3. **Backend Layer**: 
+   - Receives aggregated data from fog nodes
+   - Stores in central Redis
+   - Provides API for querying aggregated data
+   - Supports edge-to-edge data sharing
+
+### Key Features
+- **Offline-first**: Local caching allows operation without backend connection
+- **Real-time aggregation**: Time-windowed aggregation (1min, 5min, 15min, 1h)
+- **Anomaly detection**: Multiple detection algorithms (range, variance, rate of change, trends)
+- **Quality scoring**: Quality-weighted aggregation based on sensor reliability
+- **Device management**: Registration, status tracking, battery monitoring
+- **Non-blocking UI**: All I/O operations run in background threads
+- **Cache-aside pattern**: Local edge cache with backend sync

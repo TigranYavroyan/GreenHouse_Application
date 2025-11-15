@@ -49,6 +49,11 @@ class Config:
     RABBITMQ_USER = os.getenv('RABBITMQ_USER', 'guest')
     RABBITMQ_PASS = os.getenv('RABBITMQ_PASS', 'guest')
     
+    # Redis Configuration (for edge caching)
+    REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+    REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
+    REDIS_DB = int(os.getenv('REDIS_DB', '0'))
+    
     # Environment
     ENVIRONMENT = ENVIRONMENT
     

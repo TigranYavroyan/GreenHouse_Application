@@ -1,80 +1,122 @@
 // executor/commandExecutor.js
-import { exec as childExec } from 'child_process';
-import util from 'util';
-import config from '../config/index.js';
-
-const execPromise = util.promisify(childExec);
 
 class CommandExecutor {
-  constructor(systemLogger) {
+  constructor(systemLogger, greenhouseCoreClient = null) {
     this.systemLogger = systemLogger;
-    this.defaultTimeout = config.exec.timeout;
+    this.greenhouseCoreClient = greenhouseCoreClient;
   }
 
   /**
-   * Execute a shell command in the provided cwd.
-   * Returns { output, command, executionTime } or throws an object { error, code, stderr, command }.
+   * Check if command is a greenhouse-specific command
    */
-  async executeInSession(command, workingDirectory, session, opts = {}) {
-    const timeout = opts.timeout || this.defaultTimeout;
-    const options = {
-      cwd: workingDirectory,
-      shell: true,
-      timeout,
-      encoding: 'utf8',
-      maxBuffer: 10 * 1024 * 1024
-    };
+  isGreenhouseCommand(commandName) {
+    const greenhouseCommands = [
+      // Sensor reading commands
+      'read_temperature_data',
+      'read_humidity_data',
+      'read_light_data',
+      'read_co2_data',
+      'read_soil_moisture_data',
+      'read_soil_ph_data',
+      'read_sensor', // Legacy command, routes to appropriate sensor based on parameters
+      // Device control commands
+      'switch_water_canal',
+      'switch_actuator',
+      'switch_fan',
+      'switch_heater'
+    ];
+    return greenhouseCommands.includes(commandName);
+  }
 
-    session.logger.debug(`Executing: ${command} (cwd: ${workingDirectory})`);
+  /**
+   * Execute greenhouse command via core client
+   */
+  async executeGreenhouseCommand(commandName, parameters = {}, session) {
+    if (!this.greenhouseCoreClient) {
+      session.logger.error(`Greenhouse core client not available for command: ${commandName}`);
+      return { error: 'Greenhouse core client not configured', command: commandName };
+    }
+
+    // Map legacy read_sensor to appropriate command based on parameters
+    let actualCommand = commandName;
+    if (commandName === 'read_sensor') {
+      const sensorType = parameters.sensor || 'temperature';
+      if (sensorType === 'temperature') {
+        actualCommand = 'read_temperature_data';
+      } else if (sensorType === 'humidity') {
+        actualCommand = 'read_humidity_data';
+      } else if (sensorType === 'light') {
+        actualCommand = 'read_light_data';
+      } else if (sensorType === 'co2') {
+        actualCommand = 'read_co2_data';
+      } else if (sensorType === 'soil_moisture') {
+        actualCommand = 'read_soil_moisture_data';
+      } else if (sensorType === 'soil_ph') {
+        actualCommand = 'read_soil_ph_data';
+      } else {
+        actualCommand = 'read_temperature_data'; // Default fallback
+      }
+    }
+
     const start = Date.now();
+    session.logger.debug(`Executing greenhouse command: ${actualCommand}`);
 
     try {
-      const { stdout, stderr } = await execPromise(command, options);
-      const took = Date.now() - start;
-      session.logger.debug(`Command succeeded in ${took}ms: ${command}`);
-      return { output: stdout ? stdout.trim() : '', stderr: stderr ? stderr.trim() : '', command, executionTime: took };
-    } catch (err) {
-      const took = Date.now() - start;
-      if (err.killed || err.signal === 'SIGTERM') {
-        session.logger.error(`Command timeout after ${timeout}ms: ${command}`);
-        throw { error: `Command timed out after ${timeout}ms`, code: 'TIMEOUT', command };
+      const metadata = {
+        commandId: session.lastCommandId || 'unknown',
+        sessionId: session.sessionId
+      };
+
+      const result = await this.greenhouseCoreClient.executeCommand(
+        actualCommand,
+        parameters,
+        metadata
+      );
+
+      const executionTime = Date.now() - start;
+
+      if (result.success) {
+        session.logger.info(`Greenhouse command ${actualCommand} succeeded in ${executionTime}ms`);
+        // Normalize response to match existing structure
+        return {
+          output: JSON.stringify(result.data),
+          data: result.data,
+          executionTime,
+          command: commandName
+        };
+      } else {
+        session.logger.error(`Greenhouse command ${actualCommand} failed: ${result.error}`);
+        return {
+          error: result.error || 'Command execution failed',
+          command: commandName,
+          executionTime
+        };
       }
-      session.logger.error(`Command failed (${err.code || 'ERR'}): ${command} - ${err.message}`);
-      throw { error: err.message, code: err.code, stderr: err.stderr, command };
+    } catch (err) {
+      const executionTime = Date.now() - start;
+      session.logger.error(`Greenhouse command ${actualCommand} exception: ${err.message}`);
+      return {
+        error: err.message || 'Command execution exception',
+        command: commandName,
+        executionTime
+      };
     }
   }
 
-  // Expose higher-level commands here; keep it small and extensible.
+  /**
+   * Execute command - routes to greenhouse core client
+   */
   async runCommand(commandName, parameters = {}, session) {
-    switch (commandName) {
-      case 'list_directory':
-        return this.executeInSession(`ls -la`, parameters.path || session.currentPath, session);
-      case 'navigate':
-        return this.executeInSession(`cd "${parameters.path}" && pwd`, session.currentPath, session);
-      case 'change_directory':
-        return this.executeInSession(`cd "${parameters.path}" && pwd`, session.currentPath, session);
-      case 'get_current_path':
-        return { output: session.currentPath };
-      case 'system_status':
-        return this.executeInSession('ps aux | head -10', session.currentPath, session);
-      case 'execute_raw':
-        return this.executeInSession(parameters.raw_command, session.currentPath, session);
-      case 'read_sensor':
-        // simulator
-        {
-          const sensorData = {
-            temperature: Math.random() * 30 + 10,
-            humidity: Math.random() * 100,
-            light: Math.random() * 1000,
-            timestamp: new Date().toISOString()
-          };
-          session.logger.info(`Sensor data: ${JSON.stringify(sensorData)}`);
-          return sensorData;
-        }
-      default:
-        // Return error in result object instead of throwing
-        return { error: `Unknown command: ${commandName}`, command: commandName };
+    // All commands are routed to greenhouse core client
+    if (this.isGreenhouseCommand(commandName)) {
+      return this.executeGreenhouseCommand(commandName, parameters, session);
     }
+
+    // Unknown command - return error
+    return {
+      error: `Unknown command: ${commandName}. Only greenhouse commands are supported.`,
+      command: commandName
+    };
   }
 }
 

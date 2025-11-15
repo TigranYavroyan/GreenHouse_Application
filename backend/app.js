@@ -3,6 +3,7 @@ import express from 'express';
 import SystemLogger from './logger/systemLogger.js';
 import RedisClientWrapper from './clients/redisClient.js';
 import RabbitMQClient from './clients/rabbitmqClient.js';
+import GreenhouseCoreClient from './clients/greenhouseCoreClient.js';
 import SessionManager from './sessions/sessionManager.js';
 import CommandExecutor from './executor/commandExecutor.js';
 import CommandProcessor from './processor/commandProcessor.js';
@@ -18,10 +19,11 @@ class App {
     // clients
     this.redisClient = new RedisClientWrapper();
     this.rabbitClient = new RabbitMQClient();
+    this.greenhouseCoreClient = new GreenhouseCoreClient();
 
     // core services
     this.sessionManager = new SessionManager();
-    this.commandExecutor = new CommandExecutor(SystemLogger);
+    this.commandExecutor = new CommandExecutor(SystemLogger, this.greenhouseCoreClient);
     this.commandProcessor = new CommandProcessor({
       redisClient: this.redisClient,
       sessionManager: this.sessionManager,
@@ -102,12 +104,13 @@ class App {
       await this.redisClient.connect();
       this.systemLogger.info('Redis connected');
 
-      // test shell
-      const { exec } = await import('child_process');
-      exec('echo "Command test"', { shell: true }, (err, stdout) => {
-        if (err) this.systemLogger.error(`Command test failed: ${err.message}`);
-        else this.systemLogger.info(`Command test passed: ${stdout.trim()}`);
-      });
+      // Connect to greenhouse core
+      await this.greenhouseCoreClient.connect();
+      if (this.greenhouseCoreClient.connected) {
+        this.systemLogger.info('Greenhouse Core Client connected');
+      } else {
+        this.systemLogger.warn('Greenhouse Core Client connection failed - will retry on command execution');
+      }
 
       // start rabbit
       this.setupRabbitAndConsumer().catch((e) => this.systemLogger.error(`Rabbit setup error: ${e.message}`));

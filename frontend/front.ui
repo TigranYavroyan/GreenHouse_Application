@@ -143,7 +143,7 @@ QTabBar::tab:hover:!selected {
 }</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>true</bool>
@@ -350,7 +350,7 @@ QPushButton:disabled {
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QPushButton" name="pathButton">
+            <widget class="QPushButton" name="lightButton">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -380,7 +380,252 @@ QPushButton:disabled {
 }</string>
              </property>
              <property name="text">
-              <string>📂 Current Path</string>
+              <string>💡 Light</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="co2Button">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+    background-color: #2E7D32;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #4CAF50;
+}
+QPushButton:pressed {
+    background-color: #1B5E20;
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;
+    color: #757575;
+}</string>
+             </property>
+             <property name="text">
+              <string>🌬️ CO2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QPushButton" name="soilMoistureButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+    background-color: #2E7D32;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #4CAF50;
+}
+QPushButton:pressed {
+    background-color: #1B5E20;
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;
+    color: #757575;
+}</string>
+             </property>
+             <property name="text">
+              <string>🌱 Soil Moisture</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QPushButton" name="soilPHButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+    background-color: #2E7D32;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #4CAF50;
+}
+QPushButton:pressed {
+    background-color: #1B5E20;
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;
+    color: #757575;
+}</string>
+             </property>
+             <property name="text">
+              <string>🧪 Soil pH</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QPushButton" name="waterCanalButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+    background-color: #1976D2;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #2196F3;
+}
+QPushButton:pressed {
+    background-color: #0D47A1;
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;
+    color: #757575;
+}</string>
+             </property>
+             <property name="text">
+              <string>🚰 Water Canal</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QPushButton" name="fanButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+    background-color: #1976D2;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #2196F3;
+}
+QPushButton:pressed {
+    background-color: #0D47A1;
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;
+    color: #757575;
+}</string>
+             </property>
+             <property name="text">
+              <string>🌀 Fan</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QPushButton" name="heaterButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+    background-color: #1976D2;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #2196F3;
+}
+QPushButton:pressed {
+    background-color: #0D47A1;
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;
+    color: #757575;
+}</string>
+             </property>
+             <property name="text">
+              <string>🔥 Heater</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QPushButton" name="actuatorButton">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+    background-color: #1976D2;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #2196F3;
+}
+QPushButton:pressed {
+    background-color: #0D47A1;
+}
+QPushButton:disabled {
+    background-color: #BDBDBD;
+    color: #757575;
+}</string>
+             </property>
+             <property name="text">
+              <string>⚙️ Actuator</string>
              </property>
             </widget>
            </item>
@@ -435,415 +680,6 @@ QTextEdit:focus {
         </item>
         <item>
          <widget class="QPushButton" name="btn_clear_user">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-    background-color: #FF6F00;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #FF9800;
-}
-QPushButton:pressed {
-    background-color: #E65100;
-}</string>
-          </property>
-          <property name="text">
-           <string>🗑️ Clear Output</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="devTab">
-       <attribute name="title">
-        <string>💻 Terminal</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="devTabLayout">
-        <property name="spacing">
-         <number>8</number>
-        </property>
-        <property name="leftMargin">
-         <number>8</number>
-        </property>
-        <property name="topMargin">
-         <number>8</number>
-        </property>
-        <property name="rightMargin">
-         <number>8</number>
-        </property>
-        <property name="bottomMargin">
-         <number>8</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="pathLayout">
-          <item>
-           <widget class="QLabel" name="pathTitleLabel">
-            <property name="styleSheet">
-             <string notr="true">QLabel {
-    font-size: 11px;
-    color: #757575;
-    padding: 2px 0;
-}</string>
-            </property>
-            <property name="text">
-             <string>Current Path:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="path_label">
-            <property name="styleSheet">
-             <string notr="true">QLabel {
-    font-family: Consolas, Monaco, Courier New, monospace;
-    background-color: #F5F5F5;
-    padding: 4px 8px;
-    border-radius: 5px;
-    border: 1px solid #E0E0E0;
-    color: #212121;
-    font-weight: 500;
-}</string>
-            </property>
-            <property name="text">
-             <string>/</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="pathSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="quickCommandsLayout">
-          <item>
-           <widget class="QLabel" name="quickCommandsLabel">
-            <property name="styleSheet">
-             <string notr="true">QLabel {
-    font-size: 16px;
-    font-weight: 500;
-    color: #212121;
-    padding: 2px 0;
-}</string>
-            </property>
-            <property name="text">
-             <string>Quick Commands:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="lsButton">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>34</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton {
-    background-color: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-    border-color: #1B5E20;
-}</string>
-            </property>
-            <property name="text">
-             <string>📁 ls</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pwdButton">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>34</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton {
-    background-color: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-    border-color: #1B5E20;
-}</string>
-            </property>
-            <property name="text">
-             <string>📂 pwd</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="dfButton">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>34</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton {
-    background-color: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-    border-color: #1B5E20;
-}</string>
-            </property>
-            <property name="text">
-             <string>💾 df</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="psButton">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>34</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton {
-    background-color: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-    border-color: #1B5E20;
-}</string>
-            </property>
-            <property name="text">
-             <string>📋 ps</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="quickCommandsSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="commandInputLayout">
-          <item>
-           <widget class="QLineEdit" name="command_input">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>34</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLineEdit {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 5px;
-    padding: 6px 8px;
-    font-size: 12px;
-    color: #212121;
-    min-height: 20px;
-}
-QLineEdit:focus {
-    border: 1px solid #2E7D32;
-}</string>
-            </property>
-            <property name="placeholderText">
-             <string>Enter shell command...</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btn_send">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-            </property>
-            <property name="text">
-             <string>🚀 Send</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btn_cancel">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton {
-    background-color: #FF6F00;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #FF9800;
-}
-QPushButton:pressed {
-    background-color: #E65100;
-}</string>
-            </property>
-            <property name="text">
-             <string>❌ Cancel</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QLabel" name="devOutputLabel">
-          <property name="styleSheet">
-           <string notr="true">QLabel {
-    font-size: 16px;
-    font-weight: 500;
-    color: #212121;
-    padding: 2px 0;
-}</string>
-          </property>
-          <property name="text">
-           <string>Terminal Output:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTextEdit" name="dev_output">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>300</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QTextEdit {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 5px;
-    padding: 6px;
-    font-family: Consolas, Monaco, Courier New, monospace;
-    font-size: 11px;
-    color: #212121;
-    selection-background-color: #4CAF50;
-}
-QTextEdit:focus {
-    border: 1px solid #2E7D32;
-}</string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="placeholderText">
-           <string>Terminal output will appear here...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_clear_dev">
           <property name="minimumSize">
            <size>
             <width>0</width>

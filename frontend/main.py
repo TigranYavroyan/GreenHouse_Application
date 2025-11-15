@@ -13,36 +13,14 @@ from modules.greenhouse import GreenhouseDesktop, setup_logging
 from modules.command_worker import CommandWorker
 
 def run_headless():
-    # Headless behavior: connect CommandWorker and accept simple CLI input
+    # Headless mode removed - shell commands are no longer supported
+    # All commands must go through greenhouse core simulator
     setup_logging()
     logger = logging.getLogger('GreenhouseDesktop')
-    logger.info("Starting headless mode (no GUI)")
-    worker = CommandWorker()
-    worker.setup_rabbitmq()
-
-    try:
-        print("Headless mode. Type commands (or Ctrl+C to quit).")
-        while True:
-            cmd = input("> ").strip()
-            if not cmd:
-                continue
-            # Send as developer execute_raw command
-            payload = {
-                "commandId": str(uuid.uuid4()),
-                "command": "execute_raw",
-                "type": "developer",
-                "parameters": {"raw_command": cmd},
-                "sessionId": str(uuid.uuid4()),
-                "raw_command": cmd
-            }
-            worker.send_command(payload)
-    except KeyboardInterrupt:
-        logger.info("Headless exiting")
-        try:
-            worker.disconnect()
-        except Exception:
-            pass
-        sys.exit(0)
+    logger.warning("Headless mode is no longer supported. Shell commands have been removed.")
+    print("Headless mode is no longer supported.")
+    print("Please use the GUI application or send commands via RabbitMQ to greenhouse core simulator.")
+    sys.exit(1)
 
 def run_gui(debug=False):
     # Ensure runtime dir exists for Qt

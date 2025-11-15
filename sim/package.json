@@ -1,0 +1,28 @@
+{
+  "name": "greenhouse-core-simulator",
+  "version": "1.0.0",
+  "description": "Greenhouse core logic simulator",
+  "type": "module",
+  "main": "app.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "greenhouse",
+    "simulator",
+    "express"
+  ],
+  "author": "you",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
+
