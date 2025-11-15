@@ -1,0 +1,3 @@
+I am implementing desktop application for the green house automation system, where i am using pyqt5 as desktop application framework, using express.js for the backend application, which responsible for the caching system and sending commands to the greenhouse automation system as ready command to execute
+
+My desktop application code use rabbitmq as a message queue system , redis for the backend as a cache and edge-to-edge fog data aggregation system for the clear abstraction layering and responsibility segregation mechanism

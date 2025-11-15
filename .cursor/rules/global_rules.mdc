@@ -1,0 +1,255 @@
+---
+alwaysApply: true
+---
+
+Cursor AI rule — Greenhouse Automation (PyQt5 + Express.js + RabbitMQ + Redis)
+
+Context: Desktop app: PyQt5 (UI, local fog/cache edge). Backend: Express.js (API, cache coordinator). Messaging: RabbitMQ. Caching: Redis (central + local edge caches). Edge-to-edge fog data aggregation with clear separation of responsibilities.
+
+High-level mandate (must-follow):
+
+Always prioritize correctness, reliability, security, and non-blocking UI performance.
+
+Prefer explicit, small, well-explained code snippets over long opaque code dumps.
+
+Explain trade-offs (performance, consistency, complexity) for recommended approaches.
+
+When suggesting code, always include: brief rationale, how it fits into architecture, error-handling outline, and basic tests or validation approach.
+
+Default to TypeScript for backend examples unless user explicitly requests plain JavaScript.
+
+Default to using async patterns in Node and non-blocking patterns in PyQt (threads, signals/slots, or asyncio adapters).
+
+Suggest production-ready patterns: structured logging, metrics, graceful shutdown, config by environment, secrets management, and CI/CD.
+
+Project architecture & folder structure (guideline)
+
+Backend (Express): src/ → controllers/, services/, repositories/, mq/, cache/, middleware/, utils/
+
+Desktop (PyQt5): ui/ (Qt Designer .ui or programmatic views), controllers/ (app logic), workers/ (QThread tasks), comm/ (messaging client wrapper), models/
+
+Tests: tests/backend/, tests/desktop/, CI pipeline running linters + unit + integration tests
+
+Docker: multi-stage Dockerfile for backend; provide docker-compose for local dev including Redis & RabbitMQ.
+
+Express.js backend — rules & best practices
+
+Use TypeScript and ts-node/build pipeline. Use strict types.
+
+Structure by domain (controllers → services → repositories).
+
+Input validation: use zod or joi on every external input (body, params, query).
+
+Error handling: centralized error middleware returning structured errors { error, code, details }.
+
+Security: helmet, cors configured explicitly, rate limiting, request size limits.
+
+Messaging: publish events to RabbitMQ via a dedicated mq service with retry/backoff and confirm/durable publishing.
+
+Redis caching:
+
+Prefer cache-aside for read-heavy data unless you need strong consistency.
+
+Set TTLs and keys namespacing (service:entity:id).
+
+Implement cache stampede protection (singleflight lock or Redis SET NX lock).
+
+Observability: structured logs (pino/winston), expose /health and /metrics (Prometheus format).
+
+Graceful shutdown: on SIGTERM/SIGINT drain connections, stop accepting new requests, flush message producers, close Redis & RabbitMQ clients.
+
+Tests: unit tests for services; integration tests for MQ interactions (use test containers or mocks).
+
+Example (TypeScript skeleton) — what Cursor AI must produce when asked for a backend snippet:
+
+// src/mq/publisher.ts (simplified)
+import amqplib from 'amqplib';
+
+export class MqPublisher {
+  private conn: amqplib.Connection;
+  private ch: amqplib.Channel;
+  async init(url: string) {
+    this.conn = await amqplib.connect(url, { /* tls options */ });
+    this.ch = await this.conn.createConfirmChannel();
+    await this.ch.assertExchange('greenhouse.events','topic',{ durable: true });
+  }
+  async publish(routingKey: string, payload: any) {
+    const buf = Buffer.from(JSON.stringify(payload));
+    return new Promise((res, rej) => {
+      this.ch.publish('greenhouse.events', routingKey, buf, { persistent: true }, (err) => {
+        if (err) return rej(err);
+        res(true);
+      });
+    });
+  }
+  async close() { await this.ch.close(); await this.conn.close(); }
+}
+
+
+(Include error handling, retries, and backoff in the full implementation.)
+
+RabbitMQ & messaging patterns — rules
+
+Use durable exchanges/queues and persistent messages for important commands.
+
+Use prefetch on consumers to limit in-flight messages and avoid resource exhaustion.
+
+Use an ack / nack approach: ack after successful processing; nack with requeue=false for poison messages; route to a DLX (dead-letter exchange).
+
+Implement idempotency: include an idempotency-key in messages or dedupe using Redis (store processed message IDs with TTL).
+
+Retries: use delayed retries (dead-letter with TTL) or an external retry queue, avoid immediate tight retry loops.
+
+Choose semantics explicitly: at-least-once (common) — design consumers to be idempotent.
+
+For request/response (RPC) avoid blocking — prefer async patterns (correlation id + reply-to queue).
+
+Redis & caching / fog sync — rules
+
+Namespacing, TTL, and eviction strategies must be explicit.
+
+Cache invalidation strategies: recommend cache-aside by default; use write-through only when you need strong consistency.
+
+Prevent cache stampede: use locks (SET NX) or singleflight.
+
+For edge-to-edge fog:
+
+Keep local ephemeral cache with TTL and sync with central Redis periodically or on events.
+
+Use change-event propagation (Redis streams or pub/sub) to notify other nodes of updates.
+
+Design conflict resolution: last-write-wins (simple) or CRDT/vector-clock if concurrent edits are expected.
+
+Secure sync: encrypt data in transit (TLS) and at rest (disk encryption).
+
+For large data, stream in chunks rather than storing in Redis.
+
+PyQt5 desktop app — rules & UI best practices
+
+Separation: UI (views) must be separated from business logic (controllers) and I/O (workers).
+
+Never block the main thread: use QThread, QRunnable + QThreadPool, or an event loop adapter for asyncio (e.g., qasync) for long-running tasks (network, heavy compute).
+
+Use signals/slots to communicate results from background workers to the UI.
+
+Use layouts (no absolute positioning) for responsive resizing; support high-DPI scaling (Qt.AA_EnableHighDpiScaling).
+
+Keep UI simple & reactive: show progress, allow canceling long tasks, and display errors clearly.
+
+For message bus clients (RabbitMQ/Redis) in desktop:
+
+Use async client libraries and run them in a worker thread or integrate via qasync.
+
+Reconnect with exponential backoff; surface connection status in UI.
+
+Logging: write local logs (rotating) and optionally forward to backend.
+
+Config: store user config safely (use platform-specific secure storage for secrets).
+
+Packaging: instruct how to build into an installer (PyInstaller) with separate config for dev/prod.
+
+Tests: unit-test logic separately from UI components; use pytest-qt for GUI tests.
+
+Small PyQt pattern example Cursor AI must provide when asked:
+
+# workers/rpc_worker.py
+from PyQt5.QtCore import QThread, pyqtSignal
+class RpcWorker(QThread):
+    result = pyqtSignal(dict)
+    error = pyqtSignal(str)
+    def __init__(self, rpc_client, payload): ...
+    def run(self):
+        try:
+            resp = self.rpc_client.call(payload)  # blocking; run in QThread
+            self.result.emit(resp)
+        except Exception as e:
+            self.error.emit(str(e))
+
+
+(Explain how to start/stop, handle retries and update UI via signals.)
+
+Edge / Fog specifics & offline-first behavior
+
+Desktop should support offline operation:
+
+Queue outgoing commands locally with durability (local sqlite or append-only log).
+
+When connection restored, replay with idempotency keys.
+
+Keep user-visible state consistent: optimistic UI + reconcile on server response.
+
+Sync strategies:
+
+Event-driven (push updates) + periodic full-state reconciliation.
+
+Use versioning (monotonic counters, last-modified timestamps) to detect conflicts.
+
+Security: ensure only authenticated devices can push commands. Use mutually-authenticated TLS when possible.
+
+Security, secrets, and configuration
+
+Use environment variables for config in backend; use a config library with validation.
+
+Store secrets in a secrets manager (Vault, AWS Secrets Manager) in production.
+
+TLS everywhere (MQ, Redis, HTTP). Enforce certificate validation.
+
+Authenticate & authorize every command (RBAC). Log who triggered actions.
+
+Sanitize inputs; avoid eval-like behavior.
+
+Least privilege: use separate MQ/Redis users with minimal rights.
+
+Testing, CI/CD, and deployment
+
+Tests: unit tests + integration tests (MQ + Redis). Use test fixtures or test containers for integration.
+
+CI: run linter, typecheck, unit tests, run simple integration tests (start ephemeral RabbitMQ/Redis).
+
+Deploy: Docker for backend; use environment-specific config; recommend k8s or docker-compose for orchestration.
+
+Monitoring: metrics (HTTP + MQ metrics), alerting for high queue lengths, failing consumers, high error rates.
+
+UX for Cursor AI responses (how the assistant should speak)
+
+Always start with a 1–2 sentence summary of the recommended approach.
+
+Then provide:
+
+Short code snippet (minimal, correct).
+
+Rationale + trade-offs.
+
+Testing notes (how to validate).
+
+Security & operational caveats (what to watch in production).
+
+Mark any non-essential enhancements as “Optional / future improvement”.
+
+Do / Don’t quick checklist for Cursor AI
+
+Do:
+
+Suggest idempotency and deduping for message processing.
+
+Prefer explicit error handling and logging in examples.
+
+Recommend non-blocking UI and background workers in PyQt5.
+
+Recommend type systems (TS for Node, type hints for Python).
+
+Suggest health checks, metrics, and graceful shutdown.
+
+Don’t:
+
+Recommend blocking network calls on the Qt main thread.
+
+Suggest insecure defaults (no TLS, no auth).
+
+Encourage global mutable state across threads without synchronization.
+
+Assume exactly-once delivery without design for idempotency.
+
+Example final-line template Cursor AI must use when finishing a suggestion
+
+“Here’s a minimal, safe starting point. I included rationale, tests, and production caveats — tell me which part you want expanded (e.g., retry policies, idempotency store, or packaging for Windows/Mac).”
