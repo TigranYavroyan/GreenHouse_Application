@@ -12,6 +12,8 @@ A distributed greenhouse automation system with a PyQt5 desktop frontend and Nod
 - [Getting Started](#getting-started)
 - [Configuration](#configuration)
 - [API Endpoints](#api-endpoints)
+- [Edge-to-Fog Data Aggregation](#edge-to-fog-data-aggregation)
+- [Dependencies](#dependencies)
 
 ---
 
@@ -69,7 +71,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - User interacts with GUI (Control tab, Terminal tab, or Server tab)
 - Frontend creates command payload with:
   - `commandId` (UUID)
-  - `command` (e.g., "read_temperature_data", "switch_water_canal", "read_sensor", "execute_raw", "list_directory")
+  - `command` (e.g., "read_temperature_data", "switch_water_canal", "read_sensor", "switch_actuator")
   - `parameters` (command-specific parameters)
   - `sessionId` (unique session identifier)
   - `type` ("user" or "developer")
@@ -84,15 +86,15 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 #### 4. **Command Processing**
 - `CommandProcessor` checks if command is stateful (affects session state)
 - For non-stateful commands:
-  - Checks Redis cache first (cache key based on command, parameters, path, session)
+  - Checks Redis cache first (cache key based on command, parameters, session)
   - If cache hit: returns cached result immediately
   - If cache miss: proceeds to execution
-- For stateful commands (navigate, change_directory, execute_raw):
+- For stateful commands (actuator control commands):
   - Always executes (no caching)
 - Commands are queued per-session to ensure sequential execution
 
 #### 5. **Command Execution**
-- `CommandExecutor` receives the command and determines if it's a greenhouse command or shell command
+- `CommandExecutor` receives the command and routes it to Greenhouse Core via HTTP
 - **Greenhouse Commands** (routed to Greenhouse Core via HTTP):
   - `read_temperature_data`: Reads temperature sensor data from greenhouse core
     - Parameters: None
@@ -104,24 +106,16 @@ The Greenhouse Automation Application follows a **microservices architecture** w
     - Parameters: `actuatorId` (string), `action` ("on", "off", "toggle")
     - Returns: Actuator ID, status, previous status, timestamp
   - `read_sensor`: Legacy command, routes to `read_temperature_data` if core available
-- **Shell Commands** (backward compatibility for development/debugging):
-  - `list_directory`: `ls -la` in current session path
-  - `navigate`/`change_directory`: `cd` command with path validation
-  - `execute_raw`: Executes arbitrary shell command
-  - `system_status`: `ps aux` for system monitoring
-  - `get_current_path`: Returns current working directory
 - **Execution Flow**:
-  1. Greenhouse commands are routed to `GreenhouseCoreClient.executeCommand()`
+  1. Commands are routed to `GreenhouseCoreClient.executeCommand()`
   2. Client sends HTTP POST to Greenhouse Core API (`/api/v1/commands/execute`)
   3. Core processes command and returns JSON response
   4. Client handles retries, timeouts, and error recovery
-  5. Response is normalized to match shell command format
+  5. Response is normalized to standard format
 - Results include: `output` (JSON string), `data` (parsed object), `executionTime`, `error` (if any)
 
 #### 6. **Session Management**
 - `SessionManager` maintains session state:
-  - Current working directory (`currentPath`)
-  - Previous path (`previousPath`)
   - Session creation time and last activity
   - Per-session command queue (Promise chain)
   - Session-specific logger
@@ -134,12 +128,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
     - `read_sensor`: 5 seconds (legacy, routes to read_temperature_data)
     - `switch_water_canal`: No caching (stateful)
     - `switch_actuator`: No caching (stateful)
-  - **Shell Commands** (backward compatibility):
-    - `list_directory`: 15 seconds
-    - `system_status`: 8 seconds
-    - `get_current_path`: 15 seconds
-    - `execute_raw`: No caching (always fresh)
-- Cache key format: `cmd:{sessionId}:{command}:{currentPath}:{parameters}`
+- Cache key format: `cmd:{sessionId}:{command}:{parameters}`
 
 #### 8. **Response Delivery**
 - Processed command result is sent to RabbitMQ queue: `command_responses`
@@ -148,7 +137,6 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - `result` (execution output or error)
   - `cached` (boolean indicating if result was from cache)
   - `sessionId`
-  - `currentPath` (updated if navigation occurred)
   - `timestamp`
 
 #### 9. **Frontend Response Handling**
@@ -157,7 +145,6 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - Emits `response_received` signal
   - `GreenhouseDesktop` handles the signal
   - Updates appropriate output area (user output or developer terminal)
-  - Updates current path display if changed
   - Shows cache indicator if result was cached
 
 #### 10. **Logging & Monitoring**
@@ -303,8 +290,6 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Key Features**:
   - Creates unique sessions with sequential numbering
   - Maintains session state:
-    - Current working directory
-    - Previous directory
     - Creation timestamp
     - Last activity timestamp
   - Per-session command queue (Promise chain) for sequential execution
@@ -318,34 +303,24 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - Receives command data from RabbitMQ
   - Determines if command is stateful (affects session state)
   - Implements caching strategy:
-    - Generates cache keys based on command, parameters, path, session
+    - Generates cache keys based on command, parameters, session
     - Checks Redis cache for non-stateful commands
     - Stores results with TTL (time-to-live)
   - Queues commands per-session (ensures sequential execution)
-  - Updates session state (current path) after navigation commands
   - Tracks statistics: total processed, cache hits, cache misses, errors
   - Returns structured response with result, cache status, and metadata
 
 #### **`executor/commandExecutor.js`** (`CommandExecutor`)
-- **Purpose**: Executes commands - routes greenhouse commands to core, shell commands for backward compatibility
+- **Purpose**: Executes greenhouse commands by routing them to Greenhouse Core via HTTP
 - **Greenhouse Commands** (routed to Greenhouse Core):
   - `read_temperature_data`: Reads temperature sensor data
   - `switch_water_canal`: Controls water canal actuator
   - `switch_actuator`: Controls generic actuators
   - `read_sensor`: Legacy command, routes to `read_temperature_data` if core available
-- **Shell Commands** (backward compatibility for development):
-  - `list_directory`: Lists files in current directory (`ls -la`)
-  - `navigate`: Changes directory and returns new path (`cd` + `pwd`)
-  - `change_directory`: Same as navigate
-  - `get_current_path`: Returns current working directory
-  - `system_status`: Shows running processes (`ps aux`)
-  - `execute_raw`: Executes arbitrary shell command
 - **Features**:
-  - Routes greenhouse commands to `GreenhouseCoreClient` (HTTP API)
-  - Executes shell commands in session's working directory
+  - Routes all commands to `GreenhouseCoreClient` (HTTP API)
   - Configurable timeout (default 15 seconds)
-  - Captures stdout, stderr, and execution time for shell commands
-  - Normalizes responses from both greenhouse core and shell commands
+  - Normalizes responses from greenhouse core
   - Error handling with structured error objects
   - Max buffer size: 10MB
 
@@ -428,13 +403,12 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Purpose**: Main PyQt5 desktop application window
 - **Key Features**:
   - **Three-Tab Interface**:
-    1. **Control Tab**: User-friendly greenhouse controls (sensors, system status, file operations)
-    2. **Terminal Tab**: Developer terminal for raw shell commands
+    1. **Control Tab**: User-friendly greenhouse controls (sensors, system status)
+    2. **Terminal Tab**: Developer terminal for greenhouse commands
     3. **Server Tab**: Backend monitoring and management
   - **Session Management**:
     - Generates unique session ID on startup
     - Displays session information in header
-    - Tracks current working directory
   - **Command Handling**:
     - Sends commands via `CommandWorker`
     - Handles responses and updates UI
@@ -490,11 +464,58 @@ The Greenhouse Automation Application follows a **microservices architecture** w
     - Checkboxes
     - Labels (caption, body, subtitle)
 
-### Additional Modules
+### Edge/Fog Aggregation
 
-#### **`modules/edge_fog_aggregator.py`**
-- **Purpose**: Edge/Fog computing aggregation (if implemented)
-- **Note**: File exists but functionality may vary
+#### **`modules/edge_fog_aggregator.py`** (`EdgeToFogAggregator`)
+- **Purpose**: Edge-to-Fog data aggregation and anomaly detection
+- **Key Features**:
+  - Time-windowed aggregation (1min, 5min, 15min, 1h)
+  - Quality-weighted averaging for sensor data
+  - Real-time anomaly detection (out-of-range, variance, rate of change, trends)
+  - Edge device registration and status tracking
+  - Thread-safe data buffering and processing
+  - Automatic cleanup of old data (2 hours for raw, 24 hours for aggregated)
+- **Supported Sensor Types**:
+  - Temperature, Humidity, Soil Moisture, Light Intensity, CO2 Level, Soil pH
+- **Aggregation Windows**: 1 minute, 5 minutes, 15 minutes, 1 hour
+- **Anomaly Detection**:
+  - Out-of-range detection (immediate)
+  - High variance detection
+  - Rate of change detection
+  - Sustained trend detection
+- **Signals**: `new_aggregated_data`, `anomaly_detected`, `device_status_changed`
+- **Data Structures**: `SensorReading`, `AggregatedData`, `Anomaly`
+
+#### **`modules/redis_client.py`** (`RedisEdgeClient`)
+- **Purpose**: Local Redis caching for edge node (cache-aside pattern)
+- **Features**:
+  - Cache-aside pattern implementation
+  - TTL-based expiration
+  - Namespace-based key organization
+  - Graceful degradation (continues without Redis)
+  - Thread-safe operations
+- **Key Operations**:
+  - `get(key)`: Retrieve cached value
+  - `set(key, value, ttl)`: Store value with expiration
+  - `delete(key)`: Remove cached value
+  - `keys(pattern)`: List keys matching pattern
+  - `clear_namespace(namespace)`: Clear all keys in namespace
+- **Configuration**: Uses `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB` from config
+
+#### **`modules/config.py`** (`Config`)
+- **Purpose**: Centralized configuration management for frontend
+- **Features**:
+  - Environment-based configuration loading (`.env`, `.env_dev`, `.env.local`)
+  - Automatic environment detection (`ENVIRONMENT` or `NODE_ENV`)
+  - Configuration class with defaults
+  - RabbitMQ URL generation helper
+- **Configuration Values**:
+  - Backend API URL
+  - RabbitMQ connection settings
+  - Redis edge cache settings
+  - Environment mode (production/development)
+
+### Additional Modules
 
 #### **`modules/new_greenhouse.py`** & **`modules/new_style.py`**
 - **Purpose**: Alternative implementations or development versions
@@ -522,6 +543,13 @@ The Greenhouse Automation Application follows a **microservices architecture** w
    ```bash
    ./start.sh
    ```
+   The `start.sh` script:
+   - Sets up X11 display for GUI (Linux)
+   - Starts all Docker services
+   - Waits for backend to be ready
+   - Performs health check
+   - Displays service URLs
+   
    Or manually:
    ```bash
    docker compose up -d
@@ -586,8 +614,31 @@ python main.py --debug  # Debug logging
 - `RABBITMQ_PORT`: RabbitMQ port (default: 5672)
 - `RABBITMQ_USER`: RabbitMQ username (default: guest)
 - `RABBITMQ_PASS`: RabbitMQ password (default: guest)
+- `REDIS_HOST`: Redis hostname for edge caching (default: localhost)
+- `REDIS_PORT`: Redis port for edge caching (default: 6379)
+- `REDIS_DB`: Redis database number (default: 0)
+- `ENVIRONMENT`: Environment mode - `production` or `development` (default: development)
 - `DISPLAY`: X11 display (for GUI)
 - `XAUTHORITY`: X11 authority file (for GUI)
+
+### Environment Configuration Files
+
+The frontend supports multiple environment configuration files that are loaded based on the `ENVIRONMENT` variable:
+
+- **`.env`**: Production environment (used in Docker)
+- **`.env_dev`**: Development environment (Docker development)
+- **`.env.local`**: Local development environment (without Docker)
+
+**Loading Priority** (for development):
+1. `.env_dev` (if exists)
+2. `.env.local` (if exists)
+3. `.env` (fallback)
+
+**Configuration Loading**:
+- `ENVIRONMENT=production` → loads `.env`
+- `ENVIRONMENT=development` → tries `.env_dev`, then `.env.local`, then `.env`
+
+See `frontend/README_ENV.md` for detailed configuration guide.
 
 ---
 
@@ -613,6 +664,24 @@ python main.py --debug  # Debug logging
 
 - `GET /cache/keys` - List all cache keys
 - `DELETE /cache/clear` - Clear all cached entries
+- `DELETE /cache/clear-errors` - Clear only error entries from cache
+
+### Edge/Fog Data Aggregation
+
+- `POST /fog/aggregated` - Store aggregated sensor data from edge nodes
+  - Body: `{ sensorType, location, timeframe, data }`
+  - Stores in Redis with namespace: `fog:agg:{sensorType}:{location}:{timeframe}`
+- `GET /fog/aggregated` - Retrieve aggregated data with optional filtering
+  - Query params: `sensorType`, `location`, `timeframe` (all optional)
+  - Returns: `{ count, data: [...] }`
+- `GET /fog/devices` - List all registered edge devices
+  - Returns: `{ count, devices: [...] }`
+- `POST /fog/anomalies` - Store detected anomaly from edge node
+  - Body: `{ anomaly_id, sensor_type, location, anomaly_type, severity, message, timestamp, value, expected_range }`
+  - Stores in Redis: `fog:anomaly:{anomaly_id}` and adds to recent list
+- `GET /fog/anomalies` - Retrieve recent anomalies
+  - Query params: `limit` (default: 10)
+  - Returns: `{ count, anomalies: [...] }`
 
 ### Statistics & Monitoring
 
@@ -634,9 +703,8 @@ The backend uses an abstract `GreenhouseCoreClient` interface that allows seamle
 
 ### Command Routing
 
-The `CommandExecutor` automatically routes commands:
+The `CommandExecutor` routes all commands to Greenhouse Core via HTTP:
 - **Greenhouse commands** (`read_temperature_data`, `switch_water_canal`, `switch_actuator`) → Greenhouse Core via HTTP
-- **Shell commands** (`list_directory`, `execute_raw`, etc.) → Local shell execution (backward compatibility)
 
 ### Switching to Real Core
 
@@ -651,6 +719,158 @@ To switch from simulator to real greenhouse core:
 
 No code changes required - the abstract interface handles the communication.
 
+---
+
+## Edge-to-Fog Data Aggregation
+
+### Overview
+
+The system implements a three-tier Edge-to-Fog data aggregation architecture:
+
+- **Edge Layer**: Physical sensor devices collecting raw environmental data
+- **Fog Layer**: Desktop application (PyQt5) that aggregates and processes data locally
+- **Backend Layer**: Express.js server that coordinates multiple fog nodes and provides centralized storage
+
+### Key Benefits
+
+- **Offline-First Operation**: Local caching allows the system to function without backend connectivity
+- **Reduced Network Traffic**: Aggregation at the fog layer reduces data volume sent to backend (~90% reduction)
+- **Real-Time Processing**: Time-windowed aggregation provides near real-time insights
+- **Anomaly Detection**: Automatic detection of unusual patterns in sensor data
+- **Scalability**: Multiple edge devices can be managed by a single fog node
+- **Quality-Aware**: Quality scoring ensures reliable data aggregation
+
+### Architecture Flow
+
+```
+Edge Sensors → EdgeToFogAggregator → RedisEdgeClient (Local Cache) → Backend API → Central Redis
+     ↓                ↓                        ↓                          ↓
+Raw Readings    Aggregated Data         Cache (TTL)              Storage & Coordination
+```
+
+### Aggregation Windows
+
+- **1min**: 60 seconds - Real-time monitoring
+- **5min**: 300 seconds - Short-term trends
+- **15min**: 900 seconds - Medium-term analysis
+- **1h**: 3600 seconds - Long-term patterns
+
+### Supported Sensor Types
+
+- Temperature (expected range: 15.0-35.0°C)
+- Humidity (expected range: 30.0-80.0%)
+- Soil Moisture (expected range: 20.0-80.0%)
+- Light Intensity (expected range: 0.0-1000.0 Lux)
+- CO2 Level (expected range: 300.0-1500.0 PPM)
+- Soil pH (expected range: 5.5-7.5)
+
+### Anomaly Detection
+
+The system implements multiple anomaly detection algorithms:
+
+1. **Out-of-Range Detection**: Immediate detection when sensor reading exceeds expected range
+2. **High Variance Detection**: Detects when standard deviation exceeds 30% of average value
+3. **Rate of Change Detection**: Detects rapid changes (>5 units per minute)
+4. **Trend Detection**: Identifies sustained increasing or decreasing trends
+
+**Anomaly Severity Levels**:
+- `critical`: Immediate attention required
+- `warning`: Potential issue
+- `info`: Informational trend
+
+### Caching Strategy
+
+**Local Edge Cache** (RedisEdgeClient):
+- Cache-aside pattern
+- TTL: 10 minutes for aggregated data
+- Key format: `agg:{sensor_type}:{location}:{timeframe}`
+- Graceful degradation if Redis unavailable
+
+**Backend Central Cache**:
+- Key format: `fog:agg:{sensorType}:{location}:{timeframe}`
+- TTL: 5-60 minutes depending on timeframe
+- Anomalies: 24 hours TTL
+- Devices: Persistent storage
+
+### Integration
+
+The Edge/Fog aggregation is integrated into the main desktop application:
+
+- **Initialization**: `EdgeToFogAggregator` and `RedisEdgeClient` are initialized in `GreenhouseDesktop`
+- **Sensor Data Input**: Currently simulated (every 5 seconds), can be replaced with RabbitMQ consumer
+- **UI Display**: Aggregated data and anomalies displayed in Server tab
+- **Backend Sync**: Async HTTP POST to backend endpoints (non-blocking)
+
+### Usage Example
+
+```python
+# Register edge device
+aggregator.register_edge_device(
+    device_id="device_001",
+    device_type="sensor_node",
+    location="Zone_A",
+    capabilities=[SensorType.TEMPERATURE, SensorType.HUMIDITY]
+)
+
+# Add sensor reading
+reading = SensorReading(
+    device_id="device_001",
+    sensor_type=SensorType.TEMPERATURE,
+    value=22.5,
+    timestamp=datetime.now(),
+    location="Zone_A",
+    quality=0.95
+)
+aggregator.add_sensor_reading(reading)
+
+# Get aggregated metrics
+metrics = aggregator.get_aggregated_metrics(
+    sensor_type=SensorType.TEMPERATURE,
+    location="Zone_A"
+)
+```
+
+### Documentation
+
+For detailed documentation on Edge-to-Fog aggregation, see:
+- `docs/EDGE_TO_EDGE_FOG_AGGREGATION.md` - Complete technical documentation
+- `docs/EDGE_FOG_INTEGRATION_SUMMARY.md` - Integration summary
+
+---
+
+## Dependencies
+
+### Backend Dependencies
+
+**Production**:
+- `express`: ^4.18.2 - Web framework
+- `amqplib`: ^0.10.3 - RabbitMQ client
+- `redis`: ^4.6.7 - Redis client
+- `dotenv`: ^16.0.3 - Environment variable management
+
+**Development**:
+- `nodemon`: ^3.1.10 - Auto-reload for development
+- `cross-env`: ^7.0.3 - Cross-platform environment variables
+- `eslint`: ^8.46.0 - Code linting
+- `prettier`: ^3.6.2 - Code formatting
+
+### Frontend Dependencies
+
+- `PyQt5`: 5.15.9 - GUI framework
+- `pika`: 1.3.2 - RabbitMQ client
+- `requests`: 2.31.0 - HTTP client
+- `python-dotenv`: 1.0.0 - Environment variable management
+- `redis`: 5.0.1 - Redis client for edge caching
+
+### Infrastructure
+
+- **Docker**: Containerization
+- **Docker Compose**: Multi-container orchestration
+- **Redis**: 7-alpine - Caching and data storage
+- **RabbitMQ**: 3-management-alpine - Message broker
+
+---
+
 ## Architecture Benefits
 
 1. **Scalability**: RabbitMQ allows multiple frontend instances and backend workers
@@ -661,6 +881,10 @@ No code changes required - the abstract interface handles the communication.
 6. **Flexibility**: Support for both GUI and headless operation modes
 7. **Modularity**: Abstract greenhouse core interface allows easy integration with different core implementations
 8. **Resilience**: Automatic retry and timeout handling for greenhouse core communication
+9. **Edge Computing**: Edge-to-Fog aggregation reduces network traffic and enables offline operation
+10. **Real-Time Insights**: Time-windowed aggregation provides near real-time data analysis
+11. **Anomaly Detection**: Automatic detection of unusual patterns in sensor data
+12. **Quality-Aware Processing**: Quality-weighted aggregation ensures reliable data processing
 
 ---
 
