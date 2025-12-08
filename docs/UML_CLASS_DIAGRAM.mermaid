@@ -75,7 +75,7 @@ classDiagram
         -SystemLogger systemLogger
         -GreenhouseCoreClient greenhouseCoreClient
         +runCommand(command, params, session) Promise
-        +executeGreenhouseCommand() Promise
+        +executeGreenhouseCommand(command, params, session) Promise
         +isGreenhouseCommand(command) Boolean
     }
     
@@ -94,6 +94,7 @@ classDiagram
         +String currentPath
         +String createdAt
         +String lastActivity
+        +String lastCommandId
         +Promise commandQueue
         +SessionLogger logger
     }
@@ -121,11 +122,13 @@ classDiagram
     class GreenhouseCoreClient {
         -String baseUrl
         -int timeout
-        -int retries
-        -Boolean connected
-        +connect()
+        -int maxRetries
+        -Boolean isConnected
+        +connect() Promise
+        +disconnect() Promise
         +executeCommand(command, params, metadata) Promise
         +healthCheck() Promise
+        +get connected() Boolean
     }
     
     %% Data Models
@@ -196,4 +199,29 @@ classDiagram
     EdgeToFogAggregator --> AggregatedData : creates
     CommandWorker --> CommandData : creates
     CommandProcessor --> CommandResponse : creates
+    
+    %% Simulator Classes
+    class DeviceSimulator {
+        -Object deviceStates
+        -Object sensorData
+        +readTemperatureData() Object
+        +readHumidityData() Object
+        +readLightData() Object
+        +readCO2Data() Object
+        +readSoilMoistureData() Object
+        +readSoilPHData() Object
+        +switchWaterCanal(action) Object
+        +switchActuator(actuatorId, action) Object
+        +switchFan(fanId, action) Object
+        +switchHeater(heaterId, action) Object
+        +getDeviceStates() Object
+        +getSensorData() Object
+    }
+    
+    class CommandController {
+        -DeviceSimulator simulator
+        +executeCommand(req, res)
+        +healthCheck(req, res)
+        +getDeviceStates(req, res)
+    }
 

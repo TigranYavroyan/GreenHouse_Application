@@ -95,17 +95,38 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 
 #### 5. **Command Execution**
 - `CommandExecutor` receives the command and routes it to Greenhouse Core via HTTP
-- **Greenhouse Commands** (routed to Greenhouse Core via HTTP):
-  - `read_temperature_data`: Reads temperature sensor data from greenhouse core
-    - Parameters: None
-    - Returns: Temperature value, unit, timestamp, sensor ID, location
-  - `switch_water_canal`: Controls water canal actuator
-    - Parameters: `action` ("on", "off", "toggle")
-    - Returns: Device ID, status, previous status, timestamp
-  - `switch_actuator`: Controls generic actuators
-    - Parameters: `actuatorId` (string), `action` ("on", "off", "toggle")
-    - Returns: Actuator ID, status, previous status, timestamp
-  - `read_sensor`: Legacy command, routes to `read_temperature_data` if core available
+  - **Greenhouse Commands** (routed to Greenhouse Core via HTTP):
+    - `read_temperature_data`: Reads temperature sensor data from greenhouse core
+      - Parameters: None
+      - Returns: Temperature value, unit, timestamp, sensor ID, location
+    - `read_humidity_data`: Reads humidity sensor data
+      - Parameters: None
+      - Returns: Humidity value, unit, timestamp, sensor ID, location
+    - `read_light_data`: Reads light intensity sensor data
+      - Parameters: None
+      - Returns: Light value, unit, timestamp, sensor ID, location
+    - `read_co2_data`: Reads CO2 level sensor data
+      - Parameters: None
+      - Returns: CO2 value, unit, timestamp, sensor ID, location
+    - `read_soil_moisture_data`: Reads soil moisture sensor data
+      - Parameters: None
+      - Returns: Soil moisture value, unit, timestamp, sensor ID, location
+    - `read_soil_ph_data`: Reads soil pH sensor data
+      - Parameters: None
+      - Returns: Soil pH value, unit, timestamp, sensor ID, location
+    - `switch_water_canal`: Controls water canal actuator
+      - Parameters: `action` ("on", "off", "toggle")
+      - Returns: Device ID, status, previous status, timestamp
+    - `switch_actuator`: Controls generic actuators
+      - Parameters: `actuatorId` (string), `action` ("on", "off", "toggle")
+      - Returns: Actuator ID, status, previous status, timestamp
+    - `switch_fan`: Controls fan actuators
+      - Parameters: `fanId` (string), `action` ("on", "off", "toggle")
+      - Returns: Fan ID, status, speed, previous status, timestamp
+    - `switch_heater`: Controls heater actuators
+      - Parameters: `heaterId` (string), `action` ("on", "off", "toggle")
+      - Returns: Heater ID, status, temperature, previous status, timestamp
+    - `read_sensor`: Legacy command, routes to appropriate sensor command based on `sensor` parameter ("temperature", "humidity", "light", "co2", "soil_moisture", "soil_ph")
 - **Execution Flow**:
   1. Commands are routed to `GreenhouseCoreClient.executeCommand()`
   2. Client sends HTTP POST to Greenhouse Core API (`/api/v1/commands/execute`)
@@ -125,10 +146,18 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - Redis caches command results with TTL:
   - **Greenhouse Commands**:
     - `read_temperature_data`: 5 seconds
-    - `read_sensor`: 5 seconds (legacy, routes to read_temperature_data)
+    - `read_humidity_data`: 5 seconds
+    - `read_light_data`: 5 seconds
+    - `read_co2_data`: 5 seconds
+    - `read_soil_moisture_data`: 5 seconds
+    - `read_soil_ph_data`: 5 seconds
+    - `read_sensor`: 5 seconds (legacy, routes to appropriate sensor command)
     - `switch_water_canal`: No caching (stateful)
     - `switch_actuator`: No caching (stateful)
-- Cache key format: `cmd:{sessionId}:{command}:{parameters}`
+    - `switch_fan`: No caching (stateful)
+    - `switch_heater`: No caching (stateful)
+- Cache key format: `cmd:{sessionId}:{command}:{currentPath}:{parameters}`
+- Only successful results are cached (errors are not cached)
 
 #### 8. **Response Delivery**
 - Processed command result is sent to RabbitMQ queue: `command_responses`
@@ -195,20 +224,30 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - `sim/app.js` - Main Express server
   - `sim/controllers/commandController.js` - Command handling logic
   - `sim/services/deviceSimulator.js` - Device and sensor simulation
-- **APIs**:
-  - `POST /api/v1/commands/execute` - Generic command execution endpoint
-    - Body: `{ command, parameters, commandId, sessionId }`
-    - Returns: `{ success, result, error, commandId, timestamp }`
-  - `POST /api/v1/commands/read_temperature_data` - Read temperature sensor data (alternative endpoint)
-  - `POST /api/v1/commands/switch_water_canal` - Control water canal actuator (alternative endpoint)
-  - `POST /api/v1/commands/switch_actuator` - Control generic actuators (alternative endpoint)
-  - `GET /api/v1/health` or `GET /health` - Health check endpoint
-  - `GET /api/v1/devices` - Get current device states (debugging/monitoring)
-- **Simulation Features**:
-  - Temperature sensor with realistic variations (±2°C from base 22.5°C)
-  - Water canal actuator with state tracking (on/off/toggle)
-  - Generic actuators with dynamic registration
-  - Device state persistence during simulator lifetime
+  - **APIs**:
+    - `POST /api/v1/commands/execute` - Generic command execution endpoint
+      - Body: `{ command, parameters, commandId, sessionId }`
+      - Returns: `{ success, result, error, commandId, timestamp }`
+    - `POST /api/v1/commands/read_temperature_data` - Read temperature sensor data (alternative endpoint)
+    - `POST /api/v1/commands/switch_water_canal` - Control water canal actuator (alternative endpoint)
+    - `POST /api/v1/commands/switch_actuator` - Control generic actuators (alternative endpoint)
+    - `GET /api/v1/health` or `GET /health` - Health check endpoint
+    - `GET /api/v1/devices` - Get current device states (debugging/monitoring)
+  - **Simulation Features**:
+    - **Sensors**:
+      - Temperature sensor with realistic variations (±2°C from base 22.5°C, affected by heater status)
+      - Humidity sensor (65% base, affected by water canal and fans)
+      - Light sensor (varies by time of day: 750 lux daytime, 50 lux nighttime)
+      - CO2 sensor (400 ppm base, affected by fan ventilation)
+      - Soil moisture sensor (50% base, affected by water canal)
+      - Soil pH sensor (6.5 base, stable with slight variations)
+    - **Actuators**:
+      - Water canal actuator with state tracking (on/off/toggle)
+      - Generic actuators with dynamic registration
+      - Fans with speed control (default 50% when on)
+      - Heaters with temperature control (default 30°C when on)
+    - Device state persistence during simulator lifetime
+    - Realistic sensor interactions (e.g., heaters affect temperature, fans affect humidity/CO2)
 - **Health Check**: HTTP GET `/health` every 30 seconds
 - **Note**: In production, this will be replaced by the real greenhouse core system. The backend's `GreenhouseCoreClient` can be configured to point to the real core by changing `GREENHOUSE_CORE_URL` environment variable.
 
@@ -314,15 +353,22 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Purpose**: Executes greenhouse commands by routing them to Greenhouse Core via HTTP
 - **Greenhouse Commands** (routed to Greenhouse Core):
   - `read_temperature_data`: Reads temperature sensor data
+  - `read_humidity_data`: Reads humidity sensor data
+  - `read_light_data`: Reads light intensity sensor data
+  - `read_co2_data`: Reads CO2 level sensor data
+  - `read_soil_moisture_data`: Reads soil moisture sensor data
+  - `read_soil_ph_data`: Reads soil pH sensor data
   - `switch_water_canal`: Controls water canal actuator
   - `switch_actuator`: Controls generic actuators
-  - `read_sensor`: Legacy command, routes to `read_temperature_data` if core available
+  - `switch_fan`: Controls fan actuators
+  - `switch_heater`: Controls heater actuators
+  - `read_sensor`: Legacy command, routes to appropriate sensor command based on `sensor` parameter
 - **Features**:
   - Routes all commands to `GreenhouseCoreClient` (HTTP API)
   - Configurable timeout (default 15 seconds)
   - Normalizes responses from greenhouse core
   - Error handling with structured error objects
-  - Max buffer size: 10MB
+  - Legacy command mapping (read_sensor → specific sensor commands)
 
 ### Routing
 
@@ -662,9 +708,9 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 
 ### Cache
 
-- `GET /cache/keys` - List all cache keys
+- `GET /cache/keys` - List all cache keys (pattern: `cmd:*`)
 - `DELETE /cache/clear` - Clear all cached entries
-- `DELETE /cache/clear-errors` - Clear only error entries from cache
+- `DELETE /cache/clear-errors` - Clear only error entries from cache (removes corrupted or error cache entries)
 
 ### Edge/Fog Data Aggregation
 
@@ -704,7 +750,9 @@ The backend uses an abstract `GreenhouseCoreClient` interface that allows seamle
 ### Command Routing
 
 The `CommandExecutor` routes all commands to Greenhouse Core via HTTP:
-- **Greenhouse commands** (`read_temperature_data`, `switch_water_canal`, `switch_actuator`) → Greenhouse Core via HTTP
+- **Sensor Reading Commands**: `read_temperature_data`, `read_humidity_data`, `read_light_data`, `read_co2_data`, `read_soil_moisture_data`, `read_soil_ph_data` → Greenhouse Core via HTTP
+- **Actuator Control Commands**: `switch_water_canal`, `switch_actuator`, `switch_fan`, `switch_heater` → Greenhouse Core via HTTP
+- **Legacy Command**: `read_sensor` → Automatically routes to appropriate sensor command based on `sensor` parameter
 
 ### Switching to Real Core
 
@@ -714,10 +762,15 @@ To switch from simulator to real greenhouse core:
 2. Ensure real core implements the same API contract:
    - `POST /api/v1/commands/execute` with `{ command, parameters, commandId, sessionId }`
    - Returns `{ success, result, error, commandId, timestamp }`
+   - Supports all greenhouse commands: sensor readings and actuator controls
    - `GET /api/v1/health` for health checks
 3. Restart backend service
 
-No code changes required - the abstract interface handles the communication.
+No code changes required - the abstract interface handles the communication. The `GreenhouseCoreClient` includes:
+- Automatic retry logic with exponential backoff (configurable retries)
+- Timeout handling (configurable timeout)
+- Connection status tracking
+- Normalized response format
 
 ---
 

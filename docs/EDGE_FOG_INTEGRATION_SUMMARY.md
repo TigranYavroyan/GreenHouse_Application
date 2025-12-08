@@ -24,10 +24,22 @@ This document summarizes the integration of the Edge-to-Fog data aggregation sys
 ### 3. Backend Endpoints (`backend/router/routes.js`)
 Added new REST API endpoints for fog data:
 - `POST /fog/aggregated` - Store aggregated sensor data
+  - Body: `{ sensorType, location, timeframe, data }`
+  - Stores in Redis with namespace: `fog:agg:{sensorType}:{location}:{timeframe}`
+  - TTL: 5-60 minutes depending on timeframe
 - `GET /fog/aggregated` - Retrieve aggregated data (with filtering)
+  - Query params: `sensorType`, `location`, `timeframe` (all optional)
+  - Returns: `{ count, data: [...] }`
 - `GET /fog/devices` - List registered edge devices
+  - Returns: `{ count, devices: [...] }`
+  - Reads from Redis keys: `fog:device:*`
 - `POST /fog/anomalies` - Store detected anomalies
+  - Body: `{ anomaly_id, sensor_type, location, anomaly_type, severity, message, timestamp, value, expected_range }`
+  - Stores in Redis: `fog:anomaly:{anomaly_id}` (TTL: 24 hours)
+  - Also adds to recent anomalies list (max 100 entries)
 - `GET /fog/anomalies` - Retrieve recent anomalies
+  - Query params: `limit` (default: 10)
+  - Returns: `{ count, anomalies: [...] }`
 
 ### 4. Configuration Updates
 - **Frontend Config** (`frontend/modules/config.py`): Added Redis configuration (REDIS_HOST, REDIS_PORT, REDIS_DB)
@@ -50,12 +62,19 @@ Added new REST API endpoints for fog data:
    
 3. **Local Caching**:
    - Aggregated data cached in local Redis
+   - Cache key format: `agg:{sensor_type}:{location}:{timeframe}`
    - TTL: 10 minutes for aggregated data
+   - Graceful degradation if Redis unavailable
    
 4. **Backend Sync**:
    - Aggregated data synced to backend via HTTP POST (async, non-blocking)
    - Anomalies synced to backend via HTTP POST (async, non-blocking)
-   - Backend stores in central Redis with appropriate TTLs
+   - Backend stores in central Redis with appropriate TTLs:
+     - 1min aggregations: 5 minutes TTL
+     - 5min aggregations: 10 minutes TTL
+     - 15min aggregations: 30 minutes TTL
+     - 1h aggregations: 60 minutes TTL
+     - Anomalies: 24 hours TTL
 
 5. **UI Display**:
    - Aggregated data appears in Server tab output

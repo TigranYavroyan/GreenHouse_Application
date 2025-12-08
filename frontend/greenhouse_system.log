@@ -336,3 +336,450 @@ pika.exceptions.AMQPConnectionError
 2025-11-15 17:56:10,418 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
 2025-11-15 17:56:10,418 - CommandWorker - INFO - Disconnected from RabbitMQ
 2025-11-15 17:56:10,418 - RedisEdgeClient - INFO - Disconnected from Redis
+2025-12-08 16:22:43,946 - GreenhouseDesktop - INFO - Starting application with session ID: e9158401-f46a-49dd-989c-55e9b0d28988
+2025-12-08 16:22:43,946 - GreenhouseDesktop - INFO - Backend URL: http://backend:3000
+2025-12-08 16:22:43,946 - GreenhouseDesktop - INFO - Loading UI from: /app/front.ui
+2025-12-08 16:22:44,360 - GreenhouseDesktop - INFO - Setting up command worker
+2025-12-08 16:22:44,360 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at rabbitmq:5672
+2025-12-08 16:22:44,361 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-08 16:22:44,361 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-08 16:22:44,361 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-12-08 16:22:44,370 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.4', 5672)
+2025-12-08 16:22:44,370 - pika.adapters.utils.io_services_utils - ERROR - Socket failed to connect: <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.5', 37338)>; error=111 (Connection refused)
+2025-12-08 16:22:44,370 - pika.adapters.utils.connection_workflow - ERROR - TCP Connection attempt failed: ConnectionRefusedError(111, 'Connection refused'); dest=(<AddressFamily.AF_INET: 2>, <SocketKind.SOCK_STREAM: 1>, 6, '', ('172.18.0.4', 5672))
+2025-12-08 16:22:44,370 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnector - reporting failure: AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused')
+2025-12-08 16:22:44,370 - pika.adapters.utils.connection_workflow - ERROR - AMQP connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None.
+2025-12-08 16:22:44,370 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnectionWorkflow - reporting failure: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-12-08 16:22:44,371 - pika.adapters.blocking_connection - ERROR - Connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-12-08 16:22:44,371 - pika.adapters.blocking_connection - ERROR - Error in _create_connection().
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/pika/adapters/blocking_connection.py", line 451, in _create_connection
+    raise self._reap_last_connection_workflow_error(error)
+pika.exceptions.AMQPConnectionError
+2025-12-08 16:22:44,371 - CommandWorker - ERROR - Failed to connect to RabbitMQ at rabbitmq:5672: 
+2025-12-08 16:22:44,371 - GreenhouseDesktop - INFO - Setting up Edge-to-Fog aggregator
+2025-12-08 16:22:44,372 - RedisEdgeClient - WARNING - Redis connection failed: Error 111 connecting to localhost:6379. Connection refused.. Running without cache.
+2025-12-08 16:22:44,372 - GreenhouseDesktop - INFO - Sensor data consumer started (simulation mode)
+2025-12-08 16:22:44,372 - GreenhouseDesktop - INFO - Device status: device_001 - registered
+2025-12-08 16:22:44,372 - EdgeFogAggregator - INFO - Registered edge device: device_001 at Zone_A
+2025-12-08 16:22:44,372 - GreenhouseDesktop - INFO - Device status: device_002 - registered
+2025-12-08 16:22:44,372 - EdgeFogAggregator - INFO - Registered edge device: device_002 at Zone_B
+2025-12-08 16:22:44,372 - GreenhouseDesktop - INFO - Device status: device_003 - registered
+2025-12-08 16:22:44,372 - EdgeFogAggregator - INFO - Registered edge device: device_003 at Zone_C
+2025-12-08 16:22:44,372 - GreenhouseDesktop - INFO - Edge-to-Fog aggregator setup complete
+2025-12-08 16:22:49,123 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:22:49,123 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:22:49,123 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:22:49,123 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:22:49,123 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:22:49,123 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:22:53,902 - GreenhouseDesktop - INFO - Attempting to reconnect to RabbitMQ...
+2025-12-08 16:22:53,903 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-08 16:22:53,903 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-08 16:22:53,903 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-12-08 16:22:53,904 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.4', 5672)
+2025-12-08 16:22:53,904 - pika.adapters.utils.io_services_utils - INFO - Socket connected: <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.5', 34562), raddr=('172.18.0.4', 5672)>
+2025-12-08 16:22:53,904 - pika.adapters.utils.connection_workflow - INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x75bcf22e1e50>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x75bcf22e1e50> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+2025-12-08 16:22:53,906 - pika.adapters.utils.connection_workflow - INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x75bcf22e1e50> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-08 16:22:53,906 - pika.adapters.utils.connection_workflow - INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x75bcf22e1e50> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-08 16:22:53,906 - pika.adapters.blocking_connection - INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x75bcf22e1e50> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-08 16:22:53,906 - pika.adapters.blocking_connection - INFO - Created channel=1
+2025-12-08 16:22:53,908 - CommandWorker - INFO - Successfully connected to RabbitMQ
+2025-12-08 16:22:53,908 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:22:53,908 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:22:53,908 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:22:53,908 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:22:53,908 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:22:53,908 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:22:58,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:22:58,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:22:58,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:22:58,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:22:58,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:22:58,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:00,085 - GreenhouseDesktop - INFO - Sending user command 13c2389e-cbff-41b6-a920-96ac570f8f9b: read_sensor
+2025-12-08 16:23:00,185 - CommandWorker - INFO - Command 13c2389e-cbff-41b6-a920-96ac570f8f9b sent successfully: read_sensor
+2025-12-08 16:23:00,203 - CommandWorker - INFO - Received response for command: 13c2389e-cbff-41b6-a920-96ac570f8f9b
+2025-12-08 16:23:00,203 - GreenhouseDesktop - INFO - Received response for command 13c2389e-cbff-41b6-a920-96ac570f8f9b, cached: False, error: False
+2025-12-08 16:23:00,203 - GreenhouseDesktop - INFO - Pending commands: ['13c2389e-cbff-41b6-a920-96ac570f8f9b']
+2025-12-08 16:23:00,203 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:00,203 - GreenhouseDesktop - INFO - Appending to USER output: {"soilMoisture":47.3,"unit":"percent","timestamp":"2025-12-08T16:23:00.198Z","sensorId":"soil_moistu...
+2025-12-08 16:23:02,755 - GreenhouseDesktop - INFO - Sending user command eed9d035-f76d-4aa7-8c89-f9d4e1c15b10: switch_fan
+2025-12-08 16:23:02,856 - CommandWorker - INFO - Command eed9d035-f76d-4aa7-8c89-f9d4e1c15b10 sent successfully: switch_fan
+2025-12-08 16:23:02,903 - CommandWorker - INFO - Received response for command: eed9d035-f76d-4aa7-8c89-f9d4e1c15b10
+2025-12-08 16:23:02,903 - GreenhouseDesktop - INFO - Received response for command eed9d035-f76d-4aa7-8c89-f9d4e1c15b10, cached: False, error: False
+2025-12-08 16:23:02,903 - GreenhouseDesktop - INFO - Pending commands: ['eed9d035-f76d-4aa7-8c89-f9d4e1c15b10']
+2025-12-08 16:23:02,903 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_fan
+2025-12-08 16:23:02,903 - GreenhouseDesktop - INFO - Appending to USER output: {"fanId":"fan_1","status":"on","speed":50,"previousStatus":"off","timestamp":"2025-12-08T16:23:02.85...
+2025-12-08 16:23:03,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:03,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:03,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:03,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:03,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:03,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:04,458 - GreenhouseDesktop - INFO - Sending user command 85c64a73-76fe-425e-86e5-1cdaf5ba4b95: switch_heater
+2025-12-08 16:23:04,559 - CommandWorker - INFO - Command 85c64a73-76fe-425e-86e5-1cdaf5ba4b95 sent successfully: switch_heater
+2025-12-08 16:23:04,603 - CommandWorker - INFO - Received response for command: 85c64a73-76fe-425e-86e5-1cdaf5ba4b95
+2025-12-08 16:23:04,603 - GreenhouseDesktop - INFO - Received response for command 85c64a73-76fe-425e-86e5-1cdaf5ba4b95, cached: False, error: False
+2025-12-08 16:23:04,603 - GreenhouseDesktop - INFO - Pending commands: ['85c64a73-76fe-425e-86e5-1cdaf5ba4b95']
+2025-12-08 16:23:04,603 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_heater
+2025-12-08 16:23:04,604 - GreenhouseDesktop - INFO - Appending to USER output: {"heaterId":"heater_1","status":"on","temperature":30,"previousStatus":"off","timestamp":"2025-12-08...
+2025-12-08 16:23:05,849 - GreenhouseDesktop - INFO - Sending user command 15d33ab2-0329-4ad8-98ee-cb722307a018: switch_actuator
+2025-12-08 16:23:05,950 - CommandWorker - INFO - Command 15d33ab2-0329-4ad8-98ee-cb722307a018 sent successfully: switch_actuator
+2025-12-08 16:23:06,003 - CommandWorker - INFO - Received response for command: 15d33ab2-0329-4ad8-98ee-cb722307a018
+2025-12-08 16:23:06,003 - GreenhouseDesktop - INFO - Received response for command 15d33ab2-0329-4ad8-98ee-cb722307a018, cached: False, error: False
+2025-12-08 16:23:06,004 - GreenhouseDesktop - INFO - Pending commands: ['15d33ab2-0329-4ad8-98ee-cb722307a018']
+2025-12-08 16:23:06,004 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_actuator
+2025-12-08 16:23:06,004 - GreenhouseDesktop - INFO - Appending to USER output: {"actuatorId":"actuator_1","status":"on","previousStatus":"off","timestamp":"2025-12-08T16:23:05.956...
+2025-12-08 16:23:08,207 - GreenhouseDesktop - INFO - Sending user command 29b5e03f-f05e-43da-b43f-f3be3e4f9431: read_sensor
+2025-12-08 16:23:08,308 - CommandWorker - INFO - Command 29b5e03f-f05e-43da-b43f-f3be3e4f9431 sent successfully: read_sensor
+2025-12-08 16:23:08,404 - CommandWorker - INFO - Received response for command: 29b5e03f-f05e-43da-b43f-f3be3e4f9431
+2025-12-08 16:23:08,405 - GreenhouseDesktop - INFO - Received response for command 29b5e03f-f05e-43da-b43f-f3be3e4f9431, cached: False, error: False
+2025-12-08 16:23:08,405 - GreenhouseDesktop - INFO - Pending commands: ['29b5e03f-f05e-43da-b43f-f3be3e4f9431']
+2025-12-08 16:23:08,405 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:08,406 - GreenhouseDesktop - INFO - Appending to USER output: {"temperature":26,"unit":"celsius","timestamp":"2025-12-08T16:23:08.315Z","sensorId":"temp_sensor_1"...
+2025-12-08 16:23:08,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:08,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:08,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:08,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:08,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:08,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:13,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:13,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:13,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:13,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:13,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:13,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:17,925 - GreenhouseDesktop - INFO - Sending user command c414408c-5516-4ebd-b85a-47aa42882014: read_sensor
+2025-12-08 16:23:18,025 - CommandWorker - INFO - Command c414408c-5516-4ebd-b85a-47aa42882014 sent successfully: read_sensor
+2025-12-08 16:23:18,103 - CommandWorker - INFO - Received response for command: c414408c-5516-4ebd-b85a-47aa42882014
+2025-12-08 16:23:18,103 - GreenhouseDesktop - INFO - Received response for command c414408c-5516-4ebd-b85a-47aa42882014, cached: False, error: False
+2025-12-08 16:23:18,103 - GreenhouseDesktop - INFO - Pending commands: ['c414408c-5516-4ebd-b85a-47aa42882014']
+2025-12-08 16:23:18,103 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:18,103 - GreenhouseDesktop - INFO - Appending to USER output: {"light":671,"unit":"lux","timestamp":"2025-12-08T16:23:18.029Z","sensorId":"light_sensor_1","locati...
+2025-12-08 16:23:18,396 - GreenhouseDesktop - INFO - Sending user command c1bb8e9e-fd3f-4773-9263-516e16f80c88: read_sensor
+2025-12-08 16:23:18,496 - CommandWorker - INFO - Command c1bb8e9e-fd3f-4773-9263-516e16f80c88 sent successfully: read_sensor
+2025-12-08 16:23:18,498 - CommandWorker - INFO - Received response for command: c1bb8e9e-fd3f-4773-9263-516e16f80c88
+2025-12-08 16:23:18,499 - GreenhouseDesktop - INFO - Received response for command c1bb8e9e-fd3f-4773-9263-516e16f80c88, cached: True, error: False
+2025-12-08 16:23:18,499 - GreenhouseDesktop - INFO - Pending commands: ['c1bb8e9e-fd3f-4773-9263-516e16f80c88']
+2025-12-08 16:23:18,499 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:18,499 - GreenhouseDesktop - INFO - Appending to USER output: {"light":671,"unit":"lux","timestamp":"2025-12-08T16:23:18.029Z","sensorId":"light_sensor_1","locati...
+2025-12-08 16:23:18,853 - GreenhouseDesktop - INFO - Sending user command 49d030dc-6752-457c-8539-ed5870f25231: read_sensor
+2025-12-08 16:23:18,953 - CommandWorker - INFO - Command 49d030dc-6752-457c-8539-ed5870f25231 sent successfully: read_sensor
+2025-12-08 16:23:18,955 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:18,955 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:18,955 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:18,955 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:18,955 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:18,955 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:18,956 - CommandWorker - INFO - Received response for command: 49d030dc-6752-457c-8539-ed5870f25231
+2025-12-08 16:23:18,956 - GreenhouseDesktop - INFO - Received response for command 49d030dc-6752-457c-8539-ed5870f25231, cached: True, error: False
+2025-12-08 16:23:18,956 - GreenhouseDesktop - INFO - Pending commands: ['49d030dc-6752-457c-8539-ed5870f25231']
+2025-12-08 16:23:18,956 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:18,956 - GreenhouseDesktop - INFO - Appending to USER output: {"light":671,"unit":"lux","timestamp":"2025-12-08T16:23:18.029Z","sensorId":"light_sensor_1","locati...
+2025-12-08 16:23:21,165 - GreenhouseDesktop - INFO - Sending user command 9608e7ac-1d40-4c0a-baaf-2f7f00ec7cf6: read_sensor
+2025-12-08 16:23:21,266 - CommandWorker - INFO - Command 9608e7ac-1d40-4c0a-baaf-2f7f00ec7cf6 sent successfully: read_sensor
+2025-12-08 16:23:21,302 - CommandWorker - INFO - Received response for command: 9608e7ac-1d40-4c0a-baaf-2f7f00ec7cf6
+2025-12-08 16:23:21,303 - GreenhouseDesktop - INFO - Received response for command 9608e7ac-1d40-4c0a-baaf-2f7f00ec7cf6, cached: False, error: False
+2025-12-08 16:23:21,303 - GreenhouseDesktop - INFO - Pending commands: ['9608e7ac-1d40-4c0a-baaf-2f7f00ec7cf6']
+2025-12-08 16:23:21,303 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:21,303 - GreenhouseDesktop - INFO - Appending to USER output: {"co2":360,"unit":"ppm","timestamp":"2025-12-08T16:23:21.269Z","sensorId":"co2_sensor_1","location":...
+2025-12-08 16:23:21,982 - GreenhouseDesktop - INFO - Sending user command 72faba5c-2293-44f7-8994-dab9a4e18d45: read_sensor
+2025-12-08 16:23:22,083 - CommandWorker - INFO - Command 72faba5c-2293-44f7-8994-dab9a4e18d45 sent successfully: read_sensor
+2025-12-08 16:23:22,102 - CommandWorker - INFO - Received response for command: 72faba5c-2293-44f7-8994-dab9a4e18d45
+2025-12-08 16:23:22,103 - GreenhouseDesktop - INFO - Received response for command 72faba5c-2293-44f7-8994-dab9a4e18d45, cached: False, error: False
+2025-12-08 16:23:22,103 - GreenhouseDesktop - INFO - Pending commands: ['72faba5c-2293-44f7-8994-dab9a4e18d45']
+2025-12-08 16:23:22,103 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:22,103 - GreenhouseDesktop - INFO - Appending to USER output: {"soilPH":6.36,"unit":"pH","timestamp":"2025-12-08T16:23:22.086Z","sensorId":"soil_ph_sensor_1","loc...
+2025-12-08 16:23:22,673 - GreenhouseDesktop - INFO - Sending user command e9d387a9-ed3a-4803-a3fd-1fd6c7c4e3aa: read_sensor
+2025-12-08 16:23:22,774 - CommandWorker - INFO - Command e9d387a9-ed3a-4803-a3fd-1fd6c7c4e3aa sent successfully: read_sensor
+2025-12-08 16:23:22,776 - CommandWorker - INFO - Received response for command: e9d387a9-ed3a-4803-a3fd-1fd6c7c4e3aa
+2025-12-08 16:23:22,776 - GreenhouseDesktop - INFO - Received response for command e9d387a9-ed3a-4803-a3fd-1fd6c7c4e3aa, cached: True, error: False
+2025-12-08 16:23:22,776 - GreenhouseDesktop - INFO - Pending commands: ['e9d387a9-ed3a-4803-a3fd-1fd6c7c4e3aa']
+2025-12-08 16:23:22,776 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:23:22,776 - GreenhouseDesktop - INFO - Appending to USER output: {"co2":360,"unit":"ppm","timestamp":"2025-12-08T16:23:21.269Z","sensorId":"co2_sensor_1","location":...
+2025-12-08 16:23:23,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:23,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:23,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:23,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:23,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:23,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:28,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:28,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:28,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:28,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:28,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:28,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:33,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:33,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:33,904 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:33,904 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:33,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:33,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:36,238 - GreenhouseDesktop - WARNING - Showing error dialog: Session ID Required - Please enter a session ID
+2025-12-08 16:23:38,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:38,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:38,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:38,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:38,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:38,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:43,965 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:43,966 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:43,967 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:43,967 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:43,967 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:43,967 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:48,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:48,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:48,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:48,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:48,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:48,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:53,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:53,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:53,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:53,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:53,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:53,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:58,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:58,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:23:58,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:58,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:23:58,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:23:58,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:03,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:03,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:03,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:03,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:03,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:03,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:08,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:08,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:08,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:08,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:08,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:08,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:09,149 - GreenhouseDesktop - INFO - Sending user command 51a8cf31-472f-46ba-a5ef-e131efdb3b84: read_sensor
+2025-12-08 16:24:09,251 - CommandWorker - INFO - Command 51a8cf31-472f-46ba-a5ef-e131efdb3b84 sent successfully: read_sensor
+2025-12-08 16:24:09,304 - CommandWorker - INFO - Received response for command: 51a8cf31-472f-46ba-a5ef-e131efdb3b84
+2025-12-08 16:24:09,305 - GreenhouseDesktop - INFO - Received response for command 51a8cf31-472f-46ba-a5ef-e131efdb3b84, cached: False, error: False
+2025-12-08 16:24:09,305 - GreenhouseDesktop - INFO - Pending commands: ['51a8cf31-472f-46ba-a5ef-e131efdb3b84']
+2025-12-08 16:24:09,305 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:09,306 - GreenhouseDesktop - INFO - Appending to USER output: {"humidity":57.8,"unit":"percent","timestamp":"2025-12-08T16:24:09.258Z","sensorId":"humidity_sensor...
+2025-12-08 16:24:11,040 - GreenhouseDesktop - INFO - Sending user command 7a7b907d-8239-40c8-8179-690af9542be9: switch_actuator
+2025-12-08 16:24:11,141 - CommandWorker - INFO - Command 7a7b907d-8239-40c8-8179-690af9542be9 sent successfully: switch_actuator
+2025-12-08 16:24:11,203 - CommandWorker - INFO - Received response for command: 7a7b907d-8239-40c8-8179-690af9542be9
+2025-12-08 16:24:11,203 - GreenhouseDesktop - INFO - Received response for command 7a7b907d-8239-40c8-8179-690af9542be9, cached: False, error: False
+2025-12-08 16:24:11,203 - GreenhouseDesktop - INFO - Pending commands: ['7a7b907d-8239-40c8-8179-690af9542be9']
+2025-12-08 16:24:11,203 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_actuator
+2025-12-08 16:24:11,203 - GreenhouseDesktop - INFO - Appending to USER output: {"actuatorId":"actuator_1","status":"off","previousStatus":"on","timestamp":"2025-12-08T16:24:11.143...
+2025-12-08 16:24:11,768 - GreenhouseDesktop - INFO - Sending user command 309e1135-daa3-43c1-a7b6-7008553519f5: switch_fan
+2025-12-08 16:24:11,869 - CommandWorker - INFO - Command 309e1135-daa3-43c1-a7b6-7008553519f5 sent successfully: switch_fan
+2025-12-08 16:24:11,903 - CommandWorker - INFO - Received response for command: 309e1135-daa3-43c1-a7b6-7008553519f5
+2025-12-08 16:24:11,903 - GreenhouseDesktop - INFO - Received response for command 309e1135-daa3-43c1-a7b6-7008553519f5, cached: False, error: False
+2025-12-08 16:24:11,903 - GreenhouseDesktop - INFO - Pending commands: ['309e1135-daa3-43c1-a7b6-7008553519f5']
+2025-12-08 16:24:11,904 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_fan
+2025-12-08 16:24:11,904 - GreenhouseDesktop - INFO - Appending to USER output: {"fanId":"fan_1","status":"off","speed":0,"previousStatus":"on","timestamp":"2025-12-08T16:24:11.872...
+2025-12-08 16:24:12,268 - GreenhouseDesktop - INFO - Sending user command 19537f9b-4b56-4271-a5b2-1bd80684bcb2: read_sensor
+2025-12-08 16:24:12,369 - CommandWorker - INFO - Command 19537f9b-4b56-4271-a5b2-1bd80684bcb2 sent successfully: read_sensor
+2025-12-08 16:24:12,403 - CommandWorker - INFO - Received response for command: 19537f9b-4b56-4271-a5b2-1bd80684bcb2
+2025-12-08 16:24:12,403 - GreenhouseDesktop - INFO - Received response for command 19537f9b-4b56-4271-a5b2-1bd80684bcb2, cached: False, error: False
+2025-12-08 16:24:12,403 - GreenhouseDesktop - INFO - Pending commands: ['19537f9b-4b56-4271-a5b2-1bd80684bcb2']
+2025-12-08 16:24:12,403 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:12,403 - GreenhouseDesktop - INFO - Appending to USER output: {"soilPH":6.67,"unit":"pH","timestamp":"2025-12-08T16:24:12.371Z","sensorId":"soil_ph_sensor_1","loc...
+2025-12-08 16:24:13,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:13,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:13,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:13,904 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:13,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:13,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:14,526 - GreenhouseDesktop - INFO - Sending user command 2c535b56-f196-45eb-9a0a-fe271c9d73b0: read_sensor
+2025-12-08 16:24:14,626 - CommandWorker - INFO - Command 2c535b56-f196-45eb-9a0a-fe271c9d73b0 sent successfully: read_sensor
+2025-12-08 16:24:14,703 - CommandWorker - INFO - Received response for command: 2c535b56-f196-45eb-9a0a-fe271c9d73b0
+2025-12-08 16:24:14,703 - GreenhouseDesktop - INFO - Received response for command 2c535b56-f196-45eb-9a0a-fe271c9d73b0, cached: False, error: False
+2025-12-08 16:24:14,703 - GreenhouseDesktop - INFO - Pending commands: ['2c535b56-f196-45eb-9a0a-fe271c9d73b0']
+2025-12-08 16:24:14,703 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:14,703 - GreenhouseDesktop - INFO - Appending to USER output: {"light":715,"unit":"lux","timestamp":"2025-12-08T16:24:14.629Z","sensorId":"light_sensor_1","locati...
+2025-12-08 16:24:18,065 - GreenhouseDesktop - INFO - Sending user command d43b0df8-d26c-4974-bf3a-41b9605589dc: read_sensor
+2025-12-08 16:24:18,165 - CommandWorker - INFO - Command d43b0df8-d26c-4974-bf3a-41b9605589dc sent successfully: read_sensor
+2025-12-08 16:24:18,203 - CommandWorker - INFO - Received response for command: d43b0df8-d26c-4974-bf3a-41b9605589dc
+2025-12-08 16:24:18,203 - GreenhouseDesktop - INFO - Received response for command d43b0df8-d26c-4974-bf3a-41b9605589dc, cached: False, error: False
+2025-12-08 16:24:18,203 - GreenhouseDesktop - INFO - Pending commands: ['d43b0df8-d26c-4974-bf3a-41b9605589dc']
+2025-12-08 16:24:18,203 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:18,203 - GreenhouseDesktop - INFO - Appending to USER output: {"soilMoisture":40,"unit":"percent","timestamp":"2025-12-08T16:24:18.168Z","sensorId":"soil_moisture...
+2025-12-08 16:24:18,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:18,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:18,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:18,903 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:18,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:18,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:20,575 - GreenhouseDesktop - INFO - Sending user command e5a52687-9a67-4b4d-bed4-24080bf75d65: switch_water_canal
+2025-12-08 16:24:20,675 - CommandWorker - INFO - Command e5a52687-9a67-4b4d-bed4-24080bf75d65 sent successfully: switch_water_canal
+2025-12-08 16:24:20,702 - CommandWorker - INFO - Received response for command: e5a52687-9a67-4b4d-bed4-24080bf75d65
+2025-12-08 16:24:20,703 - GreenhouseDesktop - INFO - Received response for command e5a52687-9a67-4b4d-bed4-24080bf75d65, cached: False, error: False
+2025-12-08 16:24:20,703 - GreenhouseDesktop - INFO - Pending commands: ['e5a52687-9a67-4b4d-bed4-24080bf75d65']
+2025-12-08 16:24:20,703 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_water_canal
+2025-12-08 16:24:20,703 - GreenhouseDesktop - INFO - Appending to USER output: {"deviceId":"water_canal_1","status":"on","previousStatus":"off","timestamp":"2025-12-08T16:24:20.67...
+2025-12-08 16:24:23,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:23,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:23,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:23,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:23,902 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:23,902 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:28,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:28,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:28,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:28,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:28,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:28,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:33,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:33,902 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:33,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:33,902 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:33,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:33,903 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:38,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:38,903 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:38,904 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:38,904 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:38,904 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:38,905 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:43,627 - GreenhouseDesktop - INFO - Sending user command 86ca902a-8571-435e-b517-5fa789732c5e: read_sensor
+2025-12-08 16:24:43,727 - CommandWorker - INFO - Command 86ca902a-8571-435e-b517-5fa789732c5e sent successfully: read_sensor
+2025-12-08 16:24:43,803 - CommandWorker - INFO - Received response for command: 86ca902a-8571-435e-b517-5fa789732c5e
+2025-12-08 16:24:43,803 - GreenhouseDesktop - INFO - Received response for command 86ca902a-8571-435e-b517-5fa789732c5e, cached: False, error: False
+2025-12-08 16:24:43,803 - GreenhouseDesktop - INFO - Pending commands: ['86ca902a-8571-435e-b517-5fa789732c5e']
+2025-12-08 16:24:43,803 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:43,803 - GreenhouseDesktop - INFO - Appending to USER output: {"temperature":24.7,"unit":"celsius","timestamp":"2025-12-08T16:24:43.731Z","sensorId":"temp_sensor_...
+2025-12-08 16:24:43,814 - GreenhouseDesktop - INFO - Sending user command 275adbaf-1066-47e3-9042-6ab9466d54da: read_sensor
+2025-12-08 16:24:43,914 - CommandWorker - INFO - Command 275adbaf-1066-47e3-9042-6ab9466d54da sent successfully: read_sensor
+2025-12-08 16:24:43,945 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:43,945 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:43,946 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:43,946 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:43,946 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:43,947 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:43,948 - CommandWorker - INFO - Received response for command: 275adbaf-1066-47e3-9042-6ab9466d54da
+2025-12-08 16:24:43,949 - GreenhouseDesktop - INFO - Received response for command 275adbaf-1066-47e3-9042-6ab9466d54da, cached: True, error: False
+2025-12-08 16:24:43,949 - GreenhouseDesktop - INFO - Pending commands: ['275adbaf-1066-47e3-9042-6ab9466d54da']
+2025-12-08 16:24:43,949 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:43,949 - GreenhouseDesktop - INFO - Appending to USER output: {"temperature":24.7,"unit":"celsius","timestamp":"2025-12-08T16:24:43.731Z","sensorId":"temp_sensor_...
+2025-12-08 16:24:43,986 - GreenhouseDesktop - INFO - Sending user command d6393b2d-f7df-4516-b2f7-11e9c1d3d713: read_sensor
+2025-12-08 16:24:44,087 - CommandWorker - INFO - Command d6393b2d-f7df-4516-b2f7-11e9c1d3d713 sent successfully: read_sensor
+2025-12-08 16:24:44,089 - CommandWorker - INFO - Received response for command: d6393b2d-f7df-4516-b2f7-11e9c1d3d713
+2025-12-08 16:24:44,090 - GreenhouseDesktop - INFO - Received response for command d6393b2d-f7df-4516-b2f7-11e9c1d3d713, cached: True, error: False
+2025-12-08 16:24:44,090 - GreenhouseDesktop - INFO - Pending commands: ['d6393b2d-f7df-4516-b2f7-11e9c1d3d713']
+2025-12-08 16:24:44,090 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:44,090 - GreenhouseDesktop - INFO - Appending to USER output: {"temperature":24.7,"unit":"celsius","timestamp":"2025-12-08T16:24:43.731Z","sensorId":"temp_sensor_...
+2025-12-08 16:24:44,132 - GreenhouseDesktop - INFO - Sending user command 8a4e6d97-fe73-4b8e-b777-a6c13edc7f8b: read_sensor
+2025-12-08 16:24:44,233 - CommandWorker - INFO - Command 8a4e6d97-fe73-4b8e-b777-a6c13edc7f8b sent successfully: read_sensor
+2025-12-08 16:24:44,235 - CommandWorker - INFO - Received response for command: 8a4e6d97-fe73-4b8e-b777-a6c13edc7f8b
+2025-12-08 16:24:44,235 - GreenhouseDesktop - INFO - Received response for command 8a4e6d97-fe73-4b8e-b777-a6c13edc7f8b, cached: True, error: False
+2025-12-08 16:24:44,235 - GreenhouseDesktop - INFO - Pending commands: ['8a4e6d97-fe73-4b8e-b777-a6c13edc7f8b']
+2025-12-08 16:24:44,235 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:44,235 - GreenhouseDesktop - INFO - Appending to USER output: {"temperature":24.7,"unit":"celsius","timestamp":"2025-12-08T16:24:43.731Z","sensorId":"temp_sensor_...
+2025-12-08 16:24:45,301 - GreenhouseDesktop - INFO - Sending user command b7d505de-f01e-49c9-ae12-d6dcebab34a7: read_sensor
+2025-12-08 16:24:45,401 - CommandWorker - INFO - Command b7d505de-f01e-49c9-ae12-d6dcebab34a7 sent successfully: read_sensor
+2025-12-08 16:24:45,404 - CommandWorker - INFO - Received response for command: b7d505de-f01e-49c9-ae12-d6dcebab34a7
+2025-12-08 16:24:45,404 - GreenhouseDesktop - INFO - Received response for command b7d505de-f01e-49c9-ae12-d6dcebab34a7, cached: True, error: False
+2025-12-08 16:24:45,404 - GreenhouseDesktop - INFO - Pending commands: ['b7d505de-f01e-49c9-ae12-d6dcebab34a7']
+2025-12-08 16:24:45,404 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:45,404 - GreenhouseDesktop - INFO - Appending to USER output: {"temperature":24.7,"unit":"celsius","timestamp":"2025-12-08T16:24:43.731Z","sensorId":"temp_sensor_...
+2025-12-08 16:24:45,627 - GreenhouseDesktop - INFO - Sending user command b53a29c2-ad8a-48e9-9fc1-9857bcb957e5: read_sensor
+2025-12-08 16:24:45,727 - CommandWorker - INFO - Command b53a29c2-ad8a-48e9-9fc1-9857bcb957e5 sent successfully: read_sensor
+2025-12-08 16:24:45,803 - CommandWorker - INFO - Received response for command: b53a29c2-ad8a-48e9-9fc1-9857bcb957e5
+2025-12-08 16:24:45,803 - GreenhouseDesktop - INFO - Received response for command b53a29c2-ad8a-48e9-9fc1-9857bcb957e5, cached: False, error: False
+2025-12-08 16:24:45,803 - GreenhouseDesktop - INFO - Pending commands: ['b53a29c2-ad8a-48e9-9fc1-9857bcb957e5']
+2025-12-08 16:24:45,803 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:45,803 - GreenhouseDesktop - INFO - Appending to USER output: {"soilMoisture":72,"unit":"percent","timestamp":"2025-12-08T16:24:45.731Z","sensorId":"soil_moisture...
+2025-12-08 16:24:45,856 - GreenhouseDesktop - INFO - Sending user command c6f52c8c-31ae-419b-b2ad-3bb025d985aa: read_sensor
+2025-12-08 16:24:45,957 - CommandWorker - INFO - Command c6f52c8c-31ae-419b-b2ad-3bb025d985aa sent successfully: read_sensor
+2025-12-08 16:24:45,959 - CommandWorker - INFO - Received response for command: c6f52c8c-31ae-419b-b2ad-3bb025d985aa
+2025-12-08 16:24:45,959 - GreenhouseDesktop - INFO - Received response for command c6f52c8c-31ae-419b-b2ad-3bb025d985aa, cached: True, error: False
+2025-12-08 16:24:45,959 - GreenhouseDesktop - INFO - Pending commands: ['c6f52c8c-31ae-419b-b2ad-3bb025d985aa']
+2025-12-08 16:24:45,960 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:45,960 - GreenhouseDesktop - INFO - Appending to USER output: {"soilMoisture":72,"unit":"percent","timestamp":"2025-12-08T16:24:45.731Z","sensorId":"soil_moisture...
+2025-12-08 16:24:46,119 - GreenhouseDesktop - INFO - Sending user command 07d208f6-31d1-4670-a701-a96ae9703974: read_sensor
+2025-12-08 16:24:46,221 - CommandWorker - INFO - Command 07d208f6-31d1-4670-a701-a96ae9703974 sent successfully: read_sensor
+2025-12-08 16:24:46,227 - CommandWorker - INFO - Received response for command: 07d208f6-31d1-4670-a701-a96ae9703974
+2025-12-08 16:24:46,227 - GreenhouseDesktop - INFO - Received response for command 07d208f6-31d1-4670-a701-a96ae9703974, cached: True, error: False
+2025-12-08 16:24:46,227 - GreenhouseDesktop - INFO - Pending commands: ['07d208f6-31d1-4670-a701-a96ae9703974']
+2025-12-08 16:24:46,227 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:46,227 - GreenhouseDesktop - INFO - Appending to USER output: {"soilMoisture":72,"unit":"percent","timestamp":"2025-12-08T16:24:45.731Z","sensorId":"soil_moisture...
+2025-12-08 16:24:46,404 - GreenhouseDesktop - INFO - Sending user command cdefcfab-9aa8-46b4-9376-3cc3ab11aede: read_sensor
+2025-12-08 16:24:46,504 - CommandWorker - INFO - Command cdefcfab-9aa8-46b4-9376-3cc3ab11aede sent successfully: read_sensor
+2025-12-08 16:24:46,506 - CommandWorker - INFO - Received response for command: cdefcfab-9aa8-46b4-9376-3cc3ab11aede
+2025-12-08 16:24:46,507 - GreenhouseDesktop - INFO - Received response for command cdefcfab-9aa8-46b4-9376-3cc3ab11aede, cached: True, error: False
+2025-12-08 16:24:46,507 - GreenhouseDesktop - INFO - Pending commands: ['cdefcfab-9aa8-46b4-9376-3cc3ab11aede']
+2025-12-08 16:24:46,507 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:46,507 - GreenhouseDesktop - INFO - Appending to USER output: {"soilMoisture":72,"unit":"percent","timestamp":"2025-12-08T16:24:45.731Z","sensorId":"soil_moisture...
+2025-12-08 16:24:46,729 - GreenhouseDesktop - INFO - Sending user command 5e944dda-ab26-42a4-a3e1-a66f6bec1e33: read_sensor
+2025-12-08 16:24:46,830 - CommandWorker - INFO - Command 5e944dda-ab26-42a4-a3e1-a66f6bec1e33 sent successfully: read_sensor
+2025-12-08 16:24:46,832 - CommandWorker - INFO - Received response for command: 5e944dda-ab26-42a4-a3e1-a66f6bec1e33
+2025-12-08 16:24:46,832 - GreenhouseDesktop - INFO - Received response for command 5e944dda-ab26-42a4-a3e1-a66f6bec1e33, cached: True, error: False
+2025-12-08 16:24:46,832 - GreenhouseDesktop - INFO - Pending commands: ['5e944dda-ab26-42a4-a3e1-a66f6bec1e33']
+2025-12-08 16:24:46,832 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:46,832 - GreenhouseDesktop - INFO - Appending to USER output: {"soilMoisture":72,"unit":"percent","timestamp":"2025-12-08T16:24:45.731Z","sensorId":"soil_moisture...
+2025-12-08 16:24:47,006 - GreenhouseDesktop - INFO - Sending user command 2212b640-b294-4079-a4fc-9c609d559cea: read_sensor
+2025-12-08 16:24:47,107 - CommandWorker - INFO - Command 2212b640-b294-4079-a4fc-9c609d559cea sent successfully: read_sensor
+2025-12-08 16:24:47,203 - CommandWorker - INFO - Received response for command: 2212b640-b294-4079-a4fc-9c609d559cea
+2025-12-08 16:24:47,203 - GreenhouseDesktop - INFO - Received response for command 2212b640-b294-4079-a4fc-9c609d559cea, cached: False, error: False
+2025-12-08 16:24:47,203 - GreenhouseDesktop - INFO - Pending commands: ['2212b640-b294-4079-a4fc-9c609d559cea']
+2025-12-08 16:24:47,204 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:47,204 - GreenhouseDesktop - INFO - Appending to USER output: {"light":758,"unit":"lux","timestamp":"2025-12-08T16:24:47.109Z","sensorId":"light_sensor_1","locati...
+2025-12-08 16:24:47,345 - GreenhouseDesktop - INFO - Sending user command 3140233b-105a-4301-90a2-636a75b417b1: read_sensor
+2025-12-08 16:24:47,445 - CommandWorker - INFO - Command 3140233b-105a-4301-90a2-636a75b417b1 sent successfully: read_sensor
+2025-12-08 16:24:47,447 - CommandWorker - INFO - Received response for command: 3140233b-105a-4301-90a2-636a75b417b1
+2025-12-08 16:24:47,448 - GreenhouseDesktop - INFO - Received response for command 3140233b-105a-4301-90a2-636a75b417b1, cached: True, error: False
+2025-12-08 16:24:47,448 - GreenhouseDesktop - INFO - Pending commands: ['3140233b-105a-4301-90a2-636a75b417b1']
+2025-12-08 16:24:47,448 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:47,448 - GreenhouseDesktop - INFO - Appending to USER output: {"temperature":24.7,"unit":"celsius","timestamp":"2025-12-08T16:24:43.731Z","sensorId":"temp_sensor_...
+2025-12-08 16:24:47,741 - GreenhouseDesktop - INFO - Sending user command 41cae0ab-d9bf-42db-8a18-9dc878cd38db: read_sensor
+2025-12-08 16:24:47,841 - CommandWorker - INFO - Command 41cae0ab-d9bf-42db-8a18-9dc878cd38db sent successfully: read_sensor
+2025-12-08 16:24:47,843 - CommandWorker - INFO - Received response for command: 41cae0ab-d9bf-42db-8a18-9dc878cd38db
+2025-12-08 16:24:47,844 - GreenhouseDesktop - INFO - Received response for command 41cae0ab-d9bf-42db-8a18-9dc878cd38db, cached: True, error: False
+2025-12-08 16:24:47,844 - GreenhouseDesktop - INFO - Pending commands: ['41cae0ab-d9bf-42db-8a18-9dc878cd38db']
+2025-12-08 16:24:47,844 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:47,844 - GreenhouseDesktop - INFO - Appending to USER output: {"light":758,"unit":"lux","timestamp":"2025-12-08T16:24:47.109Z","sensorId":"light_sensor_1","locati...
+2025-12-08 16:24:48,233 - GreenhouseDesktop - INFO - Sending user command bbfce9a2-5920-4850-a05d-6ca70b9b3130: read_sensor
+2025-12-08 16:24:48,334 - CommandWorker - INFO - Command bbfce9a2-5920-4850-a05d-6ca70b9b3130 sent successfully: read_sensor
+2025-12-08 16:24:48,402 - CommandWorker - INFO - Received response for command: bbfce9a2-5920-4850-a05d-6ca70b9b3130
+2025-12-08 16:24:48,403 - GreenhouseDesktop - INFO - Received response for command bbfce9a2-5920-4850-a05d-6ca70b9b3130, cached: False, error: False
+2025-12-08 16:24:48,403 - GreenhouseDesktop - INFO - Pending commands: ['bbfce9a2-5920-4850-a05d-6ca70b9b3130']
+2025-12-08 16:24:48,403 - GreenhouseDesktop - INFO - Found command info: type=user, command=read_sensor
+2025-12-08 16:24:48,403 - GreenhouseDesktop - INFO - Appending to USER output: {"co2":388,"unit":"ppm","timestamp":"2025-12-08T16:24:48.338Z","sensorId":"co2_sensor_1","location":...
+2025-12-08 16:24:48,484 - GreenhouseDesktop - INFO - Sending user command 20393bb7-b833-4d46-b75c-9976a6982193: switch_fan
+2025-12-08 16:24:48,584 - CommandWorker - INFO - Command 20393bb7-b833-4d46-b75c-9976a6982193 sent successfully: switch_fan
+2025-12-08 16:24:48,602 - CommandWorker - INFO - Received response for command: 20393bb7-b833-4d46-b75c-9976a6982193
+2025-12-08 16:24:48,603 - GreenhouseDesktop - INFO - Received response for command 20393bb7-b833-4d46-b75c-9976a6982193, cached: False, error: False
+2025-12-08 16:24:48,603 - GreenhouseDesktop - INFO - Pending commands: ['20393bb7-b833-4d46-b75c-9976a6982193']
+2025-12-08 16:24:48,603 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_fan
+2025-12-08 16:24:48,603 - GreenhouseDesktop - INFO - Appending to USER output: {"fanId":"fan_1","status":"on","speed":50,"previousStatus":"off","timestamp":"2025-12-08T16:24:48.58...
+2025-12-08 16:24:48,879 - GreenhouseDesktop - INFO - Sending user command ca62b9f1-dff1-48f8-938f-3f9f0b0ce89c: switch_water_canal
+2025-12-08 16:24:48,980 - CommandWorker - INFO - Command ca62b9f1-dff1-48f8-938f-3f9f0b0ce89c sent successfully: switch_water_canal
+2025-12-08 16:24:48,981 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:48,982 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-08 16:24:48,982 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:48,982 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-08 16:24:48,982 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:48,982 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-08 16:24:49,002 - CommandWorker - INFO - Received response for command: ca62b9f1-dff1-48f8-938f-3f9f0b0ce89c
+2025-12-08 16:24:49,003 - GreenhouseDesktop - INFO - Received response for command ca62b9f1-dff1-48f8-938f-3f9f0b0ce89c, cached: False, error: False
+2025-12-08 16:24:49,003 - GreenhouseDesktop - INFO - Pending commands: ['ca62b9f1-dff1-48f8-938f-3f9f0b0ce89c']
+2025-12-08 16:24:49,003 - GreenhouseDesktop - INFO - Found command info: type=user, command=switch_water_canal
+2025-12-08 16:24:49,003 - GreenhouseDesktop - INFO - Appending to USER output: {"deviceId":"water_canal_1","status":"off","previousStatus":"on","timestamp":"2025-12-08T16:24:48.98...
+2025-12-08 16:24:50,049 - GreenhouseDesktop - INFO - Application shutting down
+2025-12-08 16:24:50,049 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-08 16:24:50,050 - pika.channel - INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x75bcf22e1e50> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-08 16:24:50,050 - pika.channel - INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x75bcf22e1e50> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-08 16:24:50,050 - pika.adapters.blocking_connection - INFO - Closing connection (200): Normal shutdown
+2025-12-08 16:24:50,050 - pika.connection - INFO - Closing connection (200): 'Normal shutdown'
+2025-12-08 16:24:50,051 - pika.adapters.utils.io_services_utils - INFO - Aborting transport connection: state=1; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.5', 34562), raddr=('172.18.0.4', 5672)>
+2025-12-08 16:24:50,051 - pika.adapters.utils.io_services_utils - INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.5', 34562), raddr=('172.18.0.4', 5672)>
+2025-12-08 16:24:50,051 - pika.adapters.utils.io_services_utils - INFO - Deactivating transport: state=1; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.5', 34562), raddr=('172.18.0.4', 5672)>
+2025-12-08 16:24:50,051 - pika.connection - INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-08 16:24:50,051 - pika.connection - INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-08 16:24:50,051 - pika.adapters.utils.io_services_utils - INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.5', 34562), raddr=('172.18.0.4', 5672)>
+2025-12-08 16:24:50,051 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
+2025-12-08 16:24:50,051 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-08 16:24:50,051 - RedisEdgeClient - INFO - Disconnected from Redis
