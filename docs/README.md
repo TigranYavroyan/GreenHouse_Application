@@ -51,7 +51,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 │ Redis  │ │ Greenhouse Core │
 │ Cache  │ │ (Simulator/Real)│
 └────────┘ └──────────────────┘
-         │
+         │RabbitMQClient
          │ HTTP API
          ▼
 ┌─────────────────┐
