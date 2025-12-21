@@ -225,3 +225,39 @@ classDiagram
         +getDeviceStates(req, res)
     }
 
+
+
+
+
+    %% ============================================
+    classDef level1 fill:#1e3a8a,stroke:#3b82f6,stroke-width:3px,color:#fff,font-size:14px
+    classDef level2 fill:#7c2d12,stroke:#ea580c,stroke-width:2px,color:#fff,font-size:12px
+    classDef kafka fill:#78350f,stroke:#fbbf24,stroke-width:4px,color:#fff,font-size:14px
+    classDef redis fill:#7c1d1d,stroke:#dc2626,stroke-width:4px,color:#fff,font-size:14px
+    classDef level4 fill:#581c87,stroke:#a855f7,stroke-width:2px,color:#fff,font-size:11px
+    classDef level5 fill:#14532d,stroke:#22c55e,stroke-width:2px,color:#fff,font-size:12px
+    classDef monitoring fill:#831843,stroke:#ec4899,stroke-width:2px,color:#fff,font-size:11px
+    
+    %% Apply styles
+    class Nginx level1
+    class APIGateway,SSEWSGateway level2
+    class Grafana,Prometheus monitoring
+    class Kafka kafka
+    class Redis redis
+    class UserService,GameService,PaymentService,OwnerService,NotificationService,RoomService,ChessEngine,SearchService level4
+    class DatabaseLayer,MongoDB,PostgreSQL level5
+    
+    %% Subgraph styling - visible borders for hierarchy
+    style L1 fill:#eff6ff,stroke:#3b82f6,stroke-width:3px,stroke-dasharray: 5 5
+    style L2 fill:#fff7ed,stroke:#ea580c,stroke-width:2px,stroke-dasharray: 5 5
+    style L3 fill:transparent,stroke:transparent,stroke-width:0px
+    style KAFKA_CLUSTER fill:#fef3c7,stroke:#fbbf24,stroke-width:4px,stroke-dasharray: 8 4
+    style REDIS_CLUSTER fill:#fee2e2,stroke:#dc2626,stroke-width:4px,stroke-dasharray: 8 4
+    style L4 fill:#faf5ff,stroke:#a855f7,stroke-width:2px,stroke-dasharray: 5 5
+    style L5 fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,stroke-dasharray: 5 5
+    style LEFT_GW fill:#fff7ed,stroke:#ea580c,stroke-width:1px
+    style RIGHT_GW fill:#fff7ed,stroke:#ea580c,stroke-width:1px
+    style MON_LEFT fill:#fce7f3,stroke:#ec4899,stroke-width:1px
+    style LEFT_SERVICES fill:#faf5ff,stroke:#a855f7,stroke-width:1px
+    style RIGHT_SERVICES fill:#faf5ff,stroke:#a855f7,stroke-width:1px
+    style DATABASES fill:#f0fdf4,stroke:#22c55e,stroke-width:1px

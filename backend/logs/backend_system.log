@@ -318,3 +318,2289 @@ Logs Directory: /app/logs
 [2025-12-08T16:24:48.983Z] INFO: Received response from greenhouse core simulator
 [2025-12-08T16:24:48.983Z] DEBUG: Command switch_water_canal executed successfully (commandId: ca62b9f1-dff1-48f8-938f-3f9f0b0ce89c)
 [2025-12-08T16:24:48.983Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 3ms
+
+
+=== Backend Restarted: 2025-12-10T07:49:05.805Z ===
+
+[2025-12-10T07:49:06.108Z] INFO: Redis Client Connected
+[2025-12-10T07:49:06.111Z] INFO: Redis Client Ready
+[2025-12-10T07:49:06.111Z] INFO: Redis connected
+[2025-12-10T07:49:06.173Z] INFO: Greenhouse Core Client connected
+[2025-12-10T07:49:06.173Z] INFO: Greenhouse Core Client connected
+[2025-12-10T07:49:06.173Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T07:49:06.178Z] INFO: Greenhouse backend running on port 3000
+[2025-12-10T07:49:06.178Z] INFO: Logs directory: /app/logs
+[2025-12-10T07:49:06.178Z] INFO: API docs available at http://localhost:3000
+[2025-12-10T07:49:06.180Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-10T07:49:06.180Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-10T07:49:11.180Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T07:49:11.181Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T07:49:11.182Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-10T07:49:11.182Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-10T07:49:11.182Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-10T07:49:16.182Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T07:49:16.182Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T07:49:16.183Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T07:49:16.233Z] INFO: RabbitMQ connected and consumer started
+[2025-12-10T07:49:18.451Z] DEBUG: Processing command: 8e214ca1-4a23-456c-97b4-15438a099026
+[2025-12-10T07:49:18.451Z] DEBUG: [Session 1] Session started - ID: 16c23358-4c26-49f7-9c05-1740d1b2cbde
+[2025-12-10T07:49:18.451Z] INFO: Created new session: 16c23358-4c26-49f7-9c05-1740d1b2cbde (session_1.log)
+[2025-12-10T07:49:18.454Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T07:49:18.471Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T07:49:18.471Z] DEBUG: Command read_temperature_data executed successfully (commandId: 8e214ca1-4a23-456c-97b4-15438a099026)
+[2025-12-10T07:49:18.471Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 18ms
+[2025-12-10T07:49:19.685Z] DEBUG: Processing command: 2b168b62-f1e3-48d2-b706-ae45f54d32ec
+
+
+=== Backend Restarted: 2025-12-10T09:02:55.927Z ===
+
+[2025-12-10T09:02:56.262Z] INFO: Redis Client Connected
+[2025-12-10T09:02:56.265Z] INFO: Redis Client Ready
+[2025-12-10T09:02:56.265Z] INFO: Redis connected
+[2025-12-10T09:02:56.325Z] INFO: Greenhouse Core Client connected
+[2025-12-10T09:02:56.325Z] INFO: Greenhouse Core Client connected
+[2025-12-10T09:02:56.326Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:02:56.331Z] INFO: Greenhouse backend running on port 3000
+[2025-12-10T09:02:56.331Z] INFO: Logs directory: /app/logs
+[2025-12-10T09:02:56.331Z] INFO: API docs available at http://localhost:3000
+[2025-12-10T09:02:56.332Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-10T09:02:56.333Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-10T09:03:01.332Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:03:01.334Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:03:01.334Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-10T09:03:01.335Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-10T09:03:01.335Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-10T09:03:06.334Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:03:06.338Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:03:06.339Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:03:06.720Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-10T09:07:09.355Z ===
+
+[2025-12-10T09:07:09.533Z] INFO: Redis Client Connected
+[2025-12-10T09:07:09.536Z] INFO: Redis Client Ready
+[2025-12-10T09:07:09.536Z] INFO: Redis connected
+[2025-12-10T09:07:09.586Z] INFO: Greenhouse Core Client connected
+[2025-12-10T09:07:09.586Z] INFO: Greenhouse Core Client connected
+[2025-12-10T09:07:09.586Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:07:09.593Z] INFO: Greenhouse backend running on port 3000
+[2025-12-10T09:07:09.593Z] INFO: Logs directory: /app/logs
+[2025-12-10T09:07:09.593Z] INFO: API docs available at http://localhost:3000
+[2025-12-10T09:07:09.595Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.19.0.2:5672
+[2025-12-10T09:07:09.596Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.19.0.2:5672
+[2025-12-10T09:07:14.596Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:07:14.599Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-10T09:07:14.658Z] INFO: RabbitMQ connected and consumer started
+[2025-12-10T09:08:00.473Z] DEBUG: Processing command: caa5871c-d00b-4bf0-b088-4414df0547f4
+[2025-12-10T09:08:00.473Z] DEBUG: [Session 1] Session started - ID: 39aa544a-e677-4a5d-a926-5dc6770a7bb7
+[2025-12-10T09:08:00.473Z] INFO: Created new session: 39aa544a-e677-4a5d-a926-5dc6770a7bb7 (session_1.log)
+[2025-12-10T09:08:00.475Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T09:08:00.491Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T09:08:00.491Z] DEBUG: Command read_light_data executed successfully (commandId: caa5871c-d00b-4bf0-b088-4414df0547f4)
+[2025-12-10T09:08:00.491Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 16ms
+[2025-12-10T09:08:07.035Z] DEBUG: Processing command: b91156ff-b4b1-4c5b-a59a-4e10b70af440
+[2025-12-10T09:08:07.036Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T09:08:07.043Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T09:08:07.043Z] DEBUG: Command switch_heater executed successfully (commandId: b91156ff-b4b1-4c5b-a59a-4e10b70af440)
+[2025-12-10T09:08:07.043Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 8ms
+[2025-12-10T09:08:07.334Z] DEBUG: Processing command: b4d966ed-27ce-4b0c-a740-823a875bffe7
+[2025-12-10T09:08:07.334Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T09:08:07.338Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T09:08:07.338Z] DEBUG: Command switch_heater executed successfully (commandId: b4d966ed-27ce-4b0c-a740-823a875bffe7)
+[2025-12-10T09:08:07.338Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 4ms
+[2025-12-10T09:08:09.237Z] DEBUG: Processing command: 5ebfdc02-8542-498d-8bce-d3fb42e0e12c
+[2025-12-10T09:08:09.237Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T09:08:09.241Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T09:08:09.241Z] DEBUG: Command switch_heater executed successfully (commandId: 5ebfdc02-8542-498d-8bce-d3fb42e0e12c)
+[2025-12-10T09:08:09.241Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 4ms
+[2025-12-10T09:08:09.610Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T09:08:09.611Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T09:08:09.611Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T09:08:09.611Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T09:08:09.612Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T09:08:09.612Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T09:08:09.612Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T09:08:09.613Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T09:08:09.614Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T09:08:09.616Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T09:08:09.616Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T09:08:09.617Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T09:08:09.619Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T09:08:09.620Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T09:08:09.621Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T09:08:09.629Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T09:08:09.631Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T09:08:09.631Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T09:08:09.633Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T09:08:09.633Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T09:08:09.634Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T09:08:09.637Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T09:08:09.639Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T09:08:09.640Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-10T09:08:12.470Z] DEBUG: Processing command: dc7bdb25-ac49-46f7-b514-7a29a6429e88
+[2025-12-10T09:08:12.471Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T09:08:12.474Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T09:08:12.474Z] DEBUG: Command read_light_data executed successfully (commandId: dc7bdb25-ac49-46f7-b514-7a29a6429e88)
+[2025-12-10T09:08:12.475Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 3ms
+[2025-12-10T09:08:13.122Z] DEBUG: Processing command: 7017438f-b6cd-4028-8a8b-86bc7cb1dc9e
+[2025-12-10T09:08:38.319Z] DEBUG: Processing command: 81669332-dd57-4f59-8b4f-4755bf1d1391
+[2025-12-10T09:08:38.320Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T09:08:38.325Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T09:08:38.325Z] DEBUG: Command read_temperature_data executed successfully (commandId: 81669332-dd57-4f59-8b4f-4755bf1d1391)
+[2025-12-10T09:08:38.325Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 6ms
+[2025-12-10T09:08:38.514Z] DEBUG: Processing command: 654988dc-ae4d-4161-850b-d2fc0307b326
+[2025-12-10T09:08:38.722Z] DEBUG: Processing command: a490a9b8-9c70-4232-b6cf-664c4bc298d8
+[2025-12-10T09:09:09.580Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T09:09:09.580Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T09:09:09.584Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T09:09:09.586Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T09:09:09.589Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T09:09:09.591Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T09:09:09.592Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T09:09:09.594Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T09:09:09.597Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T09:09:09.598Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T09:09:09.602Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T09:09:09.603Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T09:09:09.605Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T09:09:09.606Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T09:09:09.607Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T09:09:09.608Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T09:09:09.609Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T09:09:09.614Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T09:09:09.617Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T09:09:09.621Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T09:09:09.621Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T09:09:09.622Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T09:09:09.622Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-10T09:09:09.622Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T09:42:09.723Z] DEBUG: [Session 1] Session terminated due to inactivity (30 minutes)
+[2025-12-10T09:42:09.723Z] INFO: Cleaned up old session: 39aa544a-e677-4a5d-a926-5dc6770a7bb7
+[2025-12-10T10:01:42.100Z] DEBUG: Processing command: ff6a84fe-1a87-4d0e-b84b-ba9445235fbc
+[2025-12-10T10:01:42.101Z] DEBUG: [Session 2] Session started - ID: 78c09d54-09b0-4f98-95ef-b51c253c09eb
+[2025-12-10T10:01:42.101Z] INFO: Created new session: 78c09d54-09b0-4f98-95ef-b51c253c09eb (session_2.log)
+[2025-12-10T10:01:42.101Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T10:01:42.106Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T10:01:42.106Z] DEBUG: Command read_temperature_data executed successfully (commandId: ff6a84fe-1a87-4d0e-b84b-ba9445235fbc)
+[2025-12-10T10:01:42.106Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 5ms
+[2025-12-10T10:02:01.992Z] DEBUG: Processing command: 6d54ffa7-b94b-4916-bfcf-d46a49a10390
+[2025-12-10T10:02:01.994Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T10:02:01.998Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T10:02:01.998Z] DEBUG: Command read_temperature_data executed successfully (commandId: 6d54ffa7-b94b-4916-bfcf-d46a49a10390)
+[2025-12-10T10:02:01.998Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 5ms
+[2025-12-10T10:02:30.614Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T10:02:30.615Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T10:02:30.616Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T10:02:30.618Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T10:02:30.624Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T10:02:30.625Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T10:02:30.626Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T10:02:30.626Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T10:02:30.628Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T10:02:30.629Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T10:02:30.629Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T10:02:30.630Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T10:02:30.630Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T10:02:30.632Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T10:02:30.632Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T10:02:30.636Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T10:02:30.638Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T10:02:30.641Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T10:02:30.641Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T10:02:30.643Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T10:02:30.644Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T10:02:30.644Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T10:02:30.646Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T10:02:30.648Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-10T10:03:30.584Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T10:03:30.586Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T10:03:30.601Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T10:03:30.612Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T10:03:30.615Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T10:03:30.628Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T10:03:30.632Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T10:03:30.651Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T10:03:30.655Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T10:03:30.656Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T10:03:30.658Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T10:03:30.659Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T10:03:30.661Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T10:03:30.665Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T10:03:30.666Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T10:03:30.666Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T10:03:30.667Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T10:03:30.671Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T10:03:30.672Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T10:03:30.673Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T10:03:30.676Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T10:03:30.677Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T10:03:30.677Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-10T10:03:30.677Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T10:04:15.869Z] DEBUG: Processing command: 2c103580-40c4-4927-a5de-eeec58273ba8
+[2025-12-10T10:04:15.870Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T10:04:15.875Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T10:04:15.875Z] DEBUG: Command read_temperature_data executed successfully (commandId: 2c103580-40c4-4927-a5de-eeec58273ba8)
+[2025-12-10T10:04:15.875Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 5ms
+[2025-12-10T10:04:30.595Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T10:04:30.604Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T10:04:30.605Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T10:04:30.633Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T10:04:30.634Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T10:04:30.635Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T10:04:30.638Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T10:04:30.640Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T10:04:30.641Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T10:04:30.646Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T10:04:30.648Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T10:04:30.651Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T10:04:30.654Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T10:04:30.657Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T10:04:30.658Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T10:04:30.658Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T10:04:30.664Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T10:04:30.665Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T10:04:30.665Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T10:04:30.668Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T10:04:30.669Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T10:04:30.670Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-10T10:04:30.670Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T10:04:30.670Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T10:05:20.631Z] DEBUG: Processing command: 42b1dc0f-78e1-4bfb-a123-3ec65591d002
+[2025-12-10T10:05:20.632Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T10:05:20.637Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T10:05:20.637Z] DEBUG: Command read_light_data executed successfully (commandId: 42b1dc0f-78e1-4bfb-a123-3ec65591d002)
+[2025-12-10T10:05:20.637Z] DEBUG: [Session 2] Greenhouse command read_light_data succeeded in 5ms
+[2025-12-10T10:05:23.180Z] DEBUG: Processing command: 1cdb464e-c61a-4ea0-b2f5-9e8069a95175
+[2025-12-10T10:05:23.180Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T10:05:23.184Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T10:05:23.184Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 1cdb464e-c61a-4ea0-b2f5-9e8069a95175)
+[2025-12-10T10:05:23.184Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-10T10:05:30.581Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T10:05:30.583Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T10:05:30.583Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T10:05:30.584Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T10:05:30.591Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T10:05:30.592Z] WARN: Anomaly received: Rapid change in humidity: 13.0/min
+[2025-12-10T10:05:30.593Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T10:05:30.596Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T10:05:30.602Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T10:05:30.603Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T10:05:30.604Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T10:05:30.604Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T10:05:30.608Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T10:05:30.612Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T10:05:30.614Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T10:05:30.615Z] WARN: Anomaly received: Rapid change in humidity: 7.2/min
+[2025-12-10T10:05:30.622Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T10:05:30.624Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T10:05:30.625Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T10:05:30.625Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T10:05:30.631Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T10:05:30.633Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T10:05:30.633Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T10:05:30.634Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T10:05:30.635Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T10:05:30.636Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-10T10:05:38.532Z] DEBUG: Processing command: 149fef00-adcb-4e88-b503-5f00ba5c53ea
+[2025-12-10T10:05:38.532Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T10:05:38.537Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T10:05:38.537Z] DEBUG: Command read_humidity_data executed successfully (commandId: 149fef00-adcb-4e88-b503-5f00ba5c53ea)
+[2025-12-10T10:05:38.537Z] DEBUG: [Session 2] Greenhouse command read_humidity_data succeeded in 5ms
+[2025-12-10T10:05:40.601Z] DEBUG: Processing command: af4e3f7a-bd6f-420b-87fc-1e62a02f3673
+[2025-12-10T10:05:40.602Z] INFO: Sending command to greenhouse core simulator
+[2025-12-10T10:05:40.606Z] INFO: Received response from greenhouse core simulator
+[2025-12-10T10:05:40.606Z] DEBUG: Command read_co2_data executed successfully (commandId: af4e3f7a-bd6f-420b-87fc-1e62a02f3673)
+[2025-12-10T10:05:40.606Z] DEBUG: [Session 2] Greenhouse command read_co2_data succeeded in 4ms
+[2025-12-10T10:06:30.577Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T10:06:30.579Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T10:06:30.581Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T10:06:30.584Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T10:06:30.590Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T10:06:30.590Z] WARN: Anomaly received: Rapid change in humidity: 8.3/min
+[2025-12-10T10:06:30.593Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T10:06:30.597Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T10:06:30.598Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T10:06:30.599Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T10:06:30.599Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T10:06:30.601Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T10:06:30.603Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T10:06:30.603Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T10:06:30.616Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T10:06:30.616Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T10:06:30.617Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T10:06:30.617Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T10:06:30.617Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T10:06:30.617Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T10:06:30.618Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T10:06:30.621Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T10:06:30.626Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T10:06:30.627Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-10T10:06:30.628Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T10:06:30.628Z] WARN: Anomaly received: Rapid change in humidity: 9.5/min
+[2025-12-10T10:07:30.585Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-10T10:07:30.609Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-10T10:07:30.610Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-10T10:07:30.632Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-10T10:07:30.632Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-10T10:07:30.633Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-10T10:07:30.709Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-10T10:07:30.713Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-10T10:07:30.714Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-10T10:07:30.714Z] WARN: Anomaly received: Sustained decreasing trend in temperature
+[2025-12-10T10:07:30.718Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-10T10:07:30.719Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-10T10:07:30.720Z] WARN: Anomaly received: Sustained decreasing trend in temperature
+[2025-12-10T10:07:30.728Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-10T10:07:30.730Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-10T10:07:30.731Z] WARN: Anomaly received: Sustained decreasing trend in temperature
+[2025-12-10T10:07:30.736Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-10T10:07:30.738Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-10T10:07:30.740Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-10T10:07:30.742Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-10T10:07:30.742Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-10T10:07:30.742Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-10T10:07:30.746Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-10T10:07:30.746Z] WARN: Anomaly received: Rapid change in humidity: 7.4/min
+[2025-12-10T10:07:30.747Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-10T10:07:30.750Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-10T10:07:30.751Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-10T10:07:30.751Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+
+
+=== Backend Restarted: 2025-12-21T14:52:54.538Z ===
+
+[2025-12-21T14:52:54.860Z] INFO: Redis Client Connected
+[2025-12-21T14:52:54.863Z] INFO: Redis Client Ready
+[2025-12-21T14:52:54.863Z] INFO: Redis connected
+[2025-12-21T14:52:54.915Z] INFO: Greenhouse Core Client connected
+[2025-12-21T14:52:54.915Z] INFO: Greenhouse Core Client connected
+[2025-12-21T14:52:54.915Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T14:52:54.919Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T14:52:54.919Z] INFO: Logs directory: /app/logs
+[2025-12-21T14:52:54.919Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T14:52:54.920Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T14:52:54.920Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T14:52:59.920Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T14:52:59.921Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T14:52:59.969Z] DEBUG: Processing command: 945cdac6-d7cf-40e7-a21b-f6561d193c2a
+[2025-12-21T14:52:59.969Z] DEBUG: [Session 1] Session started - ID: 7f8ac3e4-1600-4c4b-ab81-e55613e781b2
+[2025-12-21T14:52:59.969Z] INFO: Created new session: 7f8ac3e4-1600-4c4b-ab81-e55613e781b2 (session_1.log)
+[2025-12-21T14:52:59.969Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T14:52:59.971Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T14:52:59.983Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T14:52:59.983Z] DEBUG: Command read_humidity_data executed successfully (commandId: 945cdac6-d7cf-40e7-a21b-f6561d193c2a)
+[2025-12-21T14:52:59.983Z] DEBUG: [Session 1] Greenhouse command read_humidity_data succeeded in 13ms
+[2025-12-21T15:00:31.451Z] DEBUG: Processing command: fedae0b1-774c-46c7-90c5-d34d5be37d4a
+[2025-12-21T15:00:31.452Z] DEBUG: [Session 2] Session started - ID: a69759a5-aa60-4a76-a6a0-437e10daad48
+[2025-12-21T15:00:31.452Z] INFO: Created new session: a69759a5-aa60-4a76-a6a0-437e10daad48 (session_2.log)
+[2025-12-21T15:00:31.454Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:00:31.472Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:00:31.473Z] DEBUG: Command read_temperature_data executed successfully (commandId: fedae0b1-774c-46c7-90c5-d34d5be37d4a)
+[2025-12-21T15:00:31.473Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 19ms
+[2025-12-21T15:00:32.245Z] DEBUG: Processing command: 04601b84-26fc-41ca-9001-69f0a5a58a20
+[2025-12-21T15:00:32.247Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:00:32.259Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:00:32.259Z] DEBUG: Command read_light_data executed successfully (commandId: 04601b84-26fc-41ca-9001-69f0a5a58a20)
+[2025-12-21T15:00:32.260Z] DEBUG: [Session 2] Greenhouse command read_light_data succeeded in 13ms
+[2025-12-21T15:00:33.632Z] DEBUG: Processing command: 45345cab-2cbe-45b4-ac78-75eff1fc47bd
+[2025-12-21T15:00:33.633Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:00:33.636Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:00:33.636Z] DEBUG: Command read_humidity_data executed successfully (commandId: 45345cab-2cbe-45b4-ac78-75eff1fc47bd)
+[2025-12-21T15:00:33.636Z] DEBUG: [Session 2] Greenhouse command read_humidity_data succeeded in 3ms
+[2025-12-21T15:00:35.669Z] DEBUG: Processing command: 2684acd7-858a-422a-801b-329a61fb3297
+[2025-12-21T15:08:41.441Z] DEBUG: Processing command: fc2075b5-6905-4f39-aeb4-f7a70ae585b6
+[2025-12-21T15:08:41.441Z] DEBUG: [Session 3] Session started - ID: 9ab12a79-29d5-467f-a2fc-e5474a6614a7
+[2025-12-21T15:08:41.441Z] INFO: Created new session: 9ab12a79-29d5-467f-a2fc-e5474a6614a7 (session_3.log)
+[2025-12-21T15:08:41.442Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:08:41.446Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:08:41.446Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: fc2075b5-6905-4f39-aeb4-f7a70ae585b6)
+[2025-12-21T15:08:41.446Z] DEBUG: [Session 3] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T15:08:44.095Z] DEBUG: Processing command: 22fb1462-2c03-4bb4-927a-c78b81c9fdc7
+[2025-12-21T15:08:44.095Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:08:44.097Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:08:44.098Z] DEBUG: Command read_co2_data executed successfully (commandId: 22fb1462-2c03-4bb4-927a-c78b81c9fdc7)
+[2025-12-21T15:08:44.098Z] DEBUG: [Session 3] Greenhouse command read_co2_data succeeded in 3ms
+
+
+=== Backend Restarted: 2025-12-21T15:08:56.065Z ===
+
+[2025-12-21T15:08:56.214Z] INFO: Redis Client Connected
+[2025-12-21T15:08:56.217Z] INFO: Redis Client Ready
+[2025-12-21T15:08:56.217Z] INFO: Redis connected
+[2025-12-21T15:08:56.255Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:08:56.255Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:08:56.256Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:08:56.260Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:08:56.260Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:08:56.260Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:08:56.261Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T15:08:56.262Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T15:09:01.261Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:09:01.262Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:09:01.313Z] DEBUG: Processing command: 5ad9aa7d-2b97-49ca-a51c-c8a9942359d6
+[2025-12-21T15:09:01.313Z] DEBUG: [Session 1] Session started - ID: d963deb5-13e2-4987-bfd4-5ab52c6716f2
+[2025-12-21T15:09:01.313Z] INFO: Created new session: d963deb5-13e2-4987-bfd4-5ab52c6716f2 (session_1.log)
+[2025-12-21T15:09:01.314Z] DEBUG: Processing command: 5fbadc27-985b-41d9-ad17-5d634ca3dcdc
+[2025-12-21T15:09:01.314Z] DEBUG: Processing command: aa1e713f-95c9-4067-9735-d12544971d1e
+[2025-12-21T15:09:01.314Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:09:01.315Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:09:01.325Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:09:01.325Z] DEBUG: Command switch_water_canal executed successfully (commandId: 5ad9aa7d-2b97-49ca-a51c-c8a9942359d6)
+[2025-12-21T15:09:01.325Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 11ms
+[2025-12-21T15:09:01.325Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:09:01.330Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:09:01.330Z] DEBUG: Command switch_water_canal executed successfully (commandId: 5fbadc27-985b-41d9-ad17-5d634ca3dcdc)
+[2025-12-21T15:09:01.330Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 5ms
+[2025-12-21T15:09:01.330Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:09:01.334Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:09:01.334Z] DEBUG: Command switch_heater executed successfully (commandId: aa1e713f-95c9-4067-9735-d12544971d1e)
+[2025-12-21T15:09:01.334Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 4ms
+[2025-12-21T15:09:01.429Z] DEBUG: Processing command: 0a72c5cc-6bae-4e18-a299-ebca71eb490e
+[2025-12-21T15:09:01.430Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:09:01.436Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:09:01.436Z] DEBUG: Command switch_heater executed successfully (commandId: 0a72c5cc-6bae-4e18-a299-ebca71eb490e)
+[2025-12-21T15:09:01.436Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 7ms
+
+
+=== Backend Restarted: 2025-12-21T15:09:56.210Z ===
+
+[2025-12-21T15:09:56.389Z] INFO: Redis Client Connected
+[2025-12-21T15:09:56.392Z] INFO: Redis Client Ready
+[2025-12-21T15:09:56.392Z] INFO: Redis connected
+[2025-12-21T15:09:56.445Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:09:56.446Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:09:56.446Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:09:56.451Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:09:56.451Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:09:56.451Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:09:56.453Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:09:56.453Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:10:01.453Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:10:01.454Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:10:01.505Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:10:06.610Z] DEBUG: Processing command: 733b6561-7bab-47b1-bec6-750901d85857
+[2025-12-21T15:10:06.610Z] DEBUG: [Session 1] Session started - ID: a146e499-efc0-47a7-92be-2c1313c6f3bb
+[2025-12-21T15:10:06.610Z] INFO: Created new session: a146e499-efc0-47a7-92be-2c1313c6f3bb (session_1.log)
+[2025-12-21T15:10:06.611Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:06.622Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:06.622Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 733b6561-7bab-47b1-bec6-750901d85857)
+[2025-12-21T15:10:06.622Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 11ms
+[2025-12-21T15:10:07.468Z] DEBUG: Processing command: 9b4237fa-c02c-4791-98ec-b092341c7a74
+[2025-12-21T15:10:07.468Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:07.472Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:07.472Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 9b4237fa-c02c-4791-98ec-b092341c7a74)
+[2025-12-21T15:10:07.472Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T15:10:08.341Z] DEBUG: Processing command: 9af35c08-dce8-45cf-9d6a-e0abdff3ce20
+[2025-12-21T15:10:09.154Z] DEBUG: Processing command: 9e1242ac-e620-45ce-9974-9d4fc4d65e11
+[2025-12-21T15:10:09.156Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:09.161Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:09.161Z] DEBUG: Command read_co2_data executed successfully (commandId: 9e1242ac-e620-45ce-9974-9d4fc4d65e11)
+[2025-12-21T15:10:09.161Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 5ms
+[2025-12-21T15:10:12.247Z] DEBUG: Processing command: 2fab0751-5460-43cc-8a5e-26d527485c65
+[2025-12-21T15:10:12.248Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:12.251Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:12.251Z] DEBUG: Command read_temperature_data executed successfully (commandId: 2fab0751-5460-43cc-8a5e-26d527485c65)
+[2025-12-21T15:10:12.251Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T15:10:12.566Z] DEBUG: Processing command: a8cbe842-2ff5-4a16-b0b3-f9986e302a5a
+[2025-12-21T15:10:12.775Z] DEBUG: Processing command: 6ccb1d62-62cc-4736-928b-06d8c98ec14f
+[2025-12-21T15:10:12.948Z] DEBUG: Processing command: f63f2c7a-808b-4ac8-828f-d0ab0095081a
+[2025-12-21T15:10:13.122Z] DEBUG: Processing command: 7cdc03f2-455f-4d63-bc24-0fbbe1549a34
+[2025-12-21T15:10:16.017Z] DEBUG: Processing command: a4b8a8f9-e7bb-4fd2-bbfd-40f2464da857
+[2025-12-21T15:10:16.018Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:16.021Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:16.021Z] DEBUG: Command switch_actuator executed successfully (commandId: a4b8a8f9-e7bb-4fd2-bbfd-40f2464da857)
+[2025-12-21T15:10:16.021Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 3ms
+[2025-12-21T15:10:16.239Z] DEBUG: Processing command: 454836b8-89db-433d-98e0-2d25156b1b80
+[2025-12-21T15:10:16.239Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:16.242Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:16.242Z] DEBUG: Command switch_actuator executed successfully (commandId: 454836b8-89db-433d-98e0-2d25156b1b80)
+[2025-12-21T15:10:16.242Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 3ms
+[2025-12-21T15:10:16.426Z] DEBUG: Processing command: 377fe6b8-d128-4453-8e44-9cb819134415
+[2025-12-21T15:10:16.426Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:16.428Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:16.429Z] DEBUG: Command switch_actuator executed successfully (commandId: 377fe6b8-d128-4453-8e44-9cb819134415)
+[2025-12-21T15:10:16.429Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 3ms
+[2025-12-21T15:10:17.244Z] DEBUG: Processing command: df677faf-3865-4155-a59c-5d3c0660c76a
+[2025-12-21T15:10:17.244Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:10:17.247Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:10:17.247Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: df677faf-3865-4155-a59c-5d3c0660c76a)
+[2025-12-21T15:10:17.248Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 3ms
+[2025-12-21T15:10:17.569Z] DEBUG: Processing command: 54aa873c-8e52-4f6a-974c-84bdc748403d
+[2025-12-21T15:10:17.741Z] DEBUG: Processing command: 17ce9130-7753-4f3e-98d3-de009a11b9b0
+
+
+=== Backend Restarted: 2025-12-21T15:13:34.179Z ===
+
+[2025-12-21T15:13:34.355Z] INFO: Redis Client Connected
+[2025-12-21T15:13:34.358Z] INFO: Redis Client Ready
+[2025-12-21T15:13:34.358Z] INFO: Redis connected
+[2025-12-21T15:13:34.418Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:13:34.419Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:13:34.419Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:13:34.425Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:13:34.425Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:13:34.425Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:13:34.427Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:13:34.427Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:13:39.428Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:13:39.430Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:13:39.484Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:13:42.673Z] DEBUG: Processing command: 802a58b6-2e0c-4cbb-9690-deecb16af409
+[2025-12-21T15:13:42.674Z] DEBUG: [Session 1] Session started - ID: 35b1463c-77af-4267-bd7d-08de4265aa88
+[2025-12-21T15:13:42.674Z] INFO: Created new session: 35b1463c-77af-4267-bd7d-08de4265aa88 (session_1.log)
+[2025-12-21T15:13:42.676Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:13:42.691Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:13:42.691Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 802a58b6-2e0c-4cbb-9690-deecb16af409)
+[2025-12-21T15:13:42.692Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 16ms
+[2025-12-21T15:13:44.141Z] DEBUG: Processing command: 31d6a825-d9bd-4055-8cd5-2e1bf43f9c01
+[2025-12-21T15:13:44.142Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:13:44.147Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:13:44.147Z] DEBUG: Command read_temperature_data executed successfully (commandId: 31d6a825-d9bd-4055-8cd5-2e1bf43f9c01)
+[2025-12-21T15:13:44.147Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 5ms
+
+
+=== Backend Restarted: 2025-12-21T15:15:09.014Z ===
+
+[2025-12-21T15:15:09.189Z] INFO: Redis Client Connected
+[2025-12-21T15:15:09.192Z] INFO: Redis Client Ready
+[2025-12-21T15:15:09.193Z] INFO: Redis connected
+[2025-12-21T15:15:09.251Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:15:09.252Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:15:09.252Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:15:09.260Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:15:09.261Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:15:09.261Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:15:09.263Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:15:09.263Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:15:14.263Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:15:14.266Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:15:14.343Z] DEBUG: Processing command: 431abede-34f2-4851-aa9f-bb4e51ca4b55
+[2025-12-21T15:15:14.344Z] DEBUG: [Session 1] Session started - ID: 3a249839-9129-4fe7-9f19-22ba53f9fb61
+[2025-12-21T15:15:14.344Z] INFO: Created new session: 3a249839-9129-4fe7-9f19-22ba53f9fb61 (session_1.log)
+[2025-12-21T15:15:14.345Z] DEBUG: Processing command: b289536a-8dcf-4925-92de-1a4a736ce4bc
+[2025-12-21T15:15:14.345Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:15:14.346Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:15:14.358Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:15:14.358Z] DEBUG: Command switch_actuator executed successfully (commandId: 431abede-34f2-4851-aa9f-bb4e51ca4b55)
+[2025-12-21T15:15:14.358Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 13ms
+[2025-12-21T15:15:14.360Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:15:14.364Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:15:14.364Z] DEBUG: Command read_co2_data executed successfully (commandId: b289536a-8dcf-4925-92de-1a4a736ce4bc)
+[2025-12-21T15:15:14.364Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 4ms
+[2025-12-21T15:15:15.366Z] DEBUG: Processing command: 9be41c5f-9a37-49de-b2b6-23a6da6a3de7
+[2025-12-21T15:15:15.367Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:15:15.371Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:15:15.371Z] DEBUG: Command read_temperature_data executed successfully (commandId: 9be41c5f-9a37-49de-b2b6-23a6da6a3de7)
+[2025-12-21T15:15:15.371Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T15:15:16.060Z] DEBUG: Processing command: 547b0845-913d-4b9a-b894-9796200c0e7e
+[2025-12-21T15:15:16.062Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:15:16.073Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:15:16.073Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 547b0845-913d-4b9a-b894-9796200c0e7e)
+[2025-12-21T15:15:16.073Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 12ms
+
+
+=== Backend Restarted: 2025-12-21T15:17:48.882Z ===
+
+[2025-12-21T15:17:49.100Z] INFO: Redis Client Connected
+[2025-12-21T15:17:49.105Z] INFO: Redis Client Ready
+[2025-12-21T15:17:49.105Z] INFO: Redis connected
+[2025-12-21T15:17:49.178Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:17:49.178Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:17:49.179Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:17:49.188Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:17:49.188Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:17:49.188Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:17:49.190Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:17:49.190Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:17:54.190Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:17:54.191Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:17:54.246Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:17:54.496Z] DEBUG: Processing command: 36adfed3-f8c2-47ed-b1d2-8394e0e51634
+[2025-12-21T15:17:54.497Z] DEBUG: [Session 1] Session started - ID: ef81d96a-3d4f-49fc-b601-79994140a102
+[2025-12-21T15:17:54.497Z] INFO: Created new session: ef81d96a-3d4f-49fc-b601-79994140a102 (session_1.log)
+[2025-12-21T15:17:54.499Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:17:54.512Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:17:54.512Z] DEBUG: Command read_temperature_data executed successfully (commandId: 36adfed3-f8c2-47ed-b1d2-8394e0e51634)
+[2025-12-21T15:17:54.512Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 13ms
+[2025-12-21T15:17:55.667Z] DEBUG: Processing command: b4ceb388-3e86-4079-80de-2cb9857fcfc1
+[2025-12-21T15:17:56.508Z] DEBUG: Processing command: 32785187-9394-44b7-98fb-4a5d9074d1a1
+[2025-12-21T15:17:56.509Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:17:56.515Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:17:56.515Z] DEBUG: Command read_co2_data executed successfully (commandId: 32785187-9394-44b7-98fb-4a5d9074d1a1)
+[2025-12-21T15:17:56.515Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 7ms
+[2025-12-21T15:17:57.032Z] DEBUG: Processing command: 829032a6-dc7c-4dfd-97ec-a4530454258a
+[2025-12-21T15:17:57.034Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:17:57.039Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:17:57.039Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 829032a6-dc7c-4dfd-97ec-a4530454258a)
+[2025-12-21T15:17:57.039Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 5ms
+[2025-12-21T15:18:00.713Z] DEBUG: Processing command: 6f4d6b62-7b30-4555-80a8-e9aff359c4cc
+[2025-12-21T15:18:00.715Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:00.720Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:00.720Z] DEBUG: Command read_temperature_data executed successfully (commandId: 6f4d6b62-7b30-4555-80a8-e9aff359c4cc)
+[2025-12-21T15:18:00.721Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 6ms
+[2025-12-21T15:18:01.195Z] DEBUG: Processing command: 2f1bbb1e-5b5d-4206-8657-9133e7b729fc
+[2025-12-21T15:18:01.196Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:01.201Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:01.201Z] DEBUG: Command read_light_data executed successfully (commandId: 2f1bbb1e-5b5d-4206-8657-9133e7b729fc)
+[2025-12-21T15:18:01.201Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 5ms
+[2025-12-21T15:18:01.354Z] DEBUG: Processing command: 43d185f2-de87-4b1b-9b4b-16c6d0d01be0
+[2025-12-21T15:18:01.500Z] DEBUG: Processing command: dda18366-d85c-4671-a559-b473944a2e9c
+[2025-12-21T15:18:01.673Z] DEBUG: Processing command: 4d32d280-1c18-4b59-b498-5f5802761f56
+[2025-12-21T15:18:02.186Z] DEBUG: Processing command: 6f87a3d9-6751-4d12-a550-905b1e431fd2
+[2025-12-21T15:18:02.187Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:02.190Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:02.190Z] DEBUG: Command read_humidity_data executed successfully (commandId: 6f87a3d9-6751-4d12-a550-905b1e431fd2)
+[2025-12-21T15:18:02.190Z] DEBUG: [Session 1] Greenhouse command read_humidity_data succeeded in 3ms
+[2025-12-21T15:18:02.352Z] DEBUG: Processing command: 061c4ec2-433e-4015-b1ef-0933ffb5badf
+[2025-12-21T15:18:02.505Z] DEBUG: Processing command: b6fd5e8b-56be-4563-aff5-be190aee5363
+[2025-12-21T15:18:05.002Z] DEBUG: Processing command: 36ccf75b-f6b6-4445-b0bd-b3fe7515d5c8
+[2025-12-21T15:18:07.725Z] DEBUG: Processing command: 81229f48-bc91-4b7f-9f11-781a2b3379d0
+[2025-12-21T15:18:07.726Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:07.731Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:07.731Z] DEBUG: Command read_temperature_data executed successfully (commandId: 81229f48-bc91-4b7f-9f11-781a2b3379d0)
+[2025-12-21T15:18:07.732Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 6ms
+[2025-12-21T15:18:07.871Z] DEBUG: Processing command: 9277d8a4-e6f4-4b67-9871-a47ca13a9261
+[2025-12-21T15:18:24.104Z] DEBUG: Processing command: 50f33898-84a4-4d7c-aa08-3f4e62dfd0fc
+[2025-12-21T15:18:24.105Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:24.112Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:24.112Z] DEBUG: Command switch_fan executed successfully (commandId: 50f33898-84a4-4d7c-aa08-3f4e62dfd0fc)
+[2025-12-21T15:18:24.112Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 8ms
+[2025-12-21T15:18:29.227Z] DEBUG: Processing command: cd56b261-74f3-4239-99f6-c73dbb369dc9
+[2025-12-21T15:18:29.227Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:29.232Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:29.232Z] DEBUG: Command switch_water_canal executed successfully (commandId: cd56b261-74f3-4239-99f6-c73dbb369dc9)
+[2025-12-21T15:18:29.232Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 5ms
+[2025-12-21T15:18:29.566Z] DEBUG: Processing command: 92e4731f-f838-4dc0-98e5-bb7e5b450457
+[2025-12-21T15:18:29.567Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:29.571Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:29.571Z] DEBUG: Command read_temperature_data executed successfully (commandId: 92e4731f-f838-4dc0-98e5-bb7e5b450457)
+[2025-12-21T15:18:29.571Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T15:18:30.058Z] DEBUG: Processing command: cef3cc62-f8db-44fd-ac53-d4c678fd0f98
+[2025-12-21T15:18:30.059Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:30.061Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:30.062Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: cef3cc62-f8db-44fd-ac53-d4c678fd0f98)
+[2025-12-21T15:18:30.062Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T15:18:30.613Z] DEBUG: Processing command: 08089231-6930-4b3f-afcf-a91d17f7cb10
+[2025-12-21T15:18:30.614Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:30.617Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:30.618Z] DEBUG: Command read_co2_data executed successfully (commandId: 08089231-6930-4b3f-afcf-a91d17f7cb10)
+[2025-12-21T15:18:30.618Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 5ms
+[2025-12-21T15:18:31.159Z] DEBUG: Processing command: 7d3bddf0-4812-4642-9944-797de08cc9fc
+[2025-12-21T15:18:31.160Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:31.164Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:31.164Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 7d3bddf0-4812-4642-9944-797de08cc9fc)
+[2025-12-21T15:18:31.164Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 5ms
+[2025-12-21T15:18:31.846Z] DEBUG: Processing command: fa0d6607-ca28-471c-9540-6fc7813b9f05
+[2025-12-21T15:18:31.847Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:18:31.850Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:18:31.850Z] DEBUG: Command read_humidity_data executed successfully (commandId: fa0d6607-ca28-471c-9540-6fc7813b9f05)
+[2025-12-21T15:18:31.850Z] DEBUG: [Session 1] Greenhouse command read_humidity_data succeeded in 3ms
+[2025-12-21T15:18:32.427Z] DEBUG: Processing command: c1516ac6-9f97-41d9-8676-10de4fe9b2f9
+[2025-12-21T15:18:48.100Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-21T15:18:48.102Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-21T15:18:48.102Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-21T15:18:48.102Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-21T15:18:48.103Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-21T15:18:48.103Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-21T15:18:48.104Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-21T15:18:48.104Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-21T15:18:48.107Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-21T15:18:48.108Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-21T15:18:48.108Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-21T15:18:48.109Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-21T15:18:48.112Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-21T15:18:48.114Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-21T15:18:48.121Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-21T15:18:48.121Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-21T15:18:48.124Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-21T15:18:48.125Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-21T15:18:48.129Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-21T15:18:48.132Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-21T15:18:48.133Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-21T15:18:48.134Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-21T15:18:48.136Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-21T15:18:48.138Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+
+
+=== Backend Restarted: 2025-12-21T15:19:36.333Z ===
+
+[2025-12-21T15:19:36.516Z] INFO: Redis Client Connected
+[2025-12-21T15:19:36.520Z] INFO: Redis Client Ready
+[2025-12-21T15:19:36.520Z] INFO: Redis connected
+[2025-12-21T15:19:36.569Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:19:36.569Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:19:36.570Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:19:36.578Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:19:36.578Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:19:36.578Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:19:36.581Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T15:19:36.581Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T15:19:41.582Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:19:41.583Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:19:41.641Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:19:46.899Z] DEBUG: Processing command: 0e098e5e-677b-4fd4-b592-7f66b509875e
+[2025-12-21T15:19:46.900Z] DEBUG: [Session 1] Session started - ID: b2db44f3-fb7c-4b2c-9577-33018205680b
+[2025-12-21T15:19:46.900Z] INFO: Created new session: b2db44f3-fb7c-4b2c-9577-33018205680b (session_1.log)
+[2025-12-21T15:19:46.902Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:46.914Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:46.914Z] DEBUG: Command read_co2_data executed successfully (commandId: 0e098e5e-677b-4fd4-b592-7f66b509875e)
+[2025-12-21T15:19:46.915Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 13ms
+[2025-12-21T15:19:47.424Z] DEBUG: Processing command: 777fe825-1379-460c-ac2f-45db1072dd60
+[2025-12-21T15:19:47.426Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:47.435Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:47.435Z] DEBUG: Command read_temperature_data executed successfully (commandId: 777fe825-1379-460c-ac2f-45db1072dd60)
+[2025-12-21T15:19:47.435Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 9ms
+[2025-12-21T15:19:48.053Z] DEBUG: Processing command: 653903ee-90ef-46c4-8d11-a889d7fe18d3
+[2025-12-21T15:19:50.276Z] DEBUG: Processing command: 716efd73-8ada-44cf-a8fb-d2651e0f2aec
+[2025-12-21T15:19:50.711Z] DEBUG: Processing command: 33f91c30-77ba-4776-80d7-0071cbbc4691
+[2025-12-21T15:19:50.711Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:50.716Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:50.716Z] DEBUG: Command switch_actuator executed successfully (commandId: 33f91c30-77ba-4776-80d7-0071cbbc4691)
+[2025-12-21T15:19:50.716Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 5ms
+[2025-12-21T15:19:51.023Z] DEBUG: Processing command: 44b41a5f-4d44-4b16-be09-d577ad4aef0a
+[2025-12-21T15:19:51.023Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:51.027Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:51.028Z] DEBUG: Command switch_actuator executed successfully (commandId: 44b41a5f-4d44-4b16-be09-d577ad4aef0a)
+[2025-12-21T15:19:51.028Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 5ms
+[2025-12-21T15:19:51.196Z] DEBUG: Processing command: 08dedf18-6869-478e-8a30-28fdc99352e6
+[2025-12-21T15:19:51.196Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:51.200Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:51.200Z] DEBUG: Command switch_actuator executed successfully (commandId: 08dedf18-6869-478e-8a30-28fdc99352e6)
+[2025-12-21T15:19:51.201Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 4ms
+[2025-12-21T15:19:51.344Z] DEBUG: Processing command: c129c82b-7d3c-47ca-a3c6-9282d94e2288
+[2025-12-21T15:19:51.345Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:51.348Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:51.348Z] DEBUG: Command switch_actuator executed successfully (commandId: c129c82b-7d3c-47ca-a3c6-9282d94e2288)
+[2025-12-21T15:19:51.349Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 3ms
+[2025-12-21T15:19:57.589Z] DEBUG: Processing command: 9e425b26-b7ba-4509-9e77-0bc026267ec6
+[2025-12-21T15:19:57.589Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:57.593Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:57.593Z] DEBUG: Command switch_fan executed successfully (commandId: 9e425b26-b7ba-4509-9e77-0bc026267ec6)
+[2025-12-21T15:19:57.593Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T15:19:57.782Z] DEBUG: Processing command: 209e09e5-932f-4f76-9098-5d1683420e95
+[2025-12-21T15:19:57.782Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:57.787Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:57.787Z] DEBUG: Command switch_fan executed successfully (commandId: 209e09e5-932f-4f76-9098-5d1683420e95)
+[2025-12-21T15:19:57.787Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T15:19:58.288Z] DEBUG: Processing command: 23135416-9818-4f07-8371-b85f0592ec06
+[2025-12-21T15:19:58.289Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:58.294Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:58.295Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 23135416-9818-4f07-8371-b85f0592ec06)
+[2025-12-21T15:19:58.295Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 6ms
+[2025-12-21T15:19:58.593Z] DEBUG: Processing command: 41aa2468-a58c-42b3-ab74-3e8a69769b1c
+[2025-12-21T15:19:58.593Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:58.597Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:58.598Z] DEBUG: Command read_co2_data executed successfully (commandId: 41aa2468-a58c-42b3-ab74-3e8a69769b1c)
+[2025-12-21T15:19:58.598Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 5ms
+[2025-12-21T15:19:58.882Z] DEBUG: Processing command: 288cad78-f205-47df-abc9-55a1bfcdd2b0
+[2025-12-21T15:19:58.883Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:19:58.887Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:19:58.887Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 288cad78-f205-47df-abc9-55a1bfcdd2b0)
+[2025-12-21T15:19:58.887Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 4ms
+[2025-12-21T15:19:59.258Z] DEBUG: Processing command: bb7584e1-2bf8-4802-8695-6827a70a3e13
+[2025-12-21T15:20:05.349Z] DEBUG: Processing command: f514c23b-2980-4540-b9dc-380c210ddeda
+[2025-12-21T15:20:05.350Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:05.354Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:05.355Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: f514c23b-2980-4540-b9dc-380c210ddeda)
+[2025-12-21T15:20:05.355Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 6ms
+[2025-12-21T15:20:05.508Z] DEBUG: Processing command: 46833465-ac9f-4558-8b04-87093f900c67
+[2025-12-21T15:20:05.695Z] DEBUG: Processing command: 37996a3f-f13e-424b-9116-4b68b8e509dc
+[2025-12-21T15:20:05.889Z] DEBUG: Processing command: b411f18c-c36e-4e94-859e-f16f2e93137e
+[2025-12-21T15:20:06.174Z] DEBUG: Processing command: 13714e98-5fbc-468e-a264-5312e823b56e
+[2025-12-21T15:20:06.175Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:06.179Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:06.179Z] DEBUG: Command read_co2_data executed successfully (commandId: 13714e98-5fbc-468e-a264-5312e823b56e)
+[2025-12-21T15:20:06.179Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 4ms
+[2025-12-21T15:20:06.977Z] DEBUG: Processing command: fb61fcfa-f088-4e7f-94be-34cd03225d7d
+[2025-12-21T15:20:06.977Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:06.983Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:06.983Z] DEBUG: Command switch_water_canal executed successfully (commandId: fb61fcfa-f088-4e7f-94be-34cd03225d7d)
+[2025-12-21T15:20:06.984Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 6ms
+[2025-12-21T15:20:14.369Z] DEBUG: Processing command: c9712524-6655-404b-ad11-5379c9d1dc20
+[2025-12-21T15:20:14.370Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:14.376Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:14.376Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: c9712524-6655-404b-ad11-5379c9d1dc20)
+[2025-12-21T15:20:14.376Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 6ms
+[2025-12-21T15:20:14.515Z] DEBUG: Processing command: 7a5160aa-ae7b-45e3-a2da-66c366f2317b
+[2025-12-21T15:20:14.757Z] DEBUG: Processing command: 4a8c87b4-8fbb-482e-bc5f-bfc1cf2d56c8
+[2025-12-21T15:20:14.758Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:14.761Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:14.761Z] DEBUG: Command read_temperature_data executed successfully (commandId: 4a8c87b4-8fbb-482e-bc5f-bfc1cf2d56c8)
+[2025-12-21T15:20:14.761Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T15:20:14.938Z] DEBUG: Processing command: 41473abf-266d-45cf-b284-c51dcc04424f
+[2025-12-21T15:20:15.152Z] DEBUG: Processing command: 3d38b15d-8c07-49a7-a780-60b7a8d34815
+[2025-12-21T15:20:15.466Z] DEBUG: Processing command: 563e67ed-3da4-4c48-b042-4c7d237ee180
+[2025-12-21T15:20:15.466Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:15.470Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:15.470Z] DEBUG: Command switch_fan executed successfully (commandId: 563e67ed-3da4-4c48-b042-4c7d237ee180)
+[2025-12-21T15:20:15.470Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T15:20:15.631Z] DEBUG: Processing command: 4a9c1383-c087-47b0-8bed-0a6d4b42e3cb
+[2025-12-21T15:20:15.632Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:15.635Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:15.635Z] DEBUG: Command switch_actuator executed successfully (commandId: 4a9c1383-c087-47b0-8bed-0a6d4b42e3cb)
+[2025-12-21T15:20:15.635Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 4ms
+[2025-12-21T15:20:15.944Z] DEBUG: Processing command: fdc621ad-cd05-41b0-bc84-de818cfdf930
+[2025-12-21T15:20:15.945Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:15.948Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:15.949Z] DEBUG: Command switch_fan executed successfully (commandId: fdc621ad-cd05-41b0-bc84-de818cfdf930)
+[2025-12-21T15:20:15.949Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T15:20:16.118Z] DEBUG: Processing command: 4f0ae7ca-a5ea-439d-b1f4-f67cdbbc0099
+[2025-12-21T15:20:16.118Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:16.121Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:16.121Z] DEBUG: Command switch_water_canal executed successfully (commandId: 4f0ae7ca-a5ea-439d-b1f4-f67cdbbc0099)
+[2025-12-21T15:20:16.121Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 3ms
+[2025-12-21T15:20:16.298Z] DEBUG: Processing command: 34b75471-4d72-414b-9f0a-59aa3289ee9f
+[2025-12-21T15:20:16.298Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:16.302Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:16.302Z] DEBUG: Command switch_water_canal executed successfully (commandId: 34b75471-4d72-414b-9f0a-59aa3289ee9f)
+[2025-12-21T15:20:16.302Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 4ms
+[2025-12-21T15:20:16.630Z] DEBUG: Processing command: 180cf164-54e9-48e6-a3a9-5453e5c28d2f
+[2025-12-21T15:20:16.631Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:20:16.634Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:20:16.634Z] DEBUG: Command read_light_data executed successfully (commandId: 180cf164-54e9-48e6-a3a9-5453e5c28d2f)
+[2025-12-21T15:20:16.634Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 3ms
+[2025-12-21T15:20:16.789Z] DEBUG: Processing command: 1d3a2f66-cccb-4cdf-97c1-10395e344777
+[2025-12-21T15:20:16.999Z] DEBUG: Processing command: 906713e5-35d2-43b0-9110-13d79232e229
+
+
+=== Backend Restarted: 2025-12-21T15:21:55.752Z ===
+
+[2025-12-21T15:21:55.969Z] INFO: Redis Client Connected
+[2025-12-21T15:21:55.972Z] INFO: Redis Client Ready
+[2025-12-21T15:21:55.973Z] INFO: Redis connected
+[2025-12-21T15:21:56.031Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:21:56.031Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:21:56.032Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:21:56.037Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:21:56.037Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:21:56.037Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:21:56.038Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T15:21:56.038Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T15:22:01.039Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:22:01.042Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:22:01.102Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:22:04.574Z] DEBUG: Processing command: cd668d54-ba69-4d5f-a7c1-834bc29dc2c0
+[2025-12-21T15:22:04.575Z] DEBUG: [Session 1] Session started - ID: ba3168fd-8a11-4e94-96d2-86e75d603d27
+[2025-12-21T15:22:04.575Z] INFO: Created new session: ba3168fd-8a11-4e94-96d2-86e75d603d27 (session_1.log)
+[2025-12-21T15:22:04.577Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:04.590Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:04.591Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: cd668d54-ba69-4d5f-a7c1-834bc29dc2c0)
+[2025-12-21T15:22:04.591Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 14ms
+[2025-12-21T15:22:05.523Z] DEBUG: Processing command: 1e41d063-63a6-4228-98be-8125a07e59e0
+[2025-12-21T15:22:06.444Z] DEBUG: Processing command: 6e1930a2-1576-4478-8c28-0fe97ce53105
+[2025-12-21T15:22:06.445Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:06.450Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:06.450Z] DEBUG: Command read_temperature_data executed successfully (commandId: 6e1930a2-1576-4478-8c28-0fe97ce53105)
+[2025-12-21T15:22:06.450Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 5ms
+[2025-12-21T15:22:06.810Z] DEBUG: Processing command: cf61f415-3a53-4e14-b0e9-ed623ca16ae2
+[2025-12-21T15:22:07.380Z] DEBUG: Processing command: 77f944e7-87d7-48fe-86d5-8de91fc5140d
+[2025-12-21T15:22:09.971Z] DEBUG: Processing command: e684d779-ad18-4078-874d-0e8aba2e8a5b
+[2025-12-21T15:22:09.972Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:09.976Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:09.976Z] DEBUG: Command read_co2_data executed successfully (commandId: e684d779-ad18-4078-874d-0e8aba2e8a5b)
+[2025-12-21T15:22:09.976Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 4ms
+[2025-12-21T15:22:10.124Z] DEBUG: Processing command: 8a207fe9-ad04-4e7c-848d-e1c7a9749359
+[2025-12-21T15:22:10.277Z] DEBUG: Processing command: c8a43c4d-27e7-4874-86a5-b351410ebe4c
+[2025-12-21T15:22:23.725Z] DEBUG: Processing command: 4f6adcbf-6cee-48cb-82da-5f1ee7e6aed0
+[2025-12-21T15:22:23.726Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:23.732Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:23.732Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 4f6adcbf-6cee-48cb-82da-5f1ee7e6aed0)
+[2025-12-21T15:22:23.732Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 6ms
+[2025-12-21T15:22:24.038Z] DEBUG: Processing command: b42f8aa0-8e8b-44f6-9819-6776725f64f4
+[2025-12-21T15:22:24.039Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:24.042Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:24.042Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: b42f8aa0-8e8b-44f6-9819-6776725f64f4)
+[2025-12-21T15:22:24.042Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 3ms
+[2025-12-21T15:22:24.390Z] DEBUG: Processing command: 662c44e5-c7a8-43a7-b74c-b9159c2477bf
+[2025-12-21T15:22:24.391Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:24.394Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:24.394Z] DEBUG: Command read_temperature_data executed successfully (commandId: 662c44e5-c7a8-43a7-b74c-b9159c2477bf)
+[2025-12-21T15:22:24.394Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T15:22:24.688Z] DEBUG: Processing command: c2764258-832e-42bf-9f94-166a2306b769
+[2025-12-21T15:22:24.688Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:24.692Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:24.693Z] DEBUG: Command switch_water_canal executed successfully (commandId: c2764258-832e-42bf-9f94-166a2306b769)
+[2025-12-21T15:22:24.693Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 5ms
+[2025-12-21T15:22:25.186Z] DEBUG: Processing command: 1775ff93-35ff-4552-8b47-bbebfd3c3888
+[2025-12-21T15:22:25.187Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:25.193Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:25.193Z] DEBUG: Command switch_heater executed successfully (commandId: 1775ff93-35ff-4552-8b47-bbebfd3c3888)
+[2025-12-21T15:22:25.193Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 6ms
+[2025-12-21T15:22:25.511Z] DEBUG: Processing command: 85d7ee29-0d8e-4a37-8603-986eaaf1c0d9
+[2025-12-21T15:22:25.512Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:25.516Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:25.516Z] DEBUG: Command switch_actuator executed successfully (commandId: 85d7ee29-0d8e-4a37-8603-986eaaf1c0d9)
+[2025-12-21T15:22:25.516Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 4ms
+[2025-12-21T15:22:34.018Z] DEBUG: Processing command: 8bd1adc0-9820-4742-b8db-0b2e9a95aa53
+[2025-12-21T15:22:34.019Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:34.030Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:34.037Z] DEBUG: Command switch_actuator executed successfully (commandId: 8bd1adc0-9820-4742-b8db-0b2e9a95aa53)
+[2025-12-21T15:22:34.037Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 18ms
+[2025-12-21T15:22:34.170Z] DEBUG: Processing command: 608a85d2-acab-4b19-b119-81b7bbce2054
+[2025-12-21T15:22:34.170Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:34.175Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:34.175Z] DEBUG: Command switch_actuator executed successfully (commandId: 608a85d2-acab-4b19-b119-81b7bbce2054)
+[2025-12-21T15:22:34.175Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 5ms
+[2025-12-21T15:22:34.509Z] DEBUG: Processing command: 12adac7e-23be-49da-8966-8b9ca5727c6f
+[2025-12-21T15:22:34.510Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:34.514Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:34.514Z] DEBUG: Command switch_fan executed successfully (commandId: 12adac7e-23be-49da-8966-8b9ca5727c6f)
+[2025-12-21T15:22:34.514Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T15:22:34.677Z] DEBUG: Processing command: faa6e982-7129-4674-8f99-20d2387454b9
+[2025-12-21T15:22:34.677Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:34.681Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:34.681Z] DEBUG: Command switch_fan executed successfully (commandId: faa6e982-7129-4674-8f99-20d2387454b9)
+[2025-12-21T15:22:34.682Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T15:22:35.414Z] DEBUG: Processing command: d2105899-68b2-4a52-aaf0-a5a88b064733
+[2025-12-21T15:22:35.414Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:35.418Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:35.418Z] DEBUG: Command switch_heater executed successfully (commandId: d2105899-68b2-4a52-aaf0-a5a88b064733)
+[2025-12-21T15:22:35.418Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 4ms
+[2025-12-21T15:22:35.588Z] DEBUG: Processing command: a496e514-fb76-4d56-8d11-09d22802e583
+[2025-12-21T15:22:35.588Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:35.592Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:35.592Z] DEBUG: Command switch_heater executed successfully (commandId: a496e514-fb76-4d56-8d11-09d22802e583)
+[2025-12-21T15:22:35.592Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 4ms
+[2025-12-21T15:22:36.017Z] DEBUG: Processing command: d88365df-a51f-4ab7-baaf-a13eb933ce3a
+[2025-12-21T15:22:36.017Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:36.021Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:36.021Z] DEBUG: Command switch_water_canal executed successfully (commandId: d88365df-a51f-4ab7-baaf-a13eb933ce3a)
+[2025-12-21T15:22:36.021Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 4ms
+[2025-12-21T15:22:36.184Z] DEBUG: Processing command: 070ab729-c45c-4dea-a1b7-23da58ad585d
+[2025-12-21T15:22:36.184Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:36.188Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:36.188Z] DEBUG: Command switch_water_canal executed successfully (commandId: 070ab729-c45c-4dea-a1b7-23da58ad585d)
+[2025-12-21T15:22:36.188Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 4ms
+[2025-12-21T15:22:36.518Z] DEBUG: Processing command: cba821ed-e829-47aa-a6df-06c9ff31a371
+[2025-12-21T15:22:36.519Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:36.523Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:36.523Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: cba821ed-e829-47aa-a6df-06c9ff31a371)
+[2025-12-21T15:22:36.523Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T15:22:36.657Z] DEBUG: Processing command: c917fd5b-b650-4b2d-8c39-85ba5869461e
+[2025-12-21T15:22:36.969Z] DEBUG: Processing command: 26401f2f-6d5e-4dd7-8ff6-df4590e4b23e
+[2025-12-21T15:22:36.970Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:36.974Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:36.975Z] DEBUG: Command read_co2_data executed successfully (commandId: 26401f2f-6d5e-4dd7-8ff6-df4590e4b23e)
+[2025-12-21T15:22:36.975Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 5ms
+[2025-12-21T15:22:37.122Z] DEBUG: Processing command: 9181ae30-c775-4a31-93f0-ae1326cd9c9e
+[2025-12-21T15:22:37.531Z] DEBUG: Processing command: d15b7c14-4632-4f89-b809-04e9dbaf48fb
+[2025-12-21T15:22:37.532Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:37.535Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:37.535Z] DEBUG: Command read_temperature_data executed successfully (commandId: d15b7c14-4632-4f89-b809-04e9dbaf48fb)
+[2025-12-21T15:22:37.535Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T15:22:37.669Z] DEBUG: Processing command: b9b831b3-079c-42f0-932b-0261eb045ef7
+[2025-12-21T15:22:38.037Z] DEBUG: Processing command: 5fb4dc4f-c624-48c7-9512-7705906020db
+[2025-12-21T15:22:38.196Z] DEBUG: Processing command: fe663f74-39bf-49ee-bf2d-4b89fd20423b
+[2025-12-21T15:22:38.558Z] DEBUG: Processing command: ba1353a1-6721-408d-8364-887ff2da021e
+[2025-12-21T15:22:38.558Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:38.562Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:38.562Z] DEBUG: Command read_humidity_data executed successfully (commandId: ba1353a1-6721-408d-8364-887ff2da021e)
+[2025-12-21T15:22:38.562Z] DEBUG: [Session 1] Greenhouse command read_humidity_data succeeded in 4ms
+[2025-12-21T15:22:38.704Z] DEBUG: Processing command: 3521c680-3ed6-4e4e-82fc-642b1564a54d
+[2025-12-21T15:22:39.045Z] DEBUG: Processing command: 79ac07da-a361-4159-9cc0-369ca76f6aa7
+[2025-12-21T15:22:39.045Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:39.048Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:39.049Z] DEBUG: Command read_light_data executed successfully (commandId: 79ac07da-a361-4159-9cc0-369ca76f6aa7)
+[2025-12-21T15:22:39.049Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 4ms
+[2025-12-21T15:22:39.177Z] DEBUG: Processing command: e547d447-7b89-43e9-8ba2-57fdf5033a81
+[2025-12-21T15:22:39.531Z] DEBUG: Processing command: 1fe457d2-58f6-4415-b9f5-b4c5d040f430
+[2025-12-21T15:22:39.532Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:22:39.536Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:22:39.536Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 1fe457d2-58f6-4415-b9f5-b4c5d040f430)
+[2025-12-21T15:22:39.536Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 4ms
+[2025-12-21T15:22:39.698Z] DEBUG: Processing command: 3f700d4c-f33c-4d4a-8540-a13832efa3df
+[2025-12-21T15:22:55.093Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-21T15:22:55.097Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-21T15:22:55.098Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-21T15:22:55.098Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-21T15:22:55.099Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-21T15:22:55.099Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-21T15:22:55.100Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-21T15:22:55.100Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-21T15:22:55.103Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-21T15:22:55.104Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-21T15:22:55.105Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-21T15:22:55.107Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-21T15:22:55.109Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-21T15:22:55.110Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-21T15:22:55.113Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-21T15:22:55.115Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-21T15:22:55.119Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-21T15:22:55.124Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-21T15:22:55.125Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-21T15:22:55.125Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-21T15:22:55.126Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-21T15:22:55.129Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-21T15:22:55.132Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-21T15:22:55.134Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+
+
+=== Backend Restarted: 2025-12-21T15:23:50.430Z ===
+
+[2025-12-21T15:23:50.612Z] INFO: Redis Client Connected
+[2025-12-21T15:23:50.616Z] INFO: Redis Client Ready
+[2025-12-21T15:23:50.616Z] INFO: Redis connected
+[2025-12-21T15:23:50.683Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:23:50.684Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:23:50.684Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:23:50.693Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:23:50.693Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:23:50.693Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:23:50.695Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T15:23:50.696Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T15:23:55.695Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:23:55.696Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:23:55.753Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:23:56.365Z] DEBUG: Processing command: cb7cb1aa-86c0-452f-845c-c3e91eacd62e
+[2025-12-21T15:23:56.366Z] DEBUG: [Session 1] Session started - ID: 86c61ea7-1729-44e7-8c2a-c78a92efef67
+[2025-12-21T15:23:56.366Z] INFO: Created new session: 86c61ea7-1729-44e7-8c2a-c78a92efef67 (session_1.log)
+[2025-12-21T15:23:56.368Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:23:56.381Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:23:56.381Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: cb7cb1aa-86c0-452f-845c-c3e91eacd62e)
+[2025-12-21T15:23:56.381Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 13ms
+[2025-12-21T15:23:57.770Z] DEBUG: Processing command: 6921a9d5-2052-41ac-b802-5a61fe0e0039
+[2025-12-21T15:23:57.771Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:23:57.774Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:23:57.775Z] DEBUG: Command read_co2_data executed successfully (commandId: 6921a9d5-2052-41ac-b802-5a61fe0e0039)
+[2025-12-21T15:23:57.775Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 4ms
+[2025-12-21T15:23:58.807Z] DEBUG: Processing command: 4dc62136-efa2-41ce-bfcb-6a1deca95a0d
+[2025-12-21T15:23:58.807Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:23:58.812Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:23:58.813Z] DEBUG: Command switch_actuator executed successfully (commandId: 4dc62136-efa2-41ce-bfcb-6a1deca95a0d)
+[2025-12-21T15:23:58.813Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 6ms
+[2025-12-21T15:24:07.390Z] DEBUG: Processing command: 4e8bc95e-0bed-4606-bd96-6add3c8b6d4e
+[2025-12-21T15:24:07.391Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:07.396Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:07.396Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 4e8bc95e-0bed-4606-bd96-6add3c8b6d4e)
+[2025-12-21T15:24:07.396Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 6ms
+[2025-12-21T15:24:08.095Z] DEBUG: Processing command: 685fd39e-12d6-4f64-9cca-717ef219721c
+[2025-12-21T15:24:08.096Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:08.100Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:08.100Z] DEBUG: Command read_light_data executed successfully (commandId: 685fd39e-12d6-4f64-9cca-717ef219721c)
+[2025-12-21T15:24:08.100Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 4ms
+[2025-12-21T15:24:10.186Z] DEBUG: Processing command: f90b4f42-9dfd-4701-aa88-5312e77c23a9
+[2025-12-21T15:24:34.204Z] DEBUG: Processing command: c025dd62-3cb6-4ddf-88aa-dbe98e2ea5dc
+[2025-12-21T15:24:34.205Z] DEBUG: [Session 2] Session started - ID: a275cb0b-c776-415d-96a7-51ebe1ce3dbf
+[2025-12-21T15:24:34.205Z] INFO: Created new session: a275cb0b-c776-415d-96a7-51ebe1ce3dbf (session_2.log)
+[2025-12-21T15:24:34.205Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:34.209Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:34.209Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: c025dd62-3cb6-4ddf-88aa-dbe98e2ea5dc)
+[2025-12-21T15:24:34.209Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T15:24:34.414Z] DEBUG: Processing command: 2656ba74-b977-4179-b865-b13a4af3bebb
+[2025-12-21T15:24:34.572Z] DEBUG: Processing command: 3cc39e1e-37fa-4327-8032-5bb3c827d33d
+[2025-12-21T15:24:36.587Z] DEBUG: Processing command: 8c1fc78f-d1a3-44f6-a6b7-c6cfdde07606
+[2025-12-21T15:24:36.587Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:36.592Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:36.592Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 8c1fc78f-d1a3-44f6-a6b7-c6cfdde07606)
+[2025-12-21T15:24:36.592Z] DEBUG: [Session 2] Greenhouse command read_soil_moisture_data succeeded in 5ms
+[2025-12-21T15:24:36.954Z] DEBUG: Processing command: 78a1f452-22fb-4159-923b-979fa28f6063
+[2025-12-21T15:24:36.954Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:36.959Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:36.960Z] DEBUG: Command switch_water_canal executed successfully (commandId: 78a1f452-22fb-4159-923b-979fa28f6063)
+[2025-12-21T15:24:36.960Z] DEBUG: [Session 2] Greenhouse command switch_water_canal succeeded in 6ms
+[2025-12-21T15:24:37.446Z] DEBUG: Processing command: f6d13fb2-2234-4b5d-ac83-01e377a13377
+[2025-12-21T15:24:37.447Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:37.451Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:37.451Z] DEBUG: Command switch_heater executed successfully (commandId: f6d13fb2-2234-4b5d-ac83-01e377a13377)
+[2025-12-21T15:24:37.451Z] DEBUG: [Session 2] Greenhouse command switch_heater succeeded in 5ms
+[2025-12-21T15:24:37.889Z] DEBUG: Processing command: 8d6f48f1-4882-4664-9a72-20804d292a10
+[2025-12-21T15:24:37.890Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:37.894Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:37.894Z] DEBUG: Command switch_actuator executed successfully (commandId: 8d6f48f1-4882-4664-9a72-20804d292a10)
+[2025-12-21T15:24:37.894Z] DEBUG: [Session 2] Greenhouse command switch_actuator succeeded in 4ms
+[2025-12-21T15:24:38.690Z] DEBUG: Processing command: 9313e871-c24a-4c69-8536-4fc77c1d8749
+[2025-12-21T15:24:38.691Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:38.696Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:38.696Z] DEBUG: Command read_light_data executed successfully (commandId: 9313e871-c24a-4c69-8536-4fc77c1d8749)
+[2025-12-21T15:24:38.696Z] DEBUG: [Session 2] Greenhouse command read_light_data succeeded in 5ms
+[2025-12-21T15:24:39.036Z] DEBUG: Processing command: d8c58cd1-0157-4fc7-862e-0fc6f9ca766e
+[2025-12-21T15:24:39.507Z] DEBUG: Processing command: 44b7ab76-d866-4d36-b2e0-008cb52f37f1
+[2025-12-21T15:24:39.508Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:39.512Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:39.512Z] DEBUG: Command read_humidity_data executed successfully (commandId: 44b7ab76-d866-4d36-b2e0-008cb52f37f1)
+[2025-12-21T15:24:39.512Z] DEBUG: [Session 2] Greenhouse command read_humidity_data succeeded in 4ms
+[2025-12-21T15:24:40.092Z] DEBUG: Processing command: 0dfe19a2-bb05-46c3-9ef2-315527d5f0d4
+[2025-12-21T15:24:40.093Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:40.096Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:40.096Z] DEBUG: Command read_temperature_data executed successfully (commandId: 0dfe19a2-bb05-46c3-9ef2-315527d5f0d4)
+[2025-12-21T15:24:40.096Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T15:24:40.439Z] DEBUG: Processing command: 2b1dd302-e25f-4877-8911-4db0a839bb09
+[2025-12-21T15:24:40.440Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:40.445Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:40.445Z] DEBUG: Command read_co2_data executed successfully (commandId: 2b1dd302-e25f-4877-8911-4db0a839bb09)
+[2025-12-21T15:24:40.445Z] DEBUG: [Session 2] Greenhouse command read_co2_data succeeded in 5ms
+[2025-12-21T15:24:40.739Z] DEBUG: Processing command: a306642b-197c-4c1e-8f19-ce75e1784c0e
+[2025-12-21T15:24:40.739Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:40.744Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:40.744Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: a306642b-197c-4c1e-8f19-ce75e1784c0e)
+[2025-12-21T15:24:40.744Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 5ms
+[2025-12-21T15:24:41.113Z] DEBUG: Processing command: 5bde087d-6de0-4462-9af1-a8f63ad174f3
+[2025-12-21T15:24:41.113Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:41.117Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:41.117Z] DEBUG: Command switch_water_canal executed successfully (commandId: 5bde087d-6de0-4462-9af1-a8f63ad174f3)
+[2025-12-21T15:24:41.117Z] DEBUG: [Session 2] Greenhouse command switch_water_canal succeeded in 4ms
+[2025-12-21T15:24:41.549Z] DEBUG: Processing command: 9091f155-8305-4e53-a836-1294f7d10c7f
+[2025-12-21T15:24:41.549Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:41.552Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:41.552Z] DEBUG: Command switch_heater executed successfully (commandId: 9091f155-8305-4e53-a836-1294f7d10c7f)
+[2025-12-21T15:24:41.552Z] DEBUG: [Session 2] Greenhouse command switch_heater succeeded in 3ms
+[2025-12-21T15:24:50.513Z] DEBUG: Processing command: b86035be-5ed7-40a7-a1df-8b595f9b2b15
+[2025-12-21T15:24:50.514Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:50.518Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:50.519Z] DEBUG: Command read_temperature_data executed successfully (commandId: b86035be-5ed7-40a7-a1df-8b595f9b2b15)
+[2025-12-21T15:24:50.519Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 6ms
+[2025-12-21T15:24:50.673Z] DEBUG: Processing command: 23c9b044-6978-4019-88a6-80567c8c3b17
+[2025-12-21T15:24:50.840Z] DEBUG: Processing command: 2d90c86b-a93e-4296-a1f0-a66e30a2faa2
+[2025-12-21T15:24:50.841Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:50.844Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:50.844Z] DEBUG: Command read_co2_data executed successfully (commandId: 2d90c86b-a93e-4296-a1f0-a66e30a2faa2)
+[2025-12-21T15:24:50.844Z] DEBUG: [Session 2] Greenhouse command read_co2_data succeeded in 3ms
+[2025-12-21T15:24:50.999Z] DEBUG: Processing command: 5b1ab2b2-0eb9-400d-9581-7169f750c0a4
+[2025-12-21T15:24:51.146Z] DEBUG: Processing command: 80a266a2-96b2-4a54-807f-7d45eab0e2d2
+[2025-12-21T15:24:51.307Z] DEBUG: Processing command: a075a09f-362b-457c-bfe8-229763714e10
+[2025-12-21T15:24:51.467Z] DEBUG: Processing command: 775ff6dc-7913-48f2-baf3-1be579214d3a
+[2025-12-21T15:24:51.613Z] DEBUG: Processing command: 8fc97022-b740-43f2-a89f-4fa3258cb993
+[2025-12-21T15:24:51.773Z] DEBUG: Processing command: 6f5e2ee6-63eb-4ead-b195-8d38a4bc274e
+[2025-12-21T15:24:51.942Z] DEBUG: Processing command: 8dcfecb8-bf3b-4c30-bf72-5343301f80b7
+[2025-12-21T15:24:52.094Z] DEBUG: Processing command: d9bc06b2-1153-4f49-9c2b-6c818a38808b
+[2025-12-21T15:24:52.247Z] DEBUG: Processing command: c3611b7d-150d-4b45-9d62-19a9c282dcb5
+[2025-12-21T15:24:52.399Z] DEBUG: Processing command: 2e291188-db87-4511-90a6-b5a0e647e852
+[2025-12-21T15:24:52.567Z] DEBUG: Processing command: 0dd41059-1c6d-4162-9e01-6380f957e477
+[2025-12-21T15:24:52.908Z] DEBUG: Processing command: 209fb828-ff06-458a-acdd-c6d49430d316
+[2025-12-21T15:24:53.011Z] DEBUG: Processing command: 850eb863-3314-4a70-bf51-b920f7be20a9
+[2025-12-21T15:24:53.208Z] DEBUG: Processing command: f3aa5693-d4c3-4ba3-990b-69baaac69742
+[2025-12-21T15:24:53.209Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:53.212Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:53.212Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: f3aa5693-d4c3-4ba3-990b-69baaac69742)
+[2025-12-21T15:24:53.212Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T15:24:53.382Z] DEBUG: Processing command: 87d959e7-50c9-4970-b195-10811dea5f7f
+[2025-12-21T15:24:53.548Z] DEBUG: Processing command: 84f42eac-7444-4577-b219-f812da52193c
+[2025-12-21T15:24:54.140Z] DEBUG: Processing command: 1c3c2530-1070-442f-9536-161bf3700396
+[2025-12-21T15:24:54.141Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:54.146Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:54.146Z] DEBUG: Command switch_fan executed successfully (commandId: 1c3c2530-1070-442f-9536-161bf3700396)
+[2025-12-21T15:24:54.146Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T15:24:54.293Z] DEBUG: Processing command: 02ce4a47-3a4f-41f9-bd2a-20b26c55fca4
+[2025-12-21T15:24:54.293Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:54.297Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:54.297Z] DEBUG: Command switch_fan executed successfully (commandId: 02ce4a47-3a4f-41f9-bd2a-20b26c55fca4)
+[2025-12-21T15:24:54.297Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T15:24:54.481Z] DEBUG: Processing command: 04b9451d-8f22-45cb-82c4-d76650b38557
+[2025-12-21T15:24:54.481Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:54.484Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:54.484Z] DEBUG: Command switch_fan executed successfully (commandId: 04b9451d-8f22-45cb-82c4-d76650b38557)
+[2025-12-21T15:24:54.484Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T15:24:54.695Z] DEBUG: Processing command: 9a507d20-9243-4bf0-928c-80db2a515a57
+[2025-12-21T15:24:54.695Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:54.698Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:54.698Z] DEBUG: Command switch_fan executed successfully (commandId: 9a507d20-9243-4bf0-928c-80db2a515a57)
+[2025-12-21T15:24:54.699Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T15:24:55.089Z] DEBUG: Processing command: eb0e0d0e-21ab-446f-990d-96c819246f19
+[2025-12-21T15:24:55.359Z] DEBUG: Processing command: 3d0fa92e-0ca9-4da6-98e8-522cedebcc24
+[2025-12-21T15:24:55.360Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:55.363Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:55.363Z] DEBUG: Command switch_water_canal executed successfully (commandId: 3d0fa92e-0ca9-4da6-98e8-522cedebcc24)
+[2025-12-21T15:24:55.363Z] DEBUG: [Session 2] Greenhouse command switch_water_canal succeeded in 3ms
+[2025-12-21T15:24:55.616Z] DEBUG: Processing command: 18b13adb-e98a-4694-b0bd-30d1d8172216
+[2025-12-21T15:24:55.616Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:24:55.619Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:24:55.619Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 18b13adb-e98a-4694-b0bd-30d1d8172216)
+[2025-12-21T15:24:55.620Z] DEBUG: [Session 2] Greenhouse command read_soil_moisture_data succeeded in 3ms
+[2025-12-21T15:24:56.260Z] DEBUG: Processing command: a27e50a0-b719-4cc0-97c1-89f2ce08cbe9
+[2025-12-21T15:28:03.430Z] DEBUG: Processing command: bf149c96-8537-4d9e-8564-7b64f0917a2a
+[2025-12-21T15:28:03.430Z] DEBUG: [Session 3] Session started - ID: 24d30262-9206-436b-8d79-4e41e6421b1b
+[2025-12-21T15:28:03.430Z] INFO: Created new session: 24d30262-9206-436b-8d79-4e41e6421b1b (session_3.log)
+[2025-12-21T15:28:03.431Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:28:03.434Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:28:03.435Z] DEBUG: Command read_temperature_data executed successfully (commandId: bf149c96-8537-4d9e-8564-7b64f0917a2a)
+[2025-12-21T15:28:03.435Z] DEBUG: [Session 3] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T15:28:04.186Z] DEBUG: Processing command: 0e9d067d-43b2-40db-83c8-f7d08666bc14
+[2025-12-21T15:28:05.019Z] DEBUG: Processing command: 5880257a-c415-404b-b8b4-bf37dc1b8da9
+[2025-12-21T15:28:05.730Z] DEBUG: Processing command: f28226cc-a4dc-4b19-b91e-0258e2e67bd7
+[2025-12-21T15:28:05.730Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:28:05.733Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:28:05.733Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: f28226cc-a4dc-4b19-b91e-0258e2e67bd7)
+[2025-12-21T15:28:05.733Z] DEBUG: [Session 3] Greenhouse command read_soil_ph_data succeeded in 3ms
+[2025-12-21T15:28:09.992Z] DEBUG: Processing command: 7b3d7870-bf9a-4e6c-a45b-7b56e085d304
+[2025-12-21T15:28:10.408Z] DEBUG: Processing command: 29caf7ec-61b2-42e0-914f-ecc6f442cf9f
+[2025-12-21T15:28:10.408Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:28:10.411Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:28:10.411Z] DEBUG: Command switch_fan executed successfully (commandId: 29caf7ec-61b2-42e0-914f-ecc6f442cf9f)
+[2025-12-21T15:28:10.411Z] DEBUG: [Session 3] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T15:28:26.334Z] DEBUG: Processing command: 4fc52c89-f1fd-4810-a8a1-c18d6f04a17a
+[2025-12-21T15:28:26.335Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:28:26.340Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:28:26.340Z] DEBUG: Command switch_fan executed successfully (commandId: 4fc52c89-f1fd-4810-a8a1-c18d6f04a17a)
+[2025-12-21T15:28:26.340Z] DEBUG: [Session 3] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T15:28:26.520Z] DEBUG: Processing command: ef573053-e751-44d1-b8c2-6fb66450d41c
+[2025-12-21T15:28:26.521Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:28:26.524Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:28:26.524Z] DEBUG: Command switch_fan executed successfully (commandId: ef573053-e751-44d1-b8c2-6fb66450d41c)
+[2025-12-21T15:28:26.524Z] DEBUG: [Session 3] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T15:28:26.672Z] DEBUG: Processing command: 2b7aa0a2-c836-4eb5-893e-16e124140b17
+[2025-12-21T15:28:26.673Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:28:26.676Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:28:26.676Z] DEBUG: Command switch_fan executed successfully (commandId: 2b7aa0a2-c836-4eb5-893e-16e124140b17)
+[2025-12-21T15:28:26.676Z] DEBUG: [Session 3] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T15:28:58.109Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-21T15:28:58.110Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-21T15:28:58.110Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-21T15:28:58.111Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-21T15:28:58.111Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-21T15:28:58.111Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-21T15:28:58.112Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-21T15:28:58.112Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-21T15:28:58.112Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-21T15:28:58.112Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-21T15:28:58.112Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-21T15:28:58.116Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-21T15:28:58.117Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-21T15:28:58.117Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-21T15:28:58.117Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-21T15:28:58.118Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-21T15:28:58.124Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-21T15:28:58.125Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-21T15:28:58.126Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-21T15:28:58.129Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-21T15:28:58.129Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-21T15:28:58.130Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-21T15:28:58.133Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-21T15:28:58.135Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+
+
+=== Backend Restarted: 2025-12-21T15:38:37.631Z ===
+
+[2025-12-21T15:38:37.812Z] INFO: Redis Client Connected
+[2025-12-21T15:38:37.815Z] INFO: Redis Client Ready
+[2025-12-21T15:38:37.815Z] INFO: Redis connected
+[2025-12-21T15:38:37.870Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:38:37.870Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:38:37.871Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:38:37.879Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:38:37.879Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:38:37.879Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:38:37.881Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:38:37.881Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T15:38:42.882Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:38:42.883Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:38:42.942Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T15:58:34.083Z ===
+
+[2025-12-21T15:58:34.329Z] INFO: Redis Client Connected
+[2025-12-21T15:58:34.332Z] INFO: Redis Client Ready
+[2025-12-21T15:58:34.332Z] INFO: Redis connected
+[2025-12-21T15:58:34.393Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:58:34.393Z] INFO: Greenhouse Core Client connected
+[2025-12-21T15:58:34.393Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:58:34.400Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T15:58:34.400Z] INFO: Logs directory: /app/logs
+[2025-12-21T15:58:34.401Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T15:58:34.402Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T15:58:34.403Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T15:58:39.402Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:58:39.404Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T15:58:39.457Z] DEBUG: Processing command: 1dbf5dfe-9bfc-4fb3-a451-d8cc2597782f
+[2025-12-21T15:58:39.457Z] DEBUG: [Session 1] Session started - ID: 4ae1f727-c909-4e39-abe0-09cfb3df7314
+[2025-12-21T15:58:39.457Z] INFO: Created new session: 4ae1f727-c909-4e39-abe0-09cfb3df7314 (session_1.log)
+[2025-12-21T15:58:39.458Z] DEBUG: Processing command: 00510d66-b6ff-4fa0-b32a-511a635f714d
+[2025-12-21T15:58:39.458Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T15:58:39.459Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:58:39.475Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:58:39.475Z] DEBUG: Command read_temperature_data executed successfully (commandId: 1dbf5dfe-9bfc-4fb3-a451-d8cc2597782f)
+[2025-12-21T15:58:39.475Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 16ms
+[2025-12-21T15:58:39.571Z] DEBUG: Processing command: 1ab8c425-69cc-40a2-b0a4-9c2cb3176a33
+[2025-12-21T15:58:39.862Z] DEBUG: Processing command: 6757c4ec-c09b-4d72-82bb-1d08e064b8bd
+[2025-12-21T15:58:39.863Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:58:39.868Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:58:39.868Z] DEBUG: Command read_humidity_data executed successfully (commandId: 6757c4ec-c09b-4d72-82bb-1d08e064b8bd)
+[2025-12-21T15:58:39.868Z] DEBUG: [Session 1] Greenhouse command read_humidity_data succeeded in 5ms
+[2025-12-21T15:58:40.029Z] DEBUG: Processing command: adc6f05f-153f-4dd3-8543-0e90a42012ea
+[2025-12-21T15:58:40.167Z] DEBUG: Processing command: 8b1ab4e7-cb6a-4e53-8b08-fa0aeab0b3c3
+[2025-12-21T15:59:20.255Z] DEBUG: Processing command: 33b65ba0-8c5e-4a09-b112-bd34602b1d8f
+[2025-12-21T15:59:20.255Z] DEBUG: [Session 2] Session started - ID: 714d2447-079f-4c2f-9932-af5ee601322a
+[2025-12-21T15:59:20.255Z] INFO: Created new session: 714d2447-079f-4c2f-9932-af5ee601322a (session_2.log)
+[2025-12-21T15:59:20.256Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:20.262Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:20.262Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 33b65ba0-8c5e-4a09-b112-bd34602b1d8f)
+[2025-12-21T15:59:20.262Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 6ms
+[2025-12-21T15:59:20.408Z] DEBUG: Processing command: 65e02ad5-d017-417d-904a-1969985a4c54
+[2025-12-21T15:59:20.559Z] DEBUG: Processing command: a4fc9785-355f-4705-b855-b1a254f8c1da
+[2025-12-21T15:59:20.871Z] DEBUG: Processing command: c17b18c6-e31f-472d-9777-a0af2988ccc5
+[2025-12-21T15:59:20.871Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:20.876Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:20.876Z] DEBUG: Command read_co2_data executed successfully (commandId: c17b18c6-e31f-472d-9777-a0af2988ccc5)
+[2025-12-21T15:59:20.876Z] DEBUG: [Session 2] Greenhouse command read_co2_data succeeded in 5ms
+[2025-12-21T15:59:21.030Z] DEBUG: Processing command: ddc29ca3-472a-45d3-a352-1633c3db85fc
+[2025-12-21T15:59:21.253Z] DEBUG: Processing command: c43ae406-0319-4c56-bac4-dc1dba979c6c
+[2025-12-21T15:59:21.254Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:21.257Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:21.257Z] DEBUG: Command read_temperature_data executed successfully (commandId: c43ae406-0319-4c56-bac4-dc1dba979c6c)
+[2025-12-21T15:59:21.257Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T15:59:22.459Z] DEBUG: Processing command: 6ee001e3-671e-4aa9-85cf-b100e9b07207
+[2025-12-21T15:59:22.460Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:22.465Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:22.465Z] DEBUG: Command switch_water_canal executed successfully (commandId: 6ee001e3-671e-4aa9-85cf-b100e9b07207)
+[2025-12-21T15:59:22.465Z] DEBUG: [Session 2] Greenhouse command switch_water_canal succeeded in 5ms
+[2025-12-21T15:59:22.590Z] DEBUG: Processing command: 5b9cdc2c-db55-40fb-837a-4641212f8e7d
+[2025-12-21T15:59:22.591Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:22.595Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:22.596Z] DEBUG: Command switch_water_canal executed successfully (commandId: 5b9cdc2c-db55-40fb-837a-4641212f8e7d)
+[2025-12-21T15:59:22.596Z] DEBUG: [Session 2] Greenhouse command switch_water_canal succeeded in 5ms
+[2025-12-21T15:59:22.958Z] DEBUG: Processing command: 540380f2-a244-4362-b55b-c567f24eda14
+[2025-12-21T15:59:22.959Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:22.964Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:22.964Z] DEBUG: Command switch_fan executed successfully (commandId: 540380f2-a244-4362-b55b-c567f24eda14)
+[2025-12-21T15:59:22.964Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T15:59:23.063Z] DEBUG: Processing command: 189700eb-2cc0-46ad-bf3e-3b0bed1492c0
+[2025-12-21T15:59:23.063Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:23.067Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:23.067Z] DEBUG: Command switch_fan executed successfully (commandId: 189700eb-2cc0-46ad-bf3e-3b0bed1492c0)
+[2025-12-21T15:59:23.068Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T15:59:23.208Z] DEBUG: Processing command: 471b0d0a-5047-4c07-8e78-0b7810e783cc
+[2025-12-21T15:59:23.208Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:23.212Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:23.212Z] DEBUG: Command switch_fan executed successfully (commandId: 471b0d0a-5047-4c07-8e78-0b7810e783cc)
+[2025-12-21T15:59:23.212Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T15:59:23.388Z] DEBUG: Processing command: bf9ed874-f0ae-4936-bb62-fe8e3ce9afdc
+[2025-12-21T15:59:23.388Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:23.392Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:23.392Z] DEBUG: Command switch_actuator executed successfully (commandId: bf9ed874-f0ae-4936-bb62-fe8e3ce9afdc)
+[2025-12-21T15:59:23.392Z] DEBUG: [Session 2] Greenhouse command switch_actuator succeeded in 4ms
+[2025-12-21T15:59:24.475Z] DEBUG: Processing command: e191e1a5-fc42-4bbb-9838-1f5742353de0
+[2025-12-21T15:59:24.476Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T15:59:24.479Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T15:59:24.479Z] DEBUG: Command read_humidity_data executed successfully (commandId: e191e1a5-fc42-4bbb-9838-1f5742353de0)
+[2025-12-21T15:59:24.479Z] DEBUG: [Session 2] Greenhouse command read_humidity_data succeeded in 3ms
+[2025-12-21T15:59:24.642Z] DEBUG: Processing command: 3852d008-1dff-4785-84d2-184ee5532655
+[2025-12-21T15:59:24.802Z] DEBUG: Processing command: 729d4bdb-d74b-4df1-a2cd-1082212d0d62
+[2025-12-21T16:05:07.780Z] DEBUG: Processing command: fa89a67b-a11d-4df4-8623-4e2d50f48ce3
+[2025-12-21T16:05:07.780Z] DEBUG: [Session 3] Session started - ID: eabbd3a6-e32d-4cb6-8bf7-0b869961313e
+[2025-12-21T16:05:07.780Z] INFO: Created new session: eabbd3a6-e32d-4cb6-8bf7-0b869961313e (session_3.log)
+[2025-12-21T16:05:07.780Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T16:05:07.785Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T16:05:07.785Z] DEBUG: Command switch_fan executed successfully (commandId: fa89a67b-a11d-4df4-8623-4e2d50f48ce3)
+[2025-12-21T16:05:07.785Z] DEBUG: [Session 3] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T16:05:07.946Z] DEBUG: Processing command: 7603c3ba-1f98-48e1-acfa-491e0b0515da
+[2025-12-21T16:05:07.947Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T16:05:07.951Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T16:05:07.951Z] DEBUG: Command switch_fan executed successfully (commandId: 7603c3ba-1f98-48e1-acfa-491e0b0515da)
+[2025-12-21T16:05:07.951Z] DEBUG: [Session 3] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T16:05:14.520Z] DEBUG: Processing command: c1e9825a-8afd-485c-8975-30558bf8db26
+[2025-12-21T16:05:14.521Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T16:05:14.526Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T16:05:14.526Z] DEBUG: Command read_temperature_data executed successfully (commandId: c1e9825a-8afd-485c-8975-30558bf8db26)
+[2025-12-21T16:05:14.526Z] DEBUG: [Session 3] Greenhouse command read_temperature_data succeeded in 5ms
+[2025-12-21T16:05:14.714Z] DEBUG: Processing command: 7627e20c-a8d5-4235-8ea5-50443a7152a3
+[2025-12-21T16:05:15.477Z] DEBUG: Processing command: 51fb3f56-0237-4fb7-bce5-7f411691c506
+[2025-12-21T16:05:15.657Z] DEBUG: Processing command: 98a1ef8d-c6b5-42e7-8466-9bacfeb8c5de
+[2025-12-21T16:05:15.824Z] DEBUG: Processing command: e8fec1f9-1381-4a70-a04a-8de3466e23cc
+[2025-12-21T16:33:34.494Z] DEBUG: [Session 1] Session terminated due to inactivity (30 minutes)
+[2025-12-21T16:33:34.494Z] INFO: Cleaned up old session: 4ae1f727-c909-4e39-abe0-09cfb3df7314
+[2025-12-21T16:33:34.495Z] DEBUG: [Session 2] Session terminated due to inactivity (30 minutes)
+[2025-12-21T16:33:34.495Z] INFO: Cleaned up old session: 714d2447-079f-4c2f-9932-af5ee601322a
+[2025-12-21T16:38:34.511Z] DEBUG: [Session 3] Session terminated due to inactivity (30 minutes)
+[2025-12-21T16:38:34.511Z] INFO: Cleaned up old session: eabbd3a6-e32d-4cb6-8bf7-0b869961313e
+
+
+=== Backend Restarted: 2025-12-21T17:31:41.188Z ===
+
+[2025-12-21T17:31:41.325Z] INFO: Redis Client Connected
+[2025-12-21T17:31:41.327Z] INFO: Redis Client Ready
+[2025-12-21T17:31:41.328Z] INFO: Redis connected
+[2025-12-21T17:31:41.372Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:31:41.372Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:31:41.373Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:31:41.377Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:31:41.377Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:31:41.377Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:31:41.379Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:31:41.379Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:31:46.378Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:31:46.379Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:31:46.434Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T17:31:47.653Z] DEBUG: Processing command: dd88db0d-dc42-4aca-9c7d-4f0e3219e572
+[2025-12-21T17:31:47.653Z] DEBUG: [Session 1] Session started - ID: 9e30336b-48a5-4401-8322-2db8a2752025
+[2025-12-21T17:31:47.654Z] INFO: Created new session: 9e30336b-48a5-4401-8322-2db8a2752025 (session_1.log)
+[2025-12-21T17:31:47.655Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:31:47.666Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:31:47.666Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: dd88db0d-dc42-4aca-9c7d-4f0e3219e572)
+[2025-12-21T17:31:47.666Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 11ms
+[2025-12-21T17:31:48.396Z] DEBUG: Processing command: f9d05d66-8d2c-46be-95b3-6b7a6f2dc78f
+[2025-12-21T17:31:48.943Z] DEBUG: Processing command: e173a1bf-fab0-4303-b3f8-977408afabe7
+[2025-12-21T17:31:48.944Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:31:48.947Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:31:48.947Z] DEBUG: Command read_co2_data executed successfully (commandId: e173a1bf-fab0-4303-b3f8-977408afabe7)
+[2025-12-21T17:31:48.947Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 3ms
+[2025-12-21T17:31:49.469Z] DEBUG: Processing command: d0f6f5eb-872a-42e2-820e-03334d2acdba
+[2025-12-21T17:31:49.470Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:31:49.474Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:31:49.474Z] DEBUG: Command read_temperature_data executed successfully (commandId: d0f6f5eb-872a-42e2-820e-03334d2acdba)
+[2025-12-21T17:31:49.474Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T17:31:49.998Z] DEBUG: Processing command: 5934267b-39e2-4b26-a471-941d4bed63e0
+[2025-12-21T17:32:21.968Z] DEBUG: Processing command: d2ddfd26-cd9a-4f72-8e9a-099a94305899
+[2025-12-21T17:32:21.968Z] DEBUG: [Session 2] Session started - ID: 63dd47b4-368c-4f21-bdce-9ca8ad590fef
+[2025-12-21T17:32:21.968Z] INFO: Created new session: 63dd47b4-368c-4f21-bdce-9ca8ad590fef (session_2.log)
+[2025-12-21T17:32:21.969Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:32:21.973Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:32:21.973Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: d2ddfd26-cd9a-4f72-8e9a-099a94305899)
+[2025-12-21T17:32:21.973Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T17:32:22.349Z] DEBUG: Processing command: 54b7da65-88e2-4eba-b678-c5a9cec0b4dc
+[2025-12-21T17:32:23.036Z] DEBUG: Processing command: d4de6e51-163a-4da0-9c09-98b4f0ca051c
+[2025-12-21T17:32:23.645Z] DEBUG: Processing command: c898eb93-fbb3-419f-bf39-a05d18fd0293
+[2025-12-21T17:32:24.040Z] DEBUG: Processing command: c9d39a02-5ce1-4ab0-9218-5bfd75a9f098
+[2025-12-21T17:32:26.216Z] DEBUG: Processing command: 03cc663c-19ac-44f8-8c54-0817dbfd2b0e
+[2025-12-21T17:32:26.216Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:32:26.219Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:32:26.219Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 03cc663c-19ac-44f8-8c54-0817dbfd2b0e)
+[2025-12-21T17:32:26.219Z] DEBUG: [Session 2] Greenhouse command read_soil_moisture_data succeeded in 3ms
+
+
+=== Backend Restarted: 2025-12-21T17:36:16.752Z ===
+
+[2025-12-21T17:36:16.906Z] INFO: Redis Client Connected
+[2025-12-21T17:36:16.909Z] INFO: Redis Client Ready
+[2025-12-21T17:36:16.909Z] INFO: Redis connected
+[2025-12-21T17:36:16.947Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:36:16.948Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:36:16.948Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:36:16.952Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:36:16.952Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:36:16.952Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:36:16.953Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:36:16.954Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:36:21.954Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:36:21.955Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:36:22.007Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T17:36:25.674Z] DEBUG: Processing command: d575e666-4454-493c-aa43-703d447234f9
+[2025-12-21T17:36:25.675Z] DEBUG: [Session 1] Session started - ID: e4b9ed36-ad4d-4706-9990-a1bedecbb8ba
+[2025-12-21T17:36:25.675Z] INFO: Created new session: e4b9ed36-ad4d-4706-9990-a1bedecbb8ba (session_1.log)
+[2025-12-21T17:36:25.676Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:36:25.687Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:36:25.687Z] DEBUG: Command read_co2_data executed successfully (commandId: d575e666-4454-493c-aa43-703d447234f9)
+[2025-12-21T17:36:25.687Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 11ms
+[2025-12-21T17:36:34.310Z] DEBUG: Processing command: 30f134c3-fc58-45ab-a2ec-b9c2bce3eb5f
+[2025-12-21T17:36:34.311Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:36:34.315Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:36:34.315Z] DEBUG: Command switch_fan executed successfully (commandId: 30f134c3-fc58-45ab-a2ec-b9c2bce3eb5f)
+[2025-12-21T17:36:34.315Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T17:36:35.537Z] DEBUG: Processing command: e990e07b-c29b-46d1-9717-e5ae39620174
+[2025-12-21T17:36:35.538Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:36:35.541Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:36:35.541Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: e990e07b-c29b-46d1-9717-e5ae39620174)
+[2025-12-21T17:36:35.541Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 3ms
+[2025-12-21T17:36:41.285Z] DEBUG: Processing command: 7bee55fa-f340-406d-87c2-70d6c543b025
+[2025-12-21T17:36:41.285Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:36:41.289Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:36:41.289Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 7bee55fa-f340-406d-87c2-70d6c543b025)
+[2025-12-21T17:36:41.289Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 4ms
+[2025-12-21T17:36:43.971Z] DEBUG: Processing command: 7245e146-d16e-46bf-a016-a2699f14be84
+[2025-12-21T17:36:43.972Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:36:43.974Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:36:43.974Z] DEBUG: Command switch_fan executed successfully (commandId: 7245e146-d16e-46bf-a016-a2699f14be84)
+[2025-12-21T17:36:43.974Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T17:38:35.108Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-21T17:38:35.109Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-21T17:38:35.109Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-21T17:38:35.109Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-21T17:38:35.110Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-21T17:38:35.110Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-21T17:38:35.110Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-21T17:38:35.110Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-21T17:38:35.111Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-21T17:38:35.111Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-21T17:38:35.111Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-21T17:38:35.111Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-21T17:38:35.111Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-21T17:38:35.112Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-21T17:38:35.115Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-21T17:38:35.115Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-21T17:38:35.115Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-21T17:38:35.115Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-21T17:38:35.116Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-21T17:38:35.119Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-21T17:38:35.119Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-21T17:38:35.120Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-21T17:38:35.121Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-21T17:38:35.122Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+
+
+=== Backend Restarted: 2025-12-21T17:40:31.532Z ===
+
+[2025-12-21T17:40:31.677Z] INFO: Redis Client Connected
+[2025-12-21T17:40:31.679Z] INFO: Redis Client Ready
+[2025-12-21T17:40:31.679Z] INFO: Redis connected
+[2025-12-21T17:40:31.717Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:40:31.717Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:40:31.717Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:40:31.721Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:40:31.722Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:40:31.722Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:40:31.723Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T17:40:31.723Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T17:40:36.723Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:40:36.726Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:40:36.806Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T17:40:53.142Z ===
+
+[2025-12-21T17:40:53.284Z] INFO: Redis Client Connected
+[2025-12-21T17:40:53.287Z] INFO: Redis Client Ready
+[2025-12-21T17:40:53.287Z] INFO: Redis connected
+[2025-12-21T17:40:53.329Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:40:53.329Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:40:53.329Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:40:53.333Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:40:53.333Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:40:53.333Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:40:53.334Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:40:53.334Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:40:58.334Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:40:58.335Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:40:58.388Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T17:41:56.641Z ===
+
+[2025-12-21T17:41:56.787Z] INFO: Redis Client Connected
+[2025-12-21T17:41:56.790Z] INFO: Redis Client Ready
+[2025-12-21T17:41:56.790Z] INFO: Redis connected
+[2025-12-21T17:41:56.828Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:41:56.828Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:41:56.829Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:41:56.833Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:41:56.833Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:41:56.833Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:41:56.835Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:41:56.835Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:42:01.835Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:42:01.838Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:42:01.912Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T17:42:43.457Z ===
+
+[2025-12-21T17:42:43.596Z] INFO: Redis Client Connected
+[2025-12-21T17:42:43.598Z] INFO: Redis Client Ready
+[2025-12-21T17:42:43.598Z] INFO: Redis connected
+[2025-12-21T17:42:43.635Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:42:43.635Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:42:43.635Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:42:43.639Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:42:43.639Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:42:43.639Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:42:43.640Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:42:43.640Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:42:48.641Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:42:48.641Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:42:48.693Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T17:45:51.796Z ===
+
+[2025-12-21T17:45:52.040Z] INFO: Redis Client Connected
+[2025-12-21T17:45:52.043Z] INFO: Redis Client Ready
+[2025-12-21T17:45:52.043Z] INFO: Redis connected
+[2025-12-21T17:45:52.081Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:45:52.081Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:45:52.082Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:45:52.086Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:45:52.086Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:45:52.086Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:45:52.087Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:45:52.087Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:45:57.088Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:45:57.091Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:45:57.163Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T17:46:31.129Z] DEBUG: Processing command: 769d1885-8e7f-409b-a456-021e58f8480f
+[2025-12-21T17:46:31.130Z] DEBUG: [Session 1] Session started - ID: fd679a34-57e6-429f-a6c0-e0f4d128c41a
+[2025-12-21T17:46:31.130Z] INFO: Created new session: fd679a34-57e6-429f-a6c0-e0f4d128c41a (session_1.log)
+[2025-12-21T17:46:31.131Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:46:31.142Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:46:31.142Z] DEBUG: Command switch_actuator executed successfully (commandId: 769d1885-8e7f-409b-a456-021e58f8480f)
+[2025-12-21T17:46:31.142Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 12ms
+[2025-12-21T17:46:31.780Z] DEBUG: Processing command: 43f1cbce-6006-4cfc-a9d6-504ea9820cc4
+[2025-12-21T17:46:31.780Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:46:31.783Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:46:31.783Z] DEBUG: Command switch_actuator executed successfully (commandId: 43f1cbce-6006-4cfc-a9d6-504ea9820cc4)
+[2025-12-21T17:46:31.783Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 3ms
+[2025-12-21T17:46:32.161Z] DEBUG: Processing command: 83bc2d7a-8996-4491-bc20-27f3b722f1bc
+[2025-12-21T17:46:32.161Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:46:32.164Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:46:32.164Z] DEBUG: Command switch_actuator executed successfully (commandId: 83bc2d7a-8996-4491-bc20-27f3b722f1bc)
+[2025-12-21T17:46:32.164Z] DEBUG: [Session 1] Greenhouse command switch_actuator succeeded in 3ms
+
+
+=== Backend Restarted: 2025-12-21T17:47:08.677Z ===
+
+[2025-12-21T17:47:08.824Z] INFO: Redis Client Connected
+[2025-12-21T17:47:08.826Z] INFO: Redis Client Ready
+[2025-12-21T17:47:08.826Z] INFO: Redis connected
+[2025-12-21T17:47:08.865Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:47:08.866Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:47:08.866Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:47:08.871Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:47:08.871Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:47:08.871Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:47:08.873Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:47:08.873Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T17:47:13.874Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:47:13.874Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:47:13.930Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T17:50:11.077Z ===
+
+[2025-12-21T17:50:11.219Z] INFO: Redis Client Connected
+[2025-12-21T17:50:11.221Z] INFO: Redis Client Ready
+[2025-12-21T17:50:11.222Z] INFO: Redis connected
+[2025-12-21T17:50:11.262Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:50:11.262Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:50:11.262Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:50:11.267Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:50:11.268Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:50:11.268Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:50:11.269Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:50:11.269Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:50:16.269Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:50:16.272Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:50:16.348Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T17:52:43.617Z ===
+
+[2025-12-21T17:52:43.769Z] INFO: Redis Client Connected
+[2025-12-21T17:52:43.771Z] INFO: Redis Client Ready
+[2025-12-21T17:52:43.771Z] INFO: Redis connected
+[2025-12-21T17:52:43.810Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:52:43.810Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:52:43.810Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:52:43.814Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:52:43.814Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:52:43.814Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:52:43.815Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T17:52:43.815Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T17:52:48.815Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:52:48.816Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:52:48.874Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T17:55:57.534Z ===
+
+[2025-12-21T17:55:57.681Z] INFO: Redis Client Connected
+[2025-12-21T17:55:57.684Z] INFO: Redis Client Ready
+[2025-12-21T17:55:57.684Z] INFO: Redis connected
+[2025-12-21T17:55:57.726Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:55:57.726Z] INFO: Greenhouse Core Client connected
+[2025-12-21T17:55:57.726Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:55:57.730Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T17:55:57.730Z] INFO: Logs directory: /app/logs
+[2025-12-21T17:55:57.730Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T17:55:57.732Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:55:57.732Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T17:56:02.731Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:56:02.732Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T17:56:02.784Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T17:56:09.008Z] DEBUG: Processing command: 72f288d4-7479-4a81-af7d-5c8bd1b72c33
+[2025-12-21T17:56:09.009Z] DEBUG: [Session 1] Session started - ID: af637997-9793-4a25-9d07-163913095fce
+[2025-12-21T17:56:09.009Z] INFO: Created new session: af637997-9793-4a25-9d07-163913095fce (session_1.log)
+[2025-12-21T17:56:09.010Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:09.024Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:09.024Z] DEBUG: Command read_temperature_data executed successfully (commandId: 72f288d4-7479-4a81-af7d-5c8bd1b72c33)
+[2025-12-21T17:56:09.024Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 14ms
+[2025-12-21T17:56:10.303Z] DEBUG: Processing command: 7e963184-8595-442b-9d75-45791b802a0d
+[2025-12-21T17:56:17.344Z] DEBUG: Processing command: 81deeb74-a5b2-4094-9474-51134a5fc9ec
+[2025-12-21T17:56:17.345Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:17.350Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:17.351Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 81deeb74-a5b2-4094-9474-51134a5fc9ec)
+[2025-12-21T17:56:17.351Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 6ms
+[2025-12-21T17:56:17.959Z] DEBUG: Processing command: 2339b2a4-2576-405a-8b0b-3d5b61a0490c
+[2025-12-21T17:56:17.960Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:17.963Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:17.963Z] DEBUG: Command read_temperature_data executed successfully (commandId: 2339b2a4-2576-405a-8b0b-3d5b61a0490c)
+[2025-12-21T17:56:17.963Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T17:56:18.610Z] DEBUG: Processing command: 4ab56dbd-ac0b-4040-ae08-abf03c8be33d
+[2025-12-21T17:56:20.001Z] DEBUG: Processing command: 53755f46-639f-4d7e-b3ae-7414cd56fe6b
+[2025-12-21T17:56:20.002Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:20.005Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:20.006Z] DEBUG: Command switch_water_canal executed successfully (commandId: 53755f46-639f-4d7e-b3ae-7414cd56fe6b)
+[2025-12-21T17:56:20.006Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 4ms
+[2025-12-21T17:56:20.368Z] DEBUG: Processing command: a2f68251-0c1f-4254-a7f4-05fd21992229
+[2025-12-21T17:56:20.368Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:20.371Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:20.371Z] DEBUG: Command switch_water_canal executed successfully (commandId: a2f68251-0c1f-4254-a7f4-05fd21992229)
+[2025-12-21T17:56:20.371Z] DEBUG: [Session 1] Greenhouse command switch_water_canal succeeded in 3ms
+[2025-12-21T17:56:20.992Z] DEBUG: Processing command: 8cb5d08b-8c5a-4c9d-998f-a5f9d532c8d6
+[2025-12-21T17:56:20.992Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:20.995Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:20.995Z] DEBUG: Command switch_heater executed successfully (commandId: 8cb5d08b-8c5a-4c9d-998f-a5f9d532c8d6)
+[2025-12-21T17:56:20.995Z] DEBUG: [Session 1] Greenhouse command switch_heater succeeded in 3ms
+[2025-12-21T17:56:21.649Z] DEBUG: Processing command: 014f8cd3-5add-47a7-b2af-0ffe0cde26a5
+[2025-12-21T17:56:21.650Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:21.653Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:21.653Z] DEBUG: Command read_light_data executed successfully (commandId: 014f8cd3-5add-47a7-b2af-0ffe0cde26a5)
+[2025-12-21T17:56:21.653Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 3ms
+[2025-12-21T17:56:24.813Z] DEBUG: Processing command: ec0d92f8-d92b-4dce-aa63-857943d89c5d
+[2025-12-21T17:56:24.814Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:56:24.818Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:56:24.818Z] DEBUG: Command read_temperature_data executed successfully (commandId: ec0d92f8-d92b-4dce-aa63-857943d89c5d)
+[2025-12-21T17:56:24.818Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T17:56:25.458Z] DEBUG: Processing command: f996f125-d979-4ab0-847a-a2f629b84ef7
+[2025-12-21T17:56:26.801Z] DEBUG: Processing command: 31324ffe-af87-43d3-b91a-e3efc856eede
+[2025-12-21T17:56:26.967Z] DEBUG: Processing command: adeef0e9-7393-41d5-91af-ec834f084f87
+[2025-12-21T17:56:27.174Z] DEBUG: Processing command: 1f04b42f-1bae-4e94-a27b-afe4d401b210
+[2025-12-21T17:56:27.348Z] DEBUG: Processing command: 3a50763a-a0f2-4b07-a3d0-b8cd48f9c12c
+[2025-12-21T17:56:27.528Z] DEBUG: Processing command: f4abb788-0a45-45b8-bfd0-0c8b4ca443c2
+[2025-12-21T17:56:27.708Z] DEBUG: Processing command: 441eeaf3-114a-4601-8c1c-99e293db7599
+[2025-12-21T17:56:27.909Z] DEBUG: Processing command: e75a8c1f-27cf-4a92-a5a3-c3d7331f02df
+[2025-12-21T17:56:28.092Z] DEBUG: Processing command: 944cf2e9-88c6-4e10-95c8-636a9e158fae
+[2025-12-21T17:56:28.264Z] DEBUG: Processing command: fe0e37d3-bc5c-4995-9aca-898d0c06e6a3
+[2025-12-21T17:56:28.445Z] DEBUG: Processing command: fc37e7c9-b2c3-477d-b18d-fa2dec7fa6b9
+[2025-12-21T17:56:28.626Z] DEBUG: Processing command: 6fa8a775-296c-4f7a-b599-9c216a60668e
+[2025-12-21T17:56:28.804Z] DEBUG: Processing command: 16624552-8878-453b-97ca-f81ff53434d6
+[2025-12-21T17:56:28.984Z] DEBUG: Processing command: e5fb8574-2287-4cae-8141-bc801d33d10a
+[2025-12-21T17:56:29.172Z] DEBUG: Processing command: 1451af91-c831-4d29-ae1e-978853daa253
+[2025-12-21T17:59:31.048Z] DEBUG: Processing command: 3fb277d3-95f0-411d-995d-92bbd0945457
+[2025-12-21T17:59:31.048Z] DEBUG: [Session 2] Session started - ID: 8978258d-2944-466d-872d-51d90567d5dc
+[2025-12-21T17:59:31.048Z] INFO: Created new session: 8978258d-2944-466d-872d-51d90567d5dc (session_2.log)
+[2025-12-21T17:59:31.048Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:59:31.052Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:59:31.052Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 3fb277d3-95f0-411d-995d-92bbd0945457)
+[2025-12-21T17:59:31.052Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T17:59:31.878Z] DEBUG: Processing command: 06e096d9-3bc0-4ab4-84f1-def32798127c
+[2025-12-21T17:59:31.879Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:59:31.882Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:59:31.882Z] DEBUG: Command read_co2_data executed successfully (commandId: 06e096d9-3bc0-4ab4-84f1-def32798127c)
+[2025-12-21T17:59:31.882Z] DEBUG: [Session 2] Greenhouse command read_co2_data succeeded in 3ms
+[2025-12-21T17:59:32.453Z] DEBUG: Processing command: 0616b2e2-9496-4f78-9902-d642fc7be2ea
+[2025-12-21T17:59:32.454Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T17:59:32.456Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T17:59:32.456Z] DEBUG: Command read_temperature_data executed successfully (commandId: 0616b2e2-9496-4f78-9902-d642fc7be2ea)
+[2025-12-21T17:59:32.456Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T17:59:32.626Z] DEBUG: Processing command: da43b605-a746-4360-8bcb-475ed5cfba53
+[2025-12-21T17:59:32.848Z] DEBUG: Processing command: 3b22e189-cbe5-4967-bd58-4ac432d830f4
+[2025-12-21T17:59:33.271Z] DEBUG: Processing command: 4448872b-f335-4d97-aa73-e08924426660
+[2025-12-21T17:59:33.438Z] DEBUG: Processing command: 9dde64d3-098f-46da-a760-81138010c6fb
+[2025-12-21T17:59:33.604Z] DEBUG: Processing command: 2a3ec2f6-ed59-44c5-98bf-9b795933b2ef
+
+
+=== Backend Restarted: 2025-12-21T18:01:18.504Z ===
+
+[2025-12-21T18:01:18.648Z] INFO: Redis Client Connected
+[2025-12-21T18:01:18.650Z] INFO: Redis Client Ready
+[2025-12-21T18:01:18.651Z] INFO: Redis connected
+[2025-12-21T18:01:18.690Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:01:18.691Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:01:18.691Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:01:18.696Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:01:18.696Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:01:18.697Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:01:18.698Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:01:18.698Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:01:23.699Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:01:23.699Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:01:23.752Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T18:03:37.540Z ===
+
+[2025-12-21T18:03:37.691Z] INFO: Redis Client Connected
+[2025-12-21T18:03:37.694Z] INFO: Redis Client Ready
+[2025-12-21T18:03:37.694Z] INFO: Redis connected
+[2025-12-21T18:03:37.735Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:03:37.735Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:03:37.735Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:03:37.739Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:03:37.739Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:03:37.739Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:03:37.740Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T18:03:37.741Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T18:03:42.741Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:03:42.742Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:03:42.794Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T18:05:33.327Z ===
+
+[2025-12-21T18:05:33.480Z] INFO: Redis Client Connected
+[2025-12-21T18:05:33.484Z] INFO: Redis Client Ready
+[2025-12-21T18:05:33.484Z] INFO: Redis connected
+[2025-12-21T18:05:33.528Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:05:33.528Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:05:33.529Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:05:33.535Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:05:33.535Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:05:33.535Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:05:33.537Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T18:05:33.537Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T18:05:38.537Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:05:38.541Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:05:38.603Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T18:12:35.987Z ===
+
+[2025-12-21T18:12:36.131Z] INFO: Redis Client Connected
+[2025-12-21T18:12:36.134Z] INFO: Redis Client Ready
+[2025-12-21T18:12:36.134Z] INFO: Redis connected
+[2025-12-21T18:12:36.176Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:12:36.176Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:12:36.177Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:12:36.181Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:12:36.182Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:12:36.182Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:12:36.183Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:12:36.184Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:12:41.183Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:12:41.184Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:12:41.237Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T18:12:43.480Z] DEBUG: Processing command: 7ea5eeb7-5b5d-4bee-adee-c2313ee021e9
+[2025-12-21T18:12:43.481Z] DEBUG: [Session 1] Session started - ID: 23f49abc-dce5-4835-ab94-3ad8e302d15f
+[2025-12-21T18:12:43.481Z] INFO: Created new session: 23f49abc-dce5-4835-ab94-3ad8e302d15f (session_1.log)
+[2025-12-21T18:12:43.482Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:12:43.495Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:12:43.495Z] DEBUG: Command read_temperature_data executed successfully (commandId: 7ea5eeb7-5b5d-4bee-adee-c2313ee021e9)
+[2025-12-21T18:12:43.495Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 13ms
+[2025-12-21T18:12:44.089Z] DEBUG: Processing command: adb97fdf-f969-4f88-8427-f0fabf343c9b
+[2025-12-21T18:12:44.554Z] DEBUG: Processing command: abda158e-3414-402f-b1f0-b8b8a98a2592
+[2025-12-21T18:12:44.555Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:12:44.559Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:12:44.559Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: abda158e-3414-402f-b1f0-b8b8a98a2592)
+[2025-12-21T18:12:44.559Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T18:12:44.941Z] DEBUG: Processing command: 7efb081e-a5a1-4f71-985d-e8f3e2fe4107
+[2025-12-21T18:12:45.786Z] DEBUG: Processing command: c6a9289d-6f98-40ce-90c6-ce165b812683
+[2025-12-21T18:12:45.788Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:12:45.793Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:12:45.793Z] DEBUG: Command read_light_data executed successfully (commandId: c6a9289d-6f98-40ce-90c6-ce165b812683)
+[2025-12-21T18:12:45.793Z] DEBUG: [Session 1] Greenhouse command read_light_data succeeded in 6ms
+[2025-12-21T18:12:45.932Z] DEBUG: Processing command: b4324bbd-c57e-4ea4-8cd1-773138d7ebb1
+[2025-12-21T18:12:46.050Z] DEBUG: Processing command: d5865632-6575-42c5-a946-aafd1ae110e7
+[2025-12-21T18:12:46.195Z] DEBUG: Processing command: 4fbea813-d7a4-4556-9144-a543549b5987
+[2025-12-21T18:12:46.319Z] DEBUG: Processing command: 0d77e860-3984-4da4-941f-836a3149e5a1
+[2025-12-21T18:12:46.465Z] DEBUG: Processing command: 01b2585a-6a4e-472d-b4c4-8f05a76ec156
+[2025-12-21T18:12:46.465Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:12:46.469Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:12:46.469Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 01b2585a-6a4e-472d-b4c4-8f05a76ec156)
+[2025-12-21T18:12:46.469Z] DEBUG: [Session 1] Greenhouse command read_soil_moisture_data succeeded in 4ms
+[2025-12-21T18:12:46.603Z] DEBUG: Processing command: 74a63dee-e75c-42c5-9e97-b1715fa39708
+[2025-12-21T18:12:48.256Z] DEBUG: Processing command: 7269bee8-ce13-4fb6-bc95-b33a13258753
+[2025-12-21T18:12:48.479Z] DEBUG: Processing command: b7a1c11a-dc39-4272-a6bb-ad86b7e1a36f
+[2025-12-21T18:12:48.582Z] DEBUG: Processing command: 96845347-d9fa-4808-8573-52cb8c685647
+[2025-12-21T18:12:48.720Z] DEBUG: Processing command: 1ccedac7-af81-4059-8a30-621506f5d453
+[2025-12-21T18:12:48.866Z] DEBUG: Processing command: 52bad5ee-fa99-490d-87be-f4572fff2496
+[2025-12-21T18:14:25.266Z] DEBUG: Processing command: 7ca70dbb-5166-48c3-82c3-83568be5341f
+[2025-12-21T18:14:25.266Z] DEBUG: [Session 2] Session started - ID: 60d95f6e-6dc5-4855-a2f5-4e73b0cd5ed1
+[2025-12-21T18:14:25.266Z] INFO: Created new session: 60d95f6e-6dc5-4855-a2f5-4e73b0cd5ed1 (session_2.log)
+[2025-12-21T18:14:25.266Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:14:25.270Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:14:25.270Z] DEBUG: Command read_temperature_data executed successfully (commandId: 7ca70dbb-5166-48c3-82c3-83568be5341f)
+[2025-12-21T18:14:25.270Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T18:14:26.027Z] DEBUG: Processing command: 1a9093ae-938f-4d3f-ade9-111a3035f47f
+[2025-12-21T18:14:26.027Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:14:26.030Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:14:26.030Z] DEBUG: Command read_co2_data executed successfully (commandId: 1a9093ae-938f-4d3f-ade9-111a3035f47f)
+[2025-12-21T18:14:26.030Z] DEBUG: [Session 2] Greenhouse command read_co2_data succeeded in 3ms
+[2025-12-21T18:14:27.406Z] DEBUG: Processing command: 448d618f-60d5-4e3e-abd4-8a86036c2276
+[2025-12-21T18:14:27.407Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:14:27.410Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:14:27.410Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 448d618f-60d5-4e3e-abd4-8a86036c2276)
+[2025-12-21T18:14:27.410Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 3ms
+[2025-12-21T18:14:49.926Z] DEBUG: Processing command: 4401330f-638f-4fb2-b876-ccbc508c61b4
+[2025-12-21T18:14:49.927Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:14:49.931Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:14:49.931Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 4401330f-638f-4fb2-b876-ccbc508c61b4)
+[2025-12-21T18:14:49.931Z] DEBUG: [Session 2] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T18:14:50.099Z] DEBUG: Processing command: afe1a376-0947-4048-9f77-afe7ed80e28a
+[2025-12-21T18:14:50.293Z] DEBUG: Processing command: cd09eed3-c0bc-48a3-bed0-07ca39f6f2ed
+[2025-12-21T18:14:50.491Z] DEBUG: Processing command: a1688139-b12a-4f23-bc88-d8da6e5b8c78
+[2025-12-21T18:14:50.667Z] DEBUG: Processing command: a375f4f3-7458-4c33-adac-9f843bfdd450
+[2025-12-21T18:14:50.854Z] DEBUG: Processing command: 0b7d5059-63f0-442b-aadb-191314822db2
+[2025-12-21T18:14:51.041Z] DEBUG: Processing command: 3c118c5b-951e-4a14-9aaf-ad970eb8e36d
+[2025-12-21T18:14:51.230Z] DEBUG: Processing command: 481e375b-0c10-49e5-8cc3-cec70b34354c
+[2025-12-21T18:14:51.416Z] DEBUG: Processing command: eaf654f6-17a7-4fbe-be3a-8ee1a8a25204
+[2025-12-21T18:14:51.610Z] DEBUG: Processing command: fd80816c-9ff9-4f57-a8a5-3d3c1ec0a20f
+[2025-12-21T18:14:51.794Z] DEBUG: Processing command: 0925ff73-30e7-441e-9802-1cb9eedbc608
+[2025-12-21T18:14:51.963Z] DEBUG: Processing command: 0fc36dcb-feaa-4de9-8568-4cace4a31418
+[2025-12-21T18:14:52.158Z] DEBUG: Processing command: 238a6204-337f-4a27-9665-ab9620d99de9
+[2025-12-21T18:14:54.024Z] DEBUG: Processing command: 0eb11e9d-9c3e-4928-b6a4-57490877df46
+[2025-12-21T18:14:54.025Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:14:54.030Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:14:54.030Z] DEBUG: Command read_soil_moisture_data executed successfully (commandId: 0eb11e9d-9c3e-4928-b6a4-57490877df46)
+[2025-12-21T18:14:54.030Z] DEBUG: [Session 2] Greenhouse command read_soil_moisture_data succeeded in 5ms
+[2025-12-21T18:14:54.339Z] DEBUG: Processing command: a9b8606d-0f03-4a28-b06a-db6cf2731cf2
+[2025-12-21T18:14:54.644Z] DEBUG: Processing command: 68793cbd-d3ef-4fb0-b429-e900693916da
+[2025-12-21T18:14:54.990Z] DEBUG: Processing command: 63166592-c1bc-4bb3-b999-675c2e6d7bd9
+[2025-12-21T18:14:55.295Z] DEBUG: Processing command: 67f37163-f042-4f93-978e-f8ead9ba8bda
+[2025-12-21T18:14:55.530Z] DEBUG: Processing command: eca4405f-2f8d-4b27-b72d-a76a65ecb1e6
+[2025-12-21T18:14:55.821Z] DEBUG: Processing command: 01af3ad3-b4e5-4aed-8e78-bdb52f68879c
+
+
+=== Backend Restarted: 2025-12-21T18:17:03.998Z ===
+
+[2025-12-21T18:17:04.144Z] INFO: Redis Client Connected
+[2025-12-21T18:17:04.147Z] INFO: Redis Client Ready
+[2025-12-21T18:17:04.147Z] INFO: Redis connected
+[2025-12-21T18:17:04.188Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:17:04.189Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:17:04.189Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:17:04.195Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:17:04.195Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:17:04.195Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:17:04.197Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T18:17:04.197Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.2:5672
+[2025-12-21T18:17:09.197Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:17:09.198Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:17:09.250Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T18:17:14.670Z] DEBUG: Processing command: 09fb1336-cd81-4274-96c9-02a28bc61ebe
+[2025-12-21T18:17:14.671Z] DEBUG: [Session 1] Session started - ID: 0b3160b3-63ea-4c3a-a844-b339abcae95c
+[2025-12-21T18:17:14.671Z] INFO: Created new session: 0b3160b3-63ea-4c3a-a844-b339abcae95c (session_1.log)
+[2025-12-21T18:17:14.672Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:17:14.683Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:17:14.683Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 09fb1336-cd81-4274-96c9-02a28bc61ebe)
+[2025-12-21T18:17:14.683Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 11ms
+[2025-12-21T18:17:15.307Z] DEBUG: Processing command: c487c359-772a-48d2-89b5-6670a128a553
+[2025-12-21T18:17:16.243Z] DEBUG: Processing command: c11ab5c1-8e4e-4c9e-bf15-11186fd8dd3d
+[2025-12-21T18:17:16.806Z] DEBUG: Processing command: d50576d8-00fd-45bc-b2a3-244aa299b98d
+[2025-12-21T18:17:17.415Z] DEBUG: Processing command: 87222222-b56a-489a-bc68-33d291b1ae1e
+[2025-12-21T18:17:17.706Z] DEBUG: Processing command: b2f7e96d-8281-484b-9464-417573ec3ae9
+[2025-12-21T18:17:17.901Z] DEBUG: Processing command: 2b23e763-beff-44ab-821f-1b023d7701db
+[2025-12-21T18:17:18.060Z] DEBUG: Processing command: 23f68f24-b23d-40f0-b0ab-1593897e1ee0
+[2025-12-21T18:17:21.606Z] DEBUG: Processing command: 8fcc8939-5414-4c1a-8f81-7f94dcd8a601
+[2025-12-21T18:17:21.607Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:17:21.611Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:17:21.611Z] DEBUG: Command read_co2_data executed successfully (commandId: 8fcc8939-5414-4c1a-8f81-7f94dcd8a601)
+[2025-12-21T18:17:21.611Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 4ms
+[2025-12-21T18:17:21.766Z] DEBUG: Processing command: 11d0641a-2ca4-49ef-8be0-9ca71019d1cd
+[2025-12-21T18:17:21.925Z] DEBUG: Processing command: d483d2ad-c90a-495e-aef0-b72e0cb04f16
+[2025-12-21T18:17:22.098Z] DEBUG: Processing command: 32efec95-8917-4064-b38c-12733bba96d1
+[2025-12-21T18:17:22.258Z] DEBUG: Processing command: c5d7e332-e7c8-4983-9cf9-42713197f7f4
+[2025-12-21T18:17:22.410Z] DEBUG: Processing command: 73ee8d3f-2b80-4331-a94d-f9c51fc883ea
+
+
+=== Backend Restarted: 2025-12-21T18:22:05.517Z ===
+
+[2025-12-21T18:22:05.666Z] INFO: Redis Client Connected
+[2025-12-21T18:22:05.668Z] INFO: Redis Client Ready
+[2025-12-21T18:22:05.669Z] INFO: Redis connected
+[2025-12-21T18:22:05.705Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:22:05.705Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:22:05.705Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:22:05.709Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:22:05.709Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:22:05.709Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:22:05.710Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T18:22:05.711Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T18:22:10.710Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:22:10.711Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:22:10.764Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T18:22:11.038Z] DEBUG: Processing command: 8bbbc780-e1af-413f-9fbd-161e2f95cd33
+[2025-12-21T18:22:11.038Z] DEBUG: [Session 1] Session started - ID: 7bba750f-bbaf-4c08-a55d-4c71050e436c
+[2025-12-21T18:22:11.039Z] INFO: Created new session: 7bba750f-bbaf-4c08-a55d-4c71050e436c (session_1.log)
+[2025-12-21T18:22:11.040Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:22:11.052Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:22:11.052Z] DEBUG: Command switch_fan executed successfully (commandId: 8bbbc780-e1af-413f-9fbd-161e2f95cd33)
+[2025-12-21T18:22:11.052Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 13ms
+[2025-12-21T18:22:11.981Z] DEBUG: Processing command: 139a9ec2-a066-44ef-afe7-59bda337bce3
+[2025-12-21T18:22:11.982Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:22:11.986Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:22:11.986Z] DEBUG: Command read_temperature_data executed successfully (commandId: 139a9ec2-a066-44ef-afe7-59bda337bce3)
+[2025-12-21T18:22:11.986Z] DEBUG: [Session 1] Greenhouse command read_temperature_data succeeded in 4ms
+[2025-12-21T18:22:12.432Z] DEBUG: Processing command: 22f89c4e-32a7-4b80-bc1f-2ddceba2423e
+[2025-12-21T18:22:12.688Z] DEBUG: Processing command: 07bd2cbd-c92c-4202-8ee3-f676b4a96c66
+[2025-12-21T18:22:14.205Z] DEBUG: Processing command: 0712916f-4014-41e1-b95a-23d0cd127ed3
+[2025-12-21T18:22:14.205Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:22:14.209Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:22:14.209Z] DEBUG: Command read_soil_ph_data executed successfully (commandId: 0712916f-4014-41e1-b95a-23d0cd127ed3)
+[2025-12-21T18:22:14.209Z] DEBUG: [Session 1] Greenhouse command read_soil_ph_data succeeded in 4ms
+[2025-12-21T18:22:14.627Z] DEBUG: Processing command: fbc5f1eb-a776-43f8-bff7-ef64a222dc6c
+[2025-12-21T18:22:14.628Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:22:14.631Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:22:14.631Z] DEBUG: Command switch_fan executed successfully (commandId: fbc5f1eb-a776-43f8-bff7-ef64a222dc6c)
+[2025-12-21T18:22:14.631Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T18:22:14.800Z] DEBUG: Processing command: 3e627e9e-0944-4be3-86af-67d02f1a169e
+[2025-12-21T18:22:14.800Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:22:14.803Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:22:14.803Z] DEBUG: Command switch_fan executed successfully (commandId: 3e627e9e-0944-4be3-86af-67d02f1a169e)
+[2025-12-21T18:22:14.803Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T18:22:14.967Z] DEBUG: Processing command: 478145c2-cd76-4fd1-b6ee-8280eeb73369
+[2025-12-21T18:22:14.967Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:22:14.970Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:22:14.970Z] DEBUG: Command switch_fan executed successfully (commandId: 478145c2-cd76-4fd1-b6ee-8280eeb73369)
+[2025-12-21T18:22:14.970Z] DEBUG: [Session 1] Greenhouse command switch_fan succeeded in 3ms
+[2025-12-21T18:27:18.526Z] DEBUG: Processing command: ea8271e9-d11a-4253-a173-314111e03c77
+[2025-12-21T18:27:18.526Z] DEBUG: [Session 2] Session started - ID: a369b0ff-7e49-45f0-8db2-d212d8c7af12
+[2025-12-21T18:27:18.526Z] INFO: Created new session: a369b0ff-7e49-45f0-8db2-d212d8c7af12 (session_2.log)
+[2025-12-21T18:27:18.527Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:18.530Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:18.530Z] DEBUG: Command read_temperature_data executed successfully (commandId: ea8271e9-d11a-4253-a173-314111e03c77)
+[2025-12-21T18:27:18.530Z] DEBUG: [Session 2] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T18:27:18.949Z] DEBUG: Processing command: 3ed5d815-b16f-487f-a100-d9dab5a92dff
+[2025-12-21T18:27:19.483Z] DEBUG: Processing command: 9bdcf17e-777d-4126-bbba-51af4310e6df
+[2025-12-21T18:27:19.664Z] DEBUG: Processing command: 25307b72-c682-450d-ac85-ee89e7603ba4
+[2025-12-21T18:27:19.816Z] DEBUG: Processing command: acb4e580-4cca-46c2-aae8-f5ada243b861
+[2025-12-21T18:27:19.984Z] DEBUG: Processing command: 5dcbd45f-bbb8-4ae4-af65-ca6780e3eae2
+[2025-12-21T18:27:20.134Z] DEBUG: Processing command: a3dade0e-5a92-4d6c-890b-f3f47bd6a591
+[2025-12-21T18:27:20.335Z] DEBUG: Processing command: 71c4d460-9e24-4ef8-95cf-a1f7b0a82eb6
+[2025-12-21T18:27:20.620Z] DEBUG: Processing command: a466ca99-6a33-466f-a551-1abc43d6d40c
+[2025-12-21T18:27:20.786Z] DEBUG: Processing command: 09bb7f15-dfa9-4053-a308-d802c2ee8c51
+[2025-12-21T18:27:20.925Z] DEBUG: Processing command: 91250bc0-f9df-48d1-993e-42db485f0cc6
+[2025-12-21T18:27:23.186Z] DEBUG: Processing command: 948b21f3-971a-4a9b-ba17-7b66944c5218
+[2025-12-21T18:27:23.186Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:23.190Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:23.190Z] DEBUG: Command read_co2_data executed successfully (commandId: 948b21f3-971a-4a9b-ba17-7b66944c5218)
+[2025-12-21T18:27:23.190Z] DEBUG: [Session 2] Greenhouse command read_co2_data succeeded in 4ms
+[2025-12-21T18:27:23.339Z] DEBUG: Processing command: f4a75910-f373-43a8-8934-1b95224df6df
+[2025-12-21T18:27:23.498Z] DEBUG: Processing command: 1bbf9e5c-2fe3-4cb2-b642-b50b70d4b59e
+[2025-12-21T18:27:23.643Z] DEBUG: Processing command: 823bf2d2-c385-4cdd-af05-9355708c0399
+[2025-12-21T18:27:50.160Z] DEBUG: Processing command: 0ca4e440-08d7-4b55-831e-12d01ffd1818
+[2025-12-21T18:27:50.160Z] DEBUG: [Session 3] Session started - ID: 61e518c4-831e-4e40-bb83-403db6ed98b4
+[2025-12-21T18:27:50.160Z] INFO: Created new session: 61e518c4-831e-4e40-bb83-403db6ed98b4 (session_3.log)
+[2025-12-21T18:27:50.161Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:50.164Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:50.164Z] DEBUG: Command read_co2_data executed successfully (commandId: 0ca4e440-08d7-4b55-831e-12d01ffd1818)
+[2025-12-21T18:27:50.164Z] DEBUG: [Session 3] Greenhouse command read_co2_data succeeded in 3ms
+[2025-12-21T18:27:50.326Z] DEBUG: Processing command: 16354d26-7f39-4e27-bb4c-000a831efabd
+[2025-12-21T18:27:50.492Z] DEBUG: Processing command: 2b4eba11-811b-4f8c-add6-d0d250d1e6c1
+[2025-12-21T18:27:50.637Z] DEBUG: Processing command: 26fd2667-7f8e-49d3-b03a-7a5307f34a2f
+[2025-12-21T18:27:50.797Z] DEBUG: Processing command: c981dbd0-4af0-4e1d-9fa0-75bf57bceafb
+[2025-12-21T18:27:50.943Z] DEBUG: Processing command: 00e4cc09-e7df-4a9a-878d-5a6c9c9a7175
+[2025-12-21T18:27:51.102Z] DEBUG: Processing command: 2228c484-91e4-4b52-9a44-d62fac74b250
+[2025-12-21T18:27:51.248Z] DEBUG: Processing command: ecab0e54-990a-48b4-8de2-d24110c5035d
+[2025-12-21T18:27:51.477Z] DEBUG: Processing command: e659e5ab-a2b5-49d0-a74c-0f1bc8726977
+[2025-12-21T18:27:51.477Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:51.480Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:51.480Z] DEBUG: Command read_light_data executed successfully (commandId: e659e5ab-a2b5-49d0-a74c-0f1bc8726977)
+[2025-12-21T18:27:51.480Z] DEBUG: [Session 3] Greenhouse command read_light_data succeeded in 3ms
+[2025-12-21T18:27:51.629Z] DEBUG: Processing command: b0f96d43-b6a8-4c7d-9378-68d2c595b122
+[2025-12-21T18:27:51.761Z] DEBUG: Processing command: d6c59543-c4a9-47bf-9e0c-80c0d19a1754
+[2025-12-21T18:27:52.523Z] DEBUG: Processing command: 339d6fd1-0624-44a4-9d0c-f4dd0dbd342d
+[2025-12-21T18:27:52.523Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:52.526Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:52.526Z] DEBUG: Command switch_heater executed successfully (commandId: 339d6fd1-0624-44a4-9d0c-f4dd0dbd342d)
+[2025-12-21T18:27:52.526Z] DEBUG: [Session 3] Greenhouse command switch_heater succeeded in 3ms
+[2025-12-21T18:27:52.661Z] DEBUG: Processing command: e8a5122a-2a12-4c54-b487-cc2cc51c9008
+[2025-12-21T18:27:52.662Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:52.665Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:52.665Z] DEBUG: Command switch_heater executed successfully (commandId: e8a5122a-2a12-4c54-b487-cc2cc51c9008)
+[2025-12-21T18:27:52.665Z] DEBUG: [Session 3] Greenhouse command switch_heater succeeded in 3ms
+[2025-12-21T18:27:52.967Z] DEBUG: Processing command: 777f823e-a913-460c-b8c9-8a92696b5ea0
+[2025-12-21T18:27:52.967Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:52.970Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:52.970Z] DEBUG: Command switch_actuator executed successfully (commandId: 777f823e-a913-460c-b8c9-8a92696b5ea0)
+[2025-12-21T18:27:52.970Z] DEBUG: [Session 3] Greenhouse command switch_actuator succeeded in 3ms
+[2025-12-21T18:27:53.174Z] DEBUG: Processing command: b766f499-624a-40fb-883d-92de652059af
+[2025-12-21T18:27:53.175Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:27:53.178Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:27:53.178Z] DEBUG: Command switch_actuator executed successfully (commandId: b766f499-624a-40fb-883d-92de652059af)
+[2025-12-21T18:27:53.178Z] DEBUG: [Session 3] Greenhouse command switch_actuator succeeded in 3ms
+[2025-12-21T18:31:05.185Z] DEBUG: Processing command: 514c9748-693c-4b7f-a57e-ff44b1300434
+[2025-12-21T18:31:05.186Z] DEBUG: [Session 4] Session started - ID: 6c1d8e58-b4da-4242-88ab-82e3ceb862e6
+[2025-12-21T18:31:05.186Z] INFO: Created new session: 6c1d8e58-b4da-4242-88ab-82e3ceb862e6 (session_4.log)
+[2025-12-21T18:31:05.186Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:31:05.190Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:31:05.190Z] DEBUG: Command switch_fan executed successfully (commandId: 514c9748-693c-4b7f-a57e-ff44b1300434)
+[2025-12-21T18:31:05.190Z] DEBUG: [Session 4] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T18:31:05.358Z] DEBUG: Processing command: faf9eeff-a571-45d6-af42-703e6b23bfc0
+[2025-12-21T18:31:05.358Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:31:05.361Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:31:05.362Z] DEBUG: Command switch_fan executed successfully (commandId: faf9eeff-a571-45d6-af42-703e6b23bfc0)
+[2025-12-21T18:31:05.362Z] DEBUG: [Session 4] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T18:31:05.504Z] DEBUG: Processing command: cff4891d-8abf-4f87-9169-c49db771f9aa
+[2025-12-21T18:31:05.504Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:31:05.506Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:31:05.506Z] DEBUG: Command switch_fan executed successfully (commandId: cff4891d-8abf-4f87-9169-c49db771f9aa)
+[2025-12-21T18:31:05.507Z] DEBUG: [Session 4] Greenhouse command switch_fan succeeded in 2ms
+[2025-12-21T18:31:05.643Z] DEBUG: Processing command: 4212197b-8e7a-484f-82c8-cd163b7dc152
+[2025-12-21T18:31:05.643Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:31:05.645Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:31:05.645Z] DEBUG: Command switch_fan executed successfully (commandId: 4212197b-8e7a-484f-82c8-cd163b7dc152)
+[2025-12-21T18:31:05.646Z] DEBUG: [Session 4] Greenhouse command switch_fan succeeded in 2ms
+[2025-12-21T18:31:05.796Z] DEBUG: Processing command: 3f8b9de1-1a96-4564-8e22-7fe6e4333969
+[2025-12-21T18:31:05.797Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:31:05.801Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:31:05.801Z] DEBUG: Command switch_fan executed successfully (commandId: 3f8b9de1-1a96-4564-8e22-7fe6e4333969)
+[2025-12-21T18:31:05.801Z] DEBUG: [Session 4] Greenhouse command switch_fan succeeded in 4ms
+[2025-12-21T18:33:09.173Z] DEBUG: Processing command: a6fd128b-e91d-42c3-8c01-54a7b837c5d8
+[2025-12-21T18:33:09.173Z] DEBUG: [Session 5] Session started - ID: 5d07e740-3772-4db1-bd25-40a2632415e7
+[2025-12-21T18:33:09.173Z] INFO: Created new session: 5d07e740-3772-4db1-bd25-40a2632415e7 (session_5.log)
+[2025-12-21T18:33:09.173Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:33:09.176Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:33:09.176Z] DEBUG: Command read_temperature_data executed successfully (commandId: a6fd128b-e91d-42c3-8c01-54a7b837c5d8)
+[2025-12-21T18:33:09.176Z] DEBUG: [Session 5] Greenhouse command read_temperature_data succeeded in 3ms
+[2025-12-21T18:34:04.094Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-21T18:34:04.095Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-21T18:34:04.095Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-21T18:34:04.095Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-21T18:34:04.096Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-21T18:34:04.096Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-21T18:34:04.097Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-21T18:34:04.097Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-21T18:34:04.097Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-21T18:34:04.097Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-21T18:34:04.097Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-21T18:34:04.097Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-21T18:34:04.098Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-21T18:34:04.098Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-21T18:34:04.100Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-21T18:34:04.100Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-21T18:34:04.100Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-21T18:34:04.100Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-21T18:34:04.102Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-21T18:34:04.104Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-21T18:34:04.107Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-21T18:34:04.108Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+[2025-12-21T18:34:04.109Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-21T18:34:04.110Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-21T18:35:04.091Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:5min
+[2025-12-21T18:35:04.092Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1min
+[2025-12-21T18:35:04.097Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:1h
+[2025-12-21T18:35:04.097Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1min
+[2025-12-21T18:35:04.097Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_A:15min
+[2025-12-21T18:35:04.100Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:5min
+[2025-12-21T18:35:04.101Z] WARN: Anomaly received: Rapid change in humidity: 5.9/min
+[2025-12-21T18:35:04.103Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:15min
+[2025-12-21T18:35:04.103Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_A:1h
+[2025-12-21T18:35:04.105Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1min
+[2025-12-21T18:35:04.106Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:5min
+[2025-12-21T18:35:04.108Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:15min
+[2025-12-21T18:35:04.108Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_B:1h
+[2025-12-21T18:35:04.111Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:5min
+[2025-12-21T18:35:04.111Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1min
+[2025-12-21T18:35:04.111Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:15min
+[2025-12-21T18:35:04.116Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_B:1h
+[2025-12-21T18:35:04.116Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:5min
+[2025-12-21T18:35:04.116Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1min
+[2025-12-21T18:35:04.117Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:15min
+[2025-12-21T18:35:04.119Z] INFO: Stored aggregated data: fog:agg:temperature:Zone_C:1h
+[2025-12-21T18:35:04.121Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1min
+[2025-12-21T18:35:04.122Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:15min
+[2025-12-21T18:35:04.123Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:1h
+[2025-12-21T18:35:04.123Z] INFO: Stored aggregated data: fog:agg:humidity:Zone_C:5min
+
+
+=== Backend Restarted: 2025-12-21T18:36:10.242Z ===
+
+[2025-12-21T18:36:10.383Z] INFO: Redis Client Connected
+[2025-12-21T18:36:10.386Z] INFO: Redis Client Ready
+[2025-12-21T18:36:10.386Z] INFO: Redis connected
+[2025-12-21T18:36:10.427Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:36:10.427Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:36:10.428Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:36:10.431Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:36:10.432Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:36:10.432Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:36:10.433Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T18:36:10.433Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T18:36:15.433Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:36:15.435Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:36:15.435Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T18:36:15.436Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T18:36:15.436Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.5:5672
+[2025-12-21T18:36:20.435Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:36:20.436Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:36:20.437Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:36:20.488Z] DEBUG: Processing command: 6ddb38df-c3f8-4043-8ff8-2a3091195d9c
+[2025-12-21T18:36:20.489Z] DEBUG: [Session 1] Session started - ID: f2ee541d-b4e7-4634-b19d-682b2cdd29f7
+[2025-12-21T18:36:20.489Z] INFO: Created new session: f2ee541d-b4e7-4634-b19d-682b2cdd29f7 (session_1.log)
+[2025-12-21T18:36:20.489Z] DEBUG: Processing command: 16d441c7-6afa-40a1-9d9b-bbdce1ccf69f
+[2025-12-21T18:36:20.489Z] DEBUG: Processing command: 856486b8-4cbb-4243-b5f2-1add118a6a60
+[2025-12-21T18:36:20.489Z] INFO: RabbitMQ connected and consumer started
+[2025-12-21T18:36:20.491Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:36:20.505Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:36:20.506Z] DEBUG: Command read_co2_data executed successfully (commandId: 6ddb38df-c3f8-4043-8ff8-2a3091195d9c)
+[2025-12-21T18:36:20.506Z] DEBUG: [Session 1] Greenhouse command read_co2_data succeeded in 16ms
+
+
+=== Backend Restarted: 2025-12-21T18:41:12.230Z ===
+
+[2025-12-21T18:41:12.373Z] INFO: Redis Client Connected
+[2025-12-21T18:41:12.376Z] INFO: Redis Client Ready
+[2025-12-21T18:41:12.376Z] INFO: Redis connected
+[2025-12-21T18:41:12.418Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:41:12.418Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:41:12.418Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:41:12.422Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:41:12.422Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:41:12.422Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:41:12.423Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:41:12.423Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:41:17.424Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:41:17.425Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:41:17.426Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:41:17.426Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:41:17.426Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+
+
+=== Backend Restarted: 2025-12-21T18:42:30.937Z ===
+
+[2025-12-21T18:42:31.082Z] INFO: Redis Client Connected
+[2025-12-21T18:42:31.084Z] INFO: Redis Client Ready
+[2025-12-21T18:42:31.085Z] INFO: Redis connected
+[2025-12-21T18:42:31.126Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:42:31.126Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:42:31.126Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:42:31.132Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:42:31.132Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:42:31.132Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:42:31.133Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:42:31.133Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:42:36.133Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:42:36.137Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:42:36.213Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T18:42:41.262Z ===
+
+[2025-12-21T18:42:41.407Z] INFO: Redis Client Connected
+[2025-12-21T18:42:41.410Z] INFO: Redis Client Ready
+[2025-12-21T18:42:41.411Z] INFO: Redis connected
+[2025-12-21T18:42:41.450Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:42:41.450Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:42:41.450Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:42:41.455Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:42:41.455Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:42:41.455Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:42:41.456Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:42:41.457Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:42:46.457Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:42:46.460Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:42:46.527Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T18:43:35.664Z ===
+
+[2025-12-21T18:43:35.810Z] INFO: Redis Client Connected
+[2025-12-21T18:43:35.813Z] INFO: Redis Client Ready
+[2025-12-21T18:43:35.813Z] INFO: Redis connected
+[2025-12-21T18:43:35.854Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:43:35.854Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:43:35.854Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:43:35.861Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:43:35.861Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:43:35.861Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:43:35.863Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:43:35.863Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.4:5672
+[2025-12-21T18:43:40.863Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:43:40.864Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:43:40.919Z] INFO: RabbitMQ connected and consumer started
+
+
+=== Backend Restarted: 2025-12-21T18:44:55.356Z ===
+
+[2025-12-21T18:44:55.509Z] INFO: Redis Client Connected
+[2025-12-21T18:44:55.512Z] INFO: Redis Client Ready
+[2025-12-21T18:44:55.512Z] INFO: Redis connected
+[2025-12-21T18:44:55.551Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:44:55.551Z] INFO: Greenhouse Core Client connected
+[2025-12-21T18:44:55.552Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:44:55.556Z] INFO: Greenhouse backend running on port 3000
+[2025-12-21T18:44:55.556Z] INFO: Logs directory: /app/logs
+[2025-12-21T18:44:55.556Z] INFO: API docs available at http://localhost:3000
+[2025-12-21T18:44:55.558Z] ERROR: RabbitMQ connect failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T18:44:55.558Z] ERROR: RabbitMQ setup failed: connect ECONNREFUSED 172.18.0.3:5672
+[2025-12-21T18:45:00.558Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:45:00.559Z] INFO: Connecting to RabbitMQ at: amqp://rabbitmq:5672
+[2025-12-21T18:45:00.620Z] INFO: RabbitMQ connected and consumer started

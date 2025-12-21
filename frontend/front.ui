@@ -170,6 +170,12 @@ QTabBar::tab:hover:!selected {
         </property>
         <item>
          <widget class="QGroupBox" name="controlGroup">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="styleSheet">
            <string notr="true">QGroupBox {
     background-color: #FFFFFF;
@@ -315,41 +321,6 @@ QPushButton:disabled {
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QPushButton" name="listFilesButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
-             <property name="text">
-              <string>📁 List Files</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
             <widget class="QPushButton" name="lightButton">
              <property name="minimumSize">
               <size>
@@ -384,7 +355,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
+           <item row="2" column="0">
             <widget class="QPushButton" name="co2Button">
              <property name="minimumSize">
               <size>
@@ -419,7 +390,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
+           <item row="2" column="1">
             <widget class="QPushButton" name="soilMoistureButton">
              <property name="minimumSize">
               <size>
@@ -454,7 +425,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="3" column="0">
             <widget class="QPushButton" name="soilPHButton">
              <property name="minimumSize">
               <size>
@@ -489,7 +460,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
+           <item row="3" column="1">
             <widget class="QPushButton" name="waterCanalButton">
              <property name="minimumSize">
               <size>
@@ -524,7 +495,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
+           <item row="4" column="0">
             <widget class="QPushButton" name="fanButton">
              <property name="minimumSize">
               <size>
@@ -559,7 +530,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
+           <item row="4" column="1">
             <widget class="QPushButton" name="heaterButton">
              <property name="minimumSize">
               <size>
@@ -594,7 +565,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
+           <item row="5" column="0">
             <widget class="QPushButton" name="actuatorButton">
              <property name="minimumSize">
               <size>
@@ -633,80 +604,36 @@ QPushButton:disabled {
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="userOutputLabel">
-          <property name="styleSheet">
-           <string notr="true">QLabel {
-    font-size: 16px;
-    font-weight: 500;
-    color: #212121;
-    padding: 2px 0;
-}</string>
-          </property>
-          <property name="text">
-           <string>Command Output:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTextEdit" name="user_output">
+         <widget class="QWidget" name="user_output_container">
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>300</height>
+            <height>0</height>
            </size>
           </property>
-          <property name="styleSheet">
-           <string notr="true">QTextEdit {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 5px;
-    padding: 6px;
-    font-family: Consolas, Monaco, Courier New, monospace;
-    font-size: 11px;
-    color: #212121;
-    selection-background-color: #4CAF50;
-}
-QTextEdit:focus {
-    border: 1px solid #2E7D32;
-}</string>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
           </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="placeholderText">
-           <string>Command results will appear here...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_clear_user">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-    background-color: #FF6F00;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #FF9800;
-}
-QPushButton:pressed {
-    background-color: #E65100;
-}</string>
-          </property>
-          <property name="text">
-           <string>🗑️ Clear Output</string>
-          </property>
+          <layout class="QVBoxLayout" name="user_output_layout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -717,22 +644,28 @@ QPushButton:pressed {
        </attribute>
        <layout class="QVBoxLayout" name="serverTabLayout">
         <property name="spacing">
-         <number>12</number>
+         <number>8</number>
         </property>
         <property name="leftMargin">
-         <number>12</number>
+         <number>8</number>
         </property>
         <property name="topMargin">
-         <number>12</number>
+         <number>8</number>
         </property>
         <property name="rightMargin">
-         <number>12</number>
+         <number>8</number>
         </property>
         <property name="bottomMargin">
-         <number>12</number>
+         <number>8</number>
         </property>
         <item>
          <widget class="QGroupBox" name="serverGroup">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="styleSheet">
            <string notr="true">QGroupBox {
     background-color: #FFFFFF;
@@ -1058,66 +991,26 @@ QPushButton:disabled {
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="logSelectionLayout">
-          <item>
-           <widget class="QLabel" name="sessionLogLabel">
-            <property name="styleSheet">
-             <string notr="true">QLabel {
-    font-size: 12px;
-    color: #212121;
-    padding: 2px 0;
-}</string>
-            </property>
-            <property name="text">
-             <string>Session ID:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="session_log_input">
-            <property name="styleSheet">
-             <string notr="true">QLineEdit {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 5px;
-    padding: 6px 8px;
-    font-size: 12px;
-    color: #212121;
-    min-height: 20px;
-}
-QLineEdit:focus {
-    border: 1px solid #2E7D32;
-}</string>
-            </property>
-            <property name="placeholderText">
-             <string>Enter session ID to view log...</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="logSelectionSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
          <widget class="QGroupBox" name="infoGroup">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
           <property name="styleSheet">
            <string notr="true">QGroupBox {
     background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    margin-top: 16px;
-    padding-top: 8px;
+    border: none;
+    border-radius: 0px;
+    margin-top: 0px;
+    padding-top: 0px;
     font-weight: 500;
     color: #212121;
     font-size: 14px;
@@ -1132,107 +1025,83 @@ QGroupBox::title {
 }</string>
           </property>
           <property name="title">
-           <string>📊 Server Information</string>
+           <string></string>
           </property>
           <layout class="QVBoxLayout" name="infoGroupLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
-            <widget class="QTextEdit" name="server_info">
-             <property name="styleSheet">
-              <string notr="true">QTextEdit {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 5px;
-    padding: 6px;
-    font-family: Consolas, Monaco, Courier New, monospace;
-    font-size: 11px;
-    color: #212121;
-    selection-background-color: #4CAF50;
-}
-QTextEdit:focus {
-    border: 1px solid #2E7D32;
-}</string>
-             </property>
-             <property name="readOnly">
+            <widget class="QScrollArea" name="server_info_scroll">
+             <property name="widgetResizable">
               <bool>true</bool>
              </property>
-             <property name="placeholderText">
-              <string>Server information will appear here...</string>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
              </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="refreshLayout">
-             <item>
-              <widget class="QCheckBox" name="auto_refresh">
-               <property name="styleSheet">
-                <string notr="true">QCheckBox {
-    spacing: 6px;
-    color: #212121;
-    font-size: 12px;
-}
-QCheckBox::indicator {
-    width: 16px;
-    height: 16px;
-    border: 1px solid #BDBDBD;
-    border-radius: 3px;
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>1</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QScrollArea {
     background-color: #FFFFFF;
-}
-QCheckBox::indicator:checked {
-    background-color: #2E7D32;
-    border-color: #2E7D32;
-}
-QCheckBox::indicator:checked:hover {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
-}
-QCheckBox::indicator:hover {
-    border-color: #2E7D32;
-}</string>
-               </property>
-               <property name="text">
-                <string>🔄 Auto-refresh every 10 seconds</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="refreshSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_clear_server">
-               <property name="styleSheet">
-                <string notr="true">QPushButton {
-    background-color: #FF6F00;
-    color: #FFFFFF;
     border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
+    border-radius: 0px;
 }
-QPushButton:hover {
-    background-color: #FF9800;
-}
-QPushButton:pressed {
-    background-color: #E65100;
+QScrollArea > QWidget > QWidget {
+    background-color: #FFFFFF;
 }</string>
+             </property>
+             <widget class="QWidget" name="server_info_container">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <layout class="QVBoxLayout" name="server_info_layout">
+               <property name="spacing">
+                <number>0</number>
                </property>
-               <property name="text">
-                <string>🗑️ Clear Output</string>
+               <property name="leftMargin">
+                <number>0</number>
                </property>
-              </widget>
-             </item>
-            </layout>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+              </layout>
+             </widget>
+            </widget>
            </item>
           </layout>
          </widget>
