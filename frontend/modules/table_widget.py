@@ -116,17 +116,16 @@ class SimpleDataTable(QWidget):
         layout.addWidget(self.table, 1)  # Stretch factor 1 means it takes all available space
         
         # Ensure table expands to fill available space
-        self.table.setMinimumHeight(200)  # Minimum height but can grow
+        self.table.setMinimumSize(800, 200)  # Minimum width 800px, height 200px but can grow
         self.table.setVisible(True)  # Ensure table is visible
         self.table.show()  # Explicitly show the table
         self.table.raise_()  # Bring table to front
         
-        # Ensure the widget itself expands to full width - no constraints
-        self.setMinimumHeight(240)  # Minimum height for widget (button + table)
+        # Ensure the widget itself expands to full width
+        self.setMinimumSize(800, 240)  # Minimum width 800px, height 240px (button + table)
         self.setVisible(True)  # Ensure widget is visible
         self.show()  # Explicitly show the widget
         self.raise_()  # Bring widget to front
-        # Width will be set by parent container
     
     def apply_styling(self):
         """Apply theme-based styling to the table"""

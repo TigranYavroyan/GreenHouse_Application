@@ -222,7 +222,7 @@ class GreenhouseDesktop(QMainWindow):
         
         # Ensure container expands and is visible - override UI file minimum size
         self.user_output_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.user_output_container.setMinimumHeight(300)  # Minimum height
+        self.user_output_container.setMinimumSize(800, 300)  # Minimum width 800px, height 300px
         self.user_output_container.setVisible(True)
         self.user_output_container.show()
         self.user_output_container.raise_()  # Bring to front
@@ -235,7 +235,7 @@ class GreenhouseDesktop(QMainWindow):
         self.control_table.setVisible(True)
         self.control_table.show()
         self.control_table.raise_()  # Bring to front
-        self.control_table.setMinimumHeight(250)  # Minimum height
+        self.control_table.setMinimumSize(800, 250)  # Minimum width 800px, height 250px
         layout.addWidget(self.control_table, 1)  # Stretch factor 1
         
         # Layout will handle sizing naturally
@@ -255,7 +255,7 @@ class GreenhouseDesktop(QMainWindow):
         
         # Ensure container expands and is visible - override UI file minimum size
         self.server_info_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.server_info_container.setMinimumHeight(300)  # Minimum height
+        self.server_info_container.setMinimumSize(800, 300)  # Minimum width 800px, height 300px
         self.server_info_container.setVisible(True)
         self.server_info_container.show()
         self.server_info_container.raise_()  # Bring to front
@@ -268,7 +268,7 @@ class GreenhouseDesktop(QMainWindow):
         self.server_table.setVisible(True)
         self.server_table.show()
         self.server_table.raise_()  # Bring to front
-        self.server_table.setMinimumHeight(250)  # Minimum height
+        self.server_table.setMinimumSize(800, 250)  # Minimum width 800px, height 250px
         layout.addWidget(self.server_table, 1)  # Stretch factor 1
         
         # Layout will handle sizing naturally

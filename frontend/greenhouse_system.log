@@ -1083,3 +1083,194 @@ pika.exceptions.AMQPConnectionError
 2025-12-21 18:45:01,119 - CommandWorker - INFO - Disconnecting from RabbitMQ...
 2025-12-21 18:45:01,119 - CommandWorker - INFO - Disconnected from RabbitMQ
 2025-12-21 18:45:01,119 - RedisEdgeClient - INFO - Disconnected from Redis
+2025-12-21 18:47:30,066 - GreenhouseDesktop - INFO - Starting application with session ID: 9b505cd0-342e-424d-ad18-35eee676e0fe
+2025-12-21 18:47:30,066 - GreenhouseDesktop - INFO - Backend URL: http://backend:3000
+2025-12-21 18:47:30,067 - GreenhouseDesktop - INFO - Loading UI from: /app/front.ui
+2025-12-21 18:47:30,598 - GreenhouseDesktop - INFO - Found server_info_container
+2025-12-21 18:47:30,606 - GreenhouseDesktop - INFO - Control table created: visible=False
+2025-12-21 18:47:30,609 - GreenhouseDesktop - INFO - Server table created: visible=False
+2025-12-21 18:47:30,610 - GreenhouseDesktop - INFO - Setting up command worker
+2025-12-21 18:47:30,610 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at rabbitmq:5672
+2025-12-21 18:47:30,610 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:47:30,610 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:47:30,610 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-12-21 18:47:30,611 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.5', 5672)
+2025-12-21 18:47:30,612 - pika.adapters.utils.io_services_utils - ERROR - Socket failed to connect: <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 48252)>; error=111 (Connection refused)
+2025-12-21 18:47:30,612 - pika.adapters.utils.connection_workflow - ERROR - TCP Connection attempt failed: ConnectionRefusedError(111, 'Connection refused'); dest=(<AddressFamily.AF_INET: 2>, <SocketKind.SOCK_STREAM: 1>, 6, '', ('172.18.0.5', 5672))
+2025-12-21 18:47:30,612 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnector - reporting failure: AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused')
+2025-12-21 18:47:30,612 - pika.adapters.utils.connection_workflow - ERROR - AMQP connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None.
+2025-12-21 18:47:30,612 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnectionWorkflow - reporting failure: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-12-21 18:47:30,612 - pika.adapters.blocking_connection - ERROR - Connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-12-21 18:47:30,612 - pika.adapters.blocking_connection - ERROR - Error in _create_connection().
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/pika/adapters/blocking_connection.py", line 451, in _create_connection
+    raise self._reap_last_connection_workflow_error(error)
+pika.exceptions.AMQPConnectionError
+2025-12-21 18:47:30,613 - CommandWorker - ERROR - Failed to connect to RabbitMQ at rabbitmq:5672: 
+2025-12-21 18:47:30,613 - GreenhouseDesktop - INFO - Setting up Edge-to-Fog aggregator
+2025-12-21 18:47:30,614 - RedisEdgeClient - WARNING - Redis connection failed: Error 111 connecting to localhost:6379. Connection refused.. Running without cache.
+2025-12-21 18:47:30,614 - GreenhouseDesktop - INFO - Sensor data consumer started (simulation mode)
+2025-12-21 18:47:30,614 - GreenhouseDesktop - INFO - Device status: device_001 - registered
+2025-12-21 18:47:30,614 - EdgeFogAggregator - INFO - Registered edge device: device_001 at Zone_A
+2025-12-21 18:47:30,614 - GreenhouseDesktop - INFO - Device status: device_002 - registered
+2025-12-21 18:47:30,614 - EdgeFogAggregator - INFO - Registered edge device: device_002 at Zone_B
+2025-12-21 18:47:30,614 - GreenhouseDesktop - INFO - Device status: device_003 - registered
+2025-12-21 18:47:30,614 - EdgeFogAggregator - INFO - Registered edge device: device_003 at Zone_C
+2025-12-21 18:47:30,614 - GreenhouseDesktop - INFO - Edge-to-Fog aggregator setup complete
+2025-12-21 18:47:32,902 - GreenhouseDesktop - INFO - Sending user command f8c2daf3-2bd9-411c-910b-e92401aaf9e5: read_sensor
+2025-12-21 18:47:33,003 - CommandWorker - WARNING - Connection closed, attempting reconnect...
+2025-12-21 18:47:33,003 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:47:33,003 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:47:33,003 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-12-21 18:47:33,004 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.5', 5672)
+2025-12-21 18:47:33,004 - pika.adapters.utils.io_services_utils - ERROR - Socket failed to connect: <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 48256)>; error=111 (Connection refused)
+2025-12-21 18:47:33,004 - pika.adapters.utils.connection_workflow - ERROR - TCP Connection attempt failed: ConnectionRefusedError(111, 'Connection refused'); dest=(<AddressFamily.AF_INET: 2>, <SocketKind.SOCK_STREAM: 1>, 6, '', ('172.18.0.5', 5672))
+2025-12-21 18:47:33,004 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnector - reporting failure: AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused')
+2025-12-21 18:47:33,005 - pika.adapters.utils.connection_workflow - ERROR - AMQP connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None.
+2025-12-21 18:47:33,005 - pika.adapters.utils.connection_workflow - ERROR - AMQPConnectionWorkflow - reporting failure: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-12-21 18:47:33,005 - pika.adapters.blocking_connection - ERROR - Connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None
+2025-12-21 18:47:33,005 - pika.adapters.blocking_connection - ERROR - Error in _create_connection().
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/pika/adapters/blocking_connection.py", line 451, in _create_connection
+    raise self._reap_last_connection_workflow_error(error)
+pika.exceptions.AMQPConnectionError
+2025-12-21 18:47:33,005 - CommandWorker - ERROR - Failed to connect to RabbitMQ at rabbitmq:5672: 
+2025-12-21 18:47:33,005 - GreenhouseDesktop - WARNING - First send attempt failed, attempting reconnect...
+2025-12-21 18:47:33,005 - CommandWorker - INFO - Attempting reconnect in 2 seconds (attempt 1)
+2025-12-21 18:47:35,007 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:47:35,007 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:47:35,007 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-12-21 18:47:35,008 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.5', 5672)
+2025-12-21 18:47:35,008 - pika.adapters.utils.io_services_utils - INFO - Socket connected: <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 48272), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:47:35,009 - pika.adapters.utils.connection_workflow - INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x778584ba2ac0>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x778584ba2ac0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+2025-12-21 18:47:35,011 - pika.adapters.utils.connection_workflow - INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x778584ba2ac0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:47:35,012 - pika.adapters.utils.connection_workflow - INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x778584ba2ac0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:47:35,012 - pika.adapters.blocking_connection - INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x778584ba2ac0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:47:35,012 - pika.adapters.blocking_connection - INFO - Created channel=1
+2025-12-21 18:47:35,018 - CommandWorker - INFO - Successfully connected to RabbitMQ
+2025-12-21 18:47:35,118 - CommandWorker - INFO - Command f8c2daf3-2bd9-411c-910b-e92401aaf9e5 sent successfully: read_sensor
+2025-12-21 18:47:35,118 - GreenhouseDesktop - INFO - Command sent successfully after reconnect
+2025-12-21 18:47:35,683 - CommandWorker - INFO - Received response for command: f8c2daf3-2bd9-411c-910b-e92401aaf9e5
+2025-12-21 18:47:35,684 - GreenhouseDesktop - INFO - Received response for command f8c2daf3-2bd9-411c-910b-e92401aaf9e5, cached: False, error: False
+2025-12-21 18:47:35,684 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:35,865 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:35,865 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:35,865 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:35,865 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:35,866 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:35,866 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:38,061 - GreenhouseDesktop - INFO - Sending user command 75a86fa3-086d-4845-9ce7-359bec345f35: read_sensor
+2025-12-21 18:47:38,162 - CommandWorker - INFO - Command 75a86fa3-086d-4845-9ce7-359bec345f35 sent successfully: read_sensor
+2025-12-21 18:47:38,162 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:38,176 - CommandWorker - INFO - Received response for command: 75a86fa3-086d-4845-9ce7-359bec345f35
+2025-12-21 18:47:38,176 - GreenhouseDesktop - INFO - Received response for command 75a86fa3-086d-4845-9ce7-359bec345f35, cached: True, error: False
+2025-12-21 18:47:38,177 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:41,075 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:41,075 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:41,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:41,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:41,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:41,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:46,075 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:46,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:46,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:46,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:46,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:46,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:51,075 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:51,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:51,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:51,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:51,077 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:51,077 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:52,787 - GreenhouseDesktop - INFO - GET /health
+2025-12-21 18:47:52,793 - GreenhouseDesktop - INFO - Added row to server table: Server Health
+2025-12-21 18:47:53,418 - GreenhouseDesktop - INFO - GET /cache/keys
+2025-12-21 18:47:53,423 - GreenhouseDesktop - INFO - Added row to server table: Cache Keys
+2025-12-21 18:47:56,075 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:56,075 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:47:56,075 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:56,075 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:47:56,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:56,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:47:56,092 - GreenhouseDesktop - INFO - Sending user command 206ff969-aff0-40be-84d0-5b57769ccef8: read_sensor
+2025-12-21 18:47:56,193 - CommandWorker - INFO - Command 206ff969-aff0-40be-84d0-5b57769ccef8 sent successfully: read_sensor
+2025-12-21 18:47:56,193 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:56,245 - GreenhouseDesktop - INFO - Sending user command c888ca8c-1ef3-47ce-b402-7e33b8039417: read_sensor
+2025-12-21 18:47:56,346 - CommandWorker - INFO - Command c888ca8c-1ef3-47ce-b402-7e33b8039417 sent successfully: read_sensor
+2025-12-21 18:47:56,346 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:56,347 - CommandWorker - INFO - Received response for command: 206ff969-aff0-40be-84d0-5b57769ccef8
+2025-12-21 18:47:56,347 - GreenhouseDesktop - INFO - Received response for command 206ff969-aff0-40be-84d0-5b57769ccef8, cached: False, error: False
+2025-12-21 18:47:56,348 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:56,377 - CommandWorker - INFO - Received response for command: c888ca8c-1ef3-47ce-b402-7e33b8039417
+2025-12-21 18:47:56,377 - GreenhouseDesktop - INFO - Received response for command c888ca8c-1ef3-47ce-b402-7e33b8039417, cached: True, error: False
+2025-12-21 18:47:56,378 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:56,404 - GreenhouseDesktop - INFO - Sending user command a43dbcbb-2ff9-42d2-b61f-50be78b2819b: read_sensor
+2025-12-21 18:47:56,505 - CommandWorker - INFO - Command a43dbcbb-2ff9-42d2-b61f-50be78b2819b sent successfully: read_sensor
+2025-12-21 18:47:56,505 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:56,571 - GreenhouseDesktop - INFO - Sending user command c52e4d46-de01-425c-9233-306a4a354927: read_sensor
+2025-12-21 18:47:56,672 - CommandWorker - INFO - Command c52e4d46-de01-425c-9233-306a4a354927 sent successfully: read_sensor
+2025-12-21 18:47:56,672 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:56,673 - CommandWorker - INFO - Received response for command: a43dbcbb-2ff9-42d2-b61f-50be78b2819b
+2025-12-21 18:47:56,674 - GreenhouseDesktop - INFO - Received response for command a43dbcbb-2ff9-42d2-b61f-50be78b2819b, cached: True, error: False
+2025-12-21 18:47:56,674 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:56,679 - CommandWorker - INFO - Received response for command: c52e4d46-de01-425c-9233-306a4a354927
+2025-12-21 18:47:56,679 - GreenhouseDesktop - INFO - Received response for command c52e4d46-de01-425c-9233-306a4a354927, cached: True, error: False
+2025-12-21 18:47:56,679 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:57,811 - GreenhouseDesktop - INFO - Sending user command 2f614280-febb-440c-b9a6-fc877639aa30: read_sensor
+2025-12-21 18:47:57,912 - CommandWorker - INFO - Command 2f614280-febb-440c-b9a6-fc877639aa30 sent successfully: read_sensor
+2025-12-21 18:47:57,912 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:57,970 - GreenhouseDesktop - INFO - Sending user command 3f623310-6174-4add-8a91-4f9679ed44b8: read_sensor
+2025-12-21 18:47:58,071 - CommandWorker - INFO - Command 3f623310-6174-4add-8a91-4f9679ed44b8 sent successfully: read_sensor
+2025-12-21 18:47:58,072 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:58,072 - CommandWorker - INFO - Received response for command: 2f614280-febb-440c-b9a6-fc877639aa30
+2025-12-21 18:47:58,073 - GreenhouseDesktop - INFO - Received response for command 2f614280-febb-440c-b9a6-fc877639aa30, cached: False, error: False
+2025-12-21 18:47:58,074 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:58,081 - CommandWorker - INFO - Received response for command: 3f623310-6174-4add-8a91-4f9679ed44b8
+2025-12-21 18:47:58,081 - GreenhouseDesktop - INFO - Received response for command 3f623310-6174-4add-8a91-4f9679ed44b8, cached: True, error: False
+2025-12-21 18:47:58,082 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:58,144 - GreenhouseDesktop - INFO - Sending user command 1a2c1e0c-3260-4938-a02a-f291fedc05fa: read_sensor
+2025-12-21 18:47:58,245 - CommandWorker - INFO - Command 1a2c1e0c-3260-4938-a02a-f291fedc05fa sent successfully: read_sensor
+2025-12-21 18:47:58,245 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:58,276 - CommandWorker - INFO - Received response for command: 1a2c1e0c-3260-4938-a02a-f291fedc05fa
+2025-12-21 18:47:58,276 - GreenhouseDesktop - INFO - Received response for command 1a2c1e0c-3260-4938-a02a-f291fedc05fa, cached: True, error: False
+2025-12-21 18:47:58,277 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:58,310 - GreenhouseDesktop - INFO - Sending user command 356279a1-4066-4651-b406-d6e7109e3f93: read_sensor
+2025-12-21 18:47:58,410 - CommandWorker - INFO - Command 356279a1-4066-4651-b406-d6e7109e3f93 sent successfully: read_sensor
+2025-12-21 18:47:58,410 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:58,469 - GreenhouseDesktop - INFO - Sending user command 6bd9253b-155e-40e1-9507-7de32f6cb293: read_sensor
+2025-12-21 18:47:58,570 - CommandWorker - INFO - Command 6bd9253b-155e-40e1-9507-7de32f6cb293 sent successfully: read_sensor
+2025-12-21 18:47:58,570 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:58,571 - CommandWorker - INFO - Received response for command: 356279a1-4066-4651-b406-d6e7109e3f93
+2025-12-21 18:47:58,571 - GreenhouseDesktop - INFO - Received response for command 356279a1-4066-4651-b406-d6e7109e3f93, cached: True, error: False
+2025-12-21 18:47:58,572 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:58,576 - CommandWorker - INFO - Received response for command: 6bd9253b-155e-40e1-9507-7de32f6cb293
+2025-12-21 18:47:58,576 - GreenhouseDesktop - INFO - Received response for command 6bd9253b-155e-40e1-9507-7de32f6cb293, cached: True, error: False
+2025-12-21 18:47:58,576 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:47:58,809 - GreenhouseDesktop - INFO - Sending user command fffdceb5-a234-4995-9018-bf9dbbf30110: read_sensor
+2025-12-21 18:47:58,910 - CommandWorker - INFO - Command fffdceb5-a234-4995-9018-bf9dbbf30110 sent successfully: read_sensor
+2025-12-21 18:47:58,910 - GreenhouseDesktop - INFO - Command sent: read_sensor
+2025-12-21 18:47:58,976 - CommandWorker - INFO - Received response for command: fffdceb5-a234-4995-9018-bf9dbbf30110
+2025-12-21 18:47:58,976 - GreenhouseDesktop - INFO - Received response for command fffdceb5-a234-4995-9018-bf9dbbf30110, cached: True, error: False
+2025-12-21 18:47:58,977 - GreenhouseDesktop - INFO - Added row to control table: read_sensor - ✅ Success
+2025-12-21 18:48:01,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:48:01,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:48:01,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:48:01,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:48:01,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:48:01,076 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:48:02,880 - GreenhouseDesktop - INFO - Application shutting down
+2025-12-21 18:48:02,881 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:48:02,881 - pika.channel - INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x778584ba2ac0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-21 18:48:02,882 - pika.channel - INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x778584ba2ac0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-21 18:48:02,882 - pika.adapters.blocking_connection - INFO - Closing connection (200): Normal shutdown
+2025-12-21 18:48:02,882 - pika.connection - INFO - Closing connection (200): 'Normal shutdown'
+2025-12-21 18:48:02,883 - pika.adapters.utils.io_services_utils - INFO - Aborting transport connection: state=1; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 48272), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:48:02,883 - pika.adapters.utils.io_services_utils - INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 48272), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:48:02,883 - pika.adapters.utils.io_services_utils - INFO - Deactivating transport: state=1; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 48272), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:48:02,883 - pika.connection - INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-21 18:48:02,883 - pika.connection - INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-21 18:48:02,883 - pika.adapters.utils.io_services_utils - INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=11, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 48272), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:48:02,883 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
+2025-12-21 18:48:02,884 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:48:02,884 - RedisEdgeClient - INFO - Disconnected from Redis
