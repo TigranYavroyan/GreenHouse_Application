@@ -2648,3 +2648,30 @@ Logs Directory: /app/logs
 [2025-12-21T18:47:58.411Z] DEBUG: Processing command: 356279a1-4066-4651-b406-d6e7109e3f93
 [2025-12-21T18:47:58.571Z] DEBUG: Processing command: 6bd9253b-155e-40e1-9507-7de32f6cb293
 [2025-12-21T18:47:58.911Z] DEBUG: Processing command: fffdceb5-a234-4995-9018-bf9dbbf30110
+[2025-12-21T18:50:38.794Z] DEBUG: Processing command: 8322ade3-507d-4ef3-92c4-0637c8ab836d
+[2025-12-21T18:50:38.794Z] DEBUG: [Session 2] Session started - ID: b758f6d3-4899-497d-a88c-5dbb421b7ead
+[2025-12-21T18:50:38.794Z] INFO: Created new session: b758f6d3-4899-497d-a88c-5dbb421b7ead (session_2.log)
+[2025-12-21T18:50:38.795Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:50:38.801Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:50:38.801Z] DEBUG: Command switch_fan executed successfully (commandId: 8322ade3-507d-4ef3-92c4-0637c8ab836d)
+[2025-12-21T18:50:38.801Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 7ms
+[2025-12-21T18:50:39.504Z] DEBUG: Processing command: 5e4650bc-a384-4fff-b76d-ebb09a791a94
+[2025-12-21T18:50:39.505Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:50:39.510Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:50:39.510Z] DEBUG: Command switch_fan executed successfully (commandId: 5e4650bc-a384-4fff-b76d-ebb09a791a94)
+[2025-12-21T18:50:39.510Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 6ms
+[2025-12-21T18:50:39.714Z] DEBUG: Processing command: 39e4355f-07fb-4995-8368-f5cd907d497b
+[2025-12-21T18:50:39.715Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:50:39.719Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:50:39.720Z] DEBUG: Command switch_fan executed successfully (commandId: 39e4355f-07fb-4995-8368-f5cd907d497b)
+[2025-12-21T18:50:39.720Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T18:50:39.889Z] DEBUG: Processing command: 2532b594-8997-40e5-95ac-f0ec3368ef95
+[2025-12-21T18:50:39.889Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:50:39.894Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:50:39.894Z] DEBUG: Command switch_fan executed successfully (commandId: 2532b594-8997-40e5-95ac-f0ec3368ef95)
+[2025-12-21T18:50:39.894Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 5ms
+[2025-12-21T18:50:40.047Z] DEBUG: Processing command: a089d6db-7270-4381-a330-833fecb204d7
+[2025-12-21T18:50:40.048Z] INFO: Sending command to greenhouse core simulator
+[2025-12-21T18:50:40.056Z] INFO: Received response from greenhouse core simulator
+[2025-12-21T18:50:40.057Z] DEBUG: Command switch_fan executed successfully (commandId: a089d6db-7270-4381-a330-833fecb204d7)
+[2025-12-21T18:50:40.057Z] DEBUG: [Session 2] Greenhouse command switch_fan succeeded in 9ms

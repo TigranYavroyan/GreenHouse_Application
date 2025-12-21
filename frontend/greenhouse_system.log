@@ -1274,3 +1274,133 @@ pika.exceptions.AMQPConnectionError
 2025-12-21 18:48:02,883 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
 2025-12-21 18:48:02,884 - CommandWorker - INFO - Disconnected from RabbitMQ
 2025-12-21 18:48:02,884 - RedisEdgeClient - INFO - Disconnected from Redis
+2025-12-21 18:49:38,421 - GreenhouseDesktop - INFO - Starting application with session ID: 5f8c38b7-9c65-48e5-a264-c93751e824ad
+2025-12-21 18:49:38,421 - GreenhouseDesktop - INFO - Backend URL: http://backend:3000
+2025-12-21 18:49:38,422 - GreenhouseDesktop - INFO - Loading UI from: /app/front.ui
+2025-12-21 18:49:38,654 - GreenhouseDesktop - INFO - Found server_info_container
+2025-12-21 18:49:38,662 - GreenhouseDesktop - INFO - Control table created: visible=False
+2025-12-21 18:49:38,665 - GreenhouseDesktop - INFO - Server table created: visible=False
+2025-12-21 18:49:38,666 - GreenhouseDesktop - INFO - Setting up command worker
+2025-12-21 18:49:38,666 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at rabbitmq:5672
+2025-12-21 18:49:38,666 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:49:38,666 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:49:38,666 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-12-21 18:49:38,667 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.5', 5672)
+2025-12-21 18:49:38,668 - pika.adapters.utils.io_services_utils - INFO - Socket connected: <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 50164), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:49:38,668 - pika.adapters.utils.connection_workflow - INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x71ed247c36a0>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x71ed247c36a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+2025-12-21 18:49:38,670 - pika.adapters.utils.connection_workflow - INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x71ed247c36a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:49:38,670 - pika.adapters.utils.connection_workflow - INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x71ed247c36a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:49:38,670 - pika.adapters.blocking_connection - INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x71ed247c36a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:49:38,670 - pika.adapters.blocking_connection - INFO - Created channel=1
+2025-12-21 18:49:38,672 - CommandWorker - INFO - Successfully connected to RabbitMQ
+2025-12-21 18:49:38,673 - GreenhouseDesktop - INFO - Setting up Edge-to-Fog aggregator
+2025-12-21 18:49:38,673 - RedisEdgeClient - WARNING - Redis connection failed: Error 111 connecting to localhost:6379. Connection refused.. Running without cache.
+2025-12-21 18:49:38,673 - GreenhouseDesktop - INFO - Sensor data consumer started (simulation mode)
+2025-12-21 18:49:38,674 - GreenhouseDesktop - INFO - Device status: device_001 - registered
+2025-12-21 18:49:38,674 - EdgeFogAggregator - INFO - Registered edge device: device_001 at Zone_A
+2025-12-21 18:49:38,674 - GreenhouseDesktop - INFO - Device status: device_002 - registered
+2025-12-21 18:49:38,674 - EdgeFogAggregator - INFO - Registered edge device: device_002 at Zone_B
+2025-12-21 18:49:38,674 - GreenhouseDesktop - INFO - Device status: device_003 - registered
+2025-12-21 18:49:38,674 - EdgeFogAggregator - INFO - Registered edge device: device_003 at Zone_C
+2025-12-21 18:49:38,674 - GreenhouseDesktop - INFO - Edge-to-Fog aggregator setup complete
+2025-12-21 18:49:41,044 - GreenhouseDesktop - INFO - Application shutting down
+2025-12-21 18:49:41,044 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:49:41,044 - pika.channel - INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x71ed247c36a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-21 18:49:41,045 - pika.channel - INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x71ed247c36a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-21 18:49:41,046 - pika.adapters.blocking_connection - INFO - Closing connection (200): Normal shutdown
+2025-12-21 18:49:41,046 - pika.connection - INFO - Closing connection (200): 'Normal shutdown'
+2025-12-21 18:49:41,046 - pika.adapters.utils.io_services_utils - INFO - Aborting transport connection: state=1; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 50164), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:49:41,046 - pika.adapters.utils.io_services_utils - INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 50164), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:49:41,047 - pika.adapters.utils.io_services_utils - INFO - Deactivating transport: state=1; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 50164), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:49:41,047 - pika.connection - INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-21 18:49:41,047 - pika.connection - INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-21 18:49:41,047 - pika.adapters.utils.io_services_utils - INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 50164), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:49:41,047 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
+2025-12-21 18:49:41,048 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:49:41,048 - RedisEdgeClient - INFO - Disconnected from Redis
+2025-12-21 18:50:35,947 - GreenhouseDesktop - INFO - Starting application with session ID: b758f6d3-4899-497d-a88c-5dbb421b7ead
+2025-12-21 18:50:35,947 - GreenhouseDesktop - INFO - Backend URL: http://backend:3000
+2025-12-21 18:50:35,948 - GreenhouseDesktop - INFO - Loading UI from: /app/front.ui
+2025-12-21 18:50:36,179 - GreenhouseDesktop - INFO - Found server_info_container
+2025-12-21 18:50:36,187 - GreenhouseDesktop - INFO - Control table created: visible=False
+2025-12-21 18:50:36,190 - GreenhouseDesktop - INFO - Server table created: visible=False
+2025-12-21 18:50:36,190 - GreenhouseDesktop - INFO - Setting up command worker
+2025-12-21 18:50:36,190 - CommandWorker - INFO - Initializing CommandWorker for RabbitMQ at rabbitmq:5672
+2025-12-21 18:50:36,191 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:50:36,191 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:50:36,191 - CommandWorker - INFO - Creating new RabbitMQ connection to rabbitmq:5672...
+2025-12-21 18:50:36,192 - pika.adapters.utils.connection_workflow - INFO - Pika version 1.3.2 connecting to ('172.18.0.5', 5672)
+2025-12-21 18:50:36,193 - pika.adapters.utils.io_services_utils - INFO - Socket connected: <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 36586), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:50:36,193 - pika.adapters.utils.connection_workflow - INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7041a02a16a0>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7041a02a16a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+2025-12-21 18:50:36,195 - pika.adapters.utils.connection_workflow - INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7041a02a16a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:50:36,196 - pika.adapters.utils.connection_workflow - INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7041a02a16a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:50:36,196 - pika.adapters.blocking_connection - INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7041a02a16a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+2025-12-21 18:50:36,196 - pika.adapters.blocking_connection - INFO - Created channel=1
+2025-12-21 18:50:36,198 - CommandWorker - INFO - Successfully connected to RabbitMQ
+2025-12-21 18:50:36,198 - GreenhouseDesktop - INFO - Setting up Edge-to-Fog aggregator
+2025-12-21 18:50:36,199 - RedisEdgeClient - WARNING - Redis connection failed: Error 111 connecting to localhost:6379. Connection refused.. Running without cache.
+2025-12-21 18:50:36,199 - GreenhouseDesktop - INFO - Sensor data consumer started (simulation mode)
+2025-12-21 18:50:36,199 - GreenhouseDesktop - INFO - Device status: device_001 - registered
+2025-12-21 18:50:36,199 - EdgeFogAggregator - INFO - Registered edge device: device_001 at Zone_A
+2025-12-21 18:50:36,199 - GreenhouseDesktop - INFO - Device status: device_002 - registered
+2025-12-21 18:50:36,199 - EdgeFogAggregator - INFO - Registered edge device: device_002 at Zone_B
+2025-12-21 18:50:36,199 - GreenhouseDesktop - INFO - Device status: device_003 - registered
+2025-12-21 18:50:36,199 - EdgeFogAggregator - INFO - Registered edge device: device_003 at Zone_C
+2025-12-21 18:50:36,199 - GreenhouseDesktop - INFO - Edge-to-Fog aggregator setup complete
+2025-12-21 18:50:38,692 - GreenhouseDesktop - INFO - Sending user command 8322ade3-507d-4ef3-92c4-0637c8ab836d: switch_fan
+2025-12-21 18:50:38,793 - CommandWorker - INFO - Command 8322ade3-507d-4ef3-92c4-0637c8ab836d sent successfully: switch_fan
+2025-12-21 18:50:38,793 - GreenhouseDesktop - INFO - Command sent: switch_fan
+2025-12-21 18:50:38,877 - CommandWorker - INFO - Received response for command: 8322ade3-507d-4ef3-92c4-0637c8ab836d
+2025-12-21 18:50:38,878 - GreenhouseDesktop - INFO - Received response for command 8322ade3-507d-4ef3-92c4-0637c8ab836d, cached: False, error: False
+2025-12-21 18:50:38,878 - GreenhouseDesktop - INFO - Added row to control table: switch_fan - ✅ Success
+2025-12-21 18:50:39,401 - GreenhouseDesktop - INFO - Sending user command 5e4650bc-a384-4fff-b76d-ebb09a791a94: switch_fan
+2025-12-21 18:50:39,502 - CommandWorker - INFO - Command 5e4650bc-a384-4fff-b76d-ebb09a791a94 sent successfully: switch_fan
+2025-12-21 18:50:39,502 - GreenhouseDesktop - INFO - Command sent: switch_fan
+2025-12-21 18:50:39,577 - CommandWorker - INFO - Received response for command: 5e4650bc-a384-4fff-b76d-ebb09a791a94
+2025-12-21 18:50:39,577 - GreenhouseDesktop - INFO - Received response for command 5e4650bc-a384-4fff-b76d-ebb09a791a94, cached: False, error: False
+2025-12-21 18:50:39,578 - GreenhouseDesktop - INFO - Added row to control table: switch_fan - ✅ Success
+2025-12-21 18:50:39,612 - GreenhouseDesktop - INFO - Sending user command 39e4355f-07fb-4995-8368-f5cd907d497b: switch_fan
+2025-12-21 18:50:39,713 - CommandWorker - INFO - Command 39e4355f-07fb-4995-8368-f5cd907d497b sent successfully: switch_fan
+2025-12-21 18:50:39,713 - GreenhouseDesktop - INFO - Command sent: switch_fan
+2025-12-21 18:50:39,776 - CommandWorker - INFO - Received response for command: 39e4355f-07fb-4995-8368-f5cd907d497b
+2025-12-21 18:50:39,777 - GreenhouseDesktop - INFO - Received response for command 39e4355f-07fb-4995-8368-f5cd907d497b, cached: False, error: False
+2025-12-21 18:50:39,778 - GreenhouseDesktop - INFO - Added row to control table: switch_fan - ✅ Success
+2025-12-21 18:50:39,786 - GreenhouseDesktop - INFO - Sending user command 2532b594-8997-40e5-95ac-f0ec3368ef95: switch_fan
+2025-12-21 18:50:39,888 - CommandWorker - INFO - Command 2532b594-8997-40e5-95ac-f0ec3368ef95 sent successfully: switch_fan
+2025-12-21 18:50:39,888 - GreenhouseDesktop - INFO - Command sent: switch_fan
+2025-12-21 18:50:39,946 - GreenhouseDesktop - INFO - Sending user command a089d6db-7270-4381-a330-833fecb204d7: switch_fan
+2025-12-21 18:50:40,047 - CommandWorker - INFO - Command a089d6db-7270-4381-a330-833fecb204d7 sent successfully: switch_fan
+2025-12-21 18:50:40,047 - GreenhouseDesktop - INFO - Command sent: switch_fan
+2025-12-21 18:50:40,048 - CommandWorker - INFO - Received response for command: 2532b594-8997-40e5-95ac-f0ec3368ef95
+2025-12-21 18:50:40,049 - GreenhouseDesktop - INFO - Received response for command 2532b594-8997-40e5-95ac-f0ec3368ef95, cached: False, error: False
+2025-12-21 18:50:40,049 - GreenhouseDesktop - INFO - Added row to control table: switch_fan - ✅ Success
+2025-12-21 18:50:40,076 - CommandWorker - INFO - Received response for command: a089d6db-7270-4381-a330-833fecb204d7
+2025-12-21 18:50:40,077 - GreenhouseDesktop - INFO - Received response for command a089d6db-7270-4381-a330-833fecb204d7, cached: False, error: False
+2025-12-21 18:50:40,077 - GreenhouseDesktop - INFO - Added row to control table: switch_fan - ✅ Success
+2025-12-21 18:50:41,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:50:41,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:50:41,077 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:50:41,077 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:50:41,077 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:50:41,078 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:50:46,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:50:46,076 - GreenhouseDesktop - INFO - Device status: device_001 - online
+2025-12-21 18:50:46,076 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:50:46,077 - GreenhouseDesktop - INFO - Device status: device_002 - online
+2025-12-21 18:50:46,077 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:50:46,077 - GreenhouseDesktop - INFO - Device status: device_003 - online
+2025-12-21 18:50:48,224 - GreenhouseDesktop - INFO - Application shutting down
+2025-12-21 18:50:48,224 - CommandWorker - INFO - Disconnecting from RabbitMQ...
+2025-12-21 18:50:48,224 - pika.channel - INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7041a02a16a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-21 18:50:48,225 - pika.channel - INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7041a02a16a0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+2025-12-21 18:50:48,225 - pika.adapters.blocking_connection - INFO - Closing connection (200): Normal shutdown
+2025-12-21 18:50:48,225 - pika.connection - INFO - Closing connection (200): 'Normal shutdown'
+2025-12-21 18:50:48,226 - pika.adapters.utils.io_services_utils - INFO - Aborting transport connection: state=1; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 36586), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:50:48,226 - pika.adapters.utils.io_services_utils - INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 36586), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:50:48,226 - pika.adapters.utils.io_services_utils - INFO - Deactivating transport: state=1; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 36586), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:50:48,226 - pika.connection - INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-21 18:50:48,226 - pika.connection - INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+2025-12-21 18:50:48,227 - pika.adapters.utils.io_services_utils - INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.18.0.4', 36586), raddr=('172.18.0.5', 5672)>
+2025-12-21 18:50:48,227 - pika.adapters.blocking_connection - INFO - User-initiated close: result=BlockingConnection__OnClosedArgs(connection=<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, error=ConnectionClosedByClient: (200) 'Normal shutdown')
+2025-12-21 18:50:48,227 - CommandWorker - INFO - Disconnected from RabbitMQ
+2025-12-21 18:50:48,227 - RedisEdgeClient - INFO - Disconnected from Redis

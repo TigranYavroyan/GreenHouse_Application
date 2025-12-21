@@ -116,13 +116,13 @@ class SimpleDataTable(QWidget):
         layout.addWidget(self.table, 1)  # Stretch factor 1 means it takes all available space
         
         # Ensure table expands to fill available space
-        self.table.setMinimumSize(800, 200)  # Minimum width 800px, height 200px but can grow
+        self.table.setMinimumSize(1200, 200)  # Minimum width 1200px, height 200px but can grow
         self.table.setVisible(True)  # Ensure table is visible
         self.table.show()  # Explicitly show the table
         self.table.raise_()  # Bring table to front
         
         # Ensure the widget itself expands to full width
-        self.setMinimumSize(800, 240)  # Minimum width 800px, height 240px (button + table)
+        self.setMinimumSize(1200, 240)  # Minimum width 1200px, height 240px (button + table)
         self.setVisible(True)  # Ensure widget is visible
         self.show()  # Explicitly show the widget
         self.raise_()  # Bring widget to front
