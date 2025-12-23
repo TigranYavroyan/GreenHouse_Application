@@ -1,5 +1,4 @@
 import sys
-import json
 import uuid
 import logging
 import requests
@@ -18,6 +17,8 @@ from modules.edge_fog_aggregator import EdgeToFogAggregator, SensorReading, Sens
 from modules.redis_client import RedisEdgeClient
 from modules.table_widget import SimpleDataTable
 from modules import table_renderers
+from modules.json_prettifier import extract_payload, build_user_friendly_rows
+from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 def setup_logging():
     logging.basicConfig(
@@ -36,6 +37,9 @@ class GreenhouseDesktop(QMainWindow):
         self.session_id = str(uuid.uuid4())
         self.rabbitmq_connected = False
         self.command_worker = None
+        # History for detailed views
+        self.control_history = []  # One entry per control_table row
+        self.server_history = []   # One entry per server_table row
         
         # Import config after it's initialized
         from modules.config import config
@@ -238,6 +242,8 @@ class GreenhouseDesktop(QMainWindow):
         self.control_table.raise_()  # Bring to front
         self.control_table.setMinimumSize(1200, 250)  # Minimum width 1200px, height 250px
         layout.addWidget(self.control_table, 1)  # Stretch factor 1
+        # Double-click on a control row opens detailed view
+        self.control_table.table.cellDoubleClicked.connect(self.show_control_details)
         
         # Layout will handle sizing naturally
         self.logger.info(f"Control table created: visible={self.control_table.isVisible()}")
@@ -271,6 +277,8 @@ class GreenhouseDesktop(QMainWindow):
         self.server_table.raise_()  # Bring to front
         self.server_table.setMinimumSize(1200, 250)  # Minimum width 1200px, height 250px
         layout.addWidget(self.server_table, 1)  # Stretch factor 1
+        # Double-click on a server row opens detailed view
+        self.server_table.table.cellDoubleClicked.connect(self.show_server_details)
         
         # Layout will handle sizing naturally
         self.logger.info(f"Server table created: visible={self.server_table.isVisible()}")
@@ -296,12 +304,6 @@ class GreenhouseDesktop(QMainWindow):
                 elif widget_name == 'infoGroup':
                     self.serverTabLayout.setStretch(i, 1)  # Table takes all remaining space
     
-    def force_layout_update(self):
-        """Update table layout - tables are now responsive and handle their own sizing"""
-        # Tables are now responsive and handle their own sizing
-        pass
-    
-    
     def display_data_table(self, title, data, data_type):
         """
         Display data in table using specialized renderers for each data type.
@@ -315,6 +317,92 @@ class GreenhouseDesktop(QMainWindow):
             self.logger.warning("Server table not initialized, cannot display data")
             return
         
+        try:
+            # Store full response for detailed view
+            self.server_history.append(
+                {
+                    "title": title,
+                    "data": data,
+                    "data_type": data_type,
+                }
+            )
+
+            # Compute a short, user-friendly status summary for the main server table
+            timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
+            status = "✅ OK"
+            if isinstance(data, dict) and data.get("error"):
+                status = f"❌ Error: {data.get('error')}"
+
+            # Append a compact summary row; detailed view is available on double-click
+            self.server_table.add_row([timestamp, title, status])
+
+            self.logger.info(f"Added server summary row for '{title}' ({data_type})")
+
+        except Exception as e:
+            self.logger.error(f"Error displaying data table: {e}", exc_info=True)
+    
+    def clear_server_tables(self):
+        """Clear server info table"""
+        if self.server_table:
+            self.server_table.clear_data()
+        self.server_history = []
+    
+    def clear_control_table(self):
+        """Clear control tab command results table"""
+        if self.control_table:
+            self.control_table.clear_data()
+        self.control_history = []
+
+    def show_control_details(self, row, column):
+        """Open a detailed table view for a selected control-table row."""
+        if row < 0 or row >= len(self.control_history):
+            self.logger.warning(f"Control details requested for invalid row {row}")
+            return
+
+        entry = self.control_history[row]
+        response = entry.get("response", {})
+        timestamp = entry.get("timestamp", "")
+        command_name = entry.get("command", "unknown")
+        cached = bool(entry.get("cached", False))
+
+        try:
+            # For double-click, focus specifically on the "result" JSON payload
+            # and present it as simple key/value rows for easy reading.
+            if isinstance(response, dict) and "result" in response:
+                payload = response.get("result")
+            else:
+                payload = extract_payload(response)
+
+            # We don't pass summary_text here so all payload fields are shown.
+            columns, rows = build_user_friendly_rows(payload, summary_text="")
+
+            dialog = QDialog(self)
+            dialog.setWindowTitle(f"Command Result Details - {command_name}")
+            dialog.setMinimumSize(800, 400)
+
+            layout = QVBoxLayout(dialog)
+            details_table = SimpleDataTable(columns=columns, parent=dialog)
+            layout.addWidget(details_table)
+
+            for r in rows:
+                details_table.add_row(r)
+
+            dialog.setLayout(layout)
+            dialog.exec_()
+        except Exception as e:
+            self.logger.error(f"Error showing control details dialog: {e}", exc_info=True)
+
+    def show_server_details(self, row, column):
+        """Open a detailed table view for a selected server-table row."""
+        if row < 0 or row >= len(self.server_history):
+            self.logger.warning(f"Server details requested for invalid row {row}")
+            return
+
+        entry = self.server_history[row]
+        title = entry.get("title", "Server Data")
+        data = entry.get("data", {})
+        data_type = entry.get("data_type", "generic")
+
         try:
             # Choose appropriate renderer based on data_type
             if data_type == 'health':
@@ -351,29 +439,21 @@ class GreenhouseDesktop(QMainWindow):
                 # Fallback to generic renderer
                 columns, rows = table_renderers.render_generic_data(data)
 
-            # Reconfigure server table columns to match rendered data
-            self.server_table.clear_data()
-            self.server_table.table.setColumnCount(len(columns))
-            self.server_table.table.setHorizontalHeaderLabels(columns)
-            self.server_table.columns = columns
+            dialog = QDialog(self)
+            dialog.setWindowTitle(f"{title} - Details")
+            dialog.setMinimumSize(800, 400)
 
-            for row in rows:
-                self.server_table.add_row(row)
+            layout = QVBoxLayout(dialog)
+            details_table = SimpleDataTable(columns=columns, parent=dialog)
+            layout.addWidget(details_table)
 
-            self.logger.info(f"Rendered data table for '{title}' with type '{data_type}'")
+            for r in rows:
+                details_table.add_row(r)
 
+            dialog.setLayout(layout)
+            dialog.exec_()
         except Exception as e:
-            self.logger.error(f"Error displaying data table: {e}", exc_info=True)
-    
-    def clear_server_tables(self):
-        """Clear server info table"""
-        if self.server_table:
-            self.server_table.clear_data()
-    
-    def clear_control_table(self):
-        """Clear control tab command results table"""
-        if self.control_table:
-            self.control_table.clear_data()
+            self.logger.error(f"Error showing server details dialog: {e}", exc_info=True)
 
     def list_log_files(self):
         """List all session log files"""
@@ -808,7 +888,18 @@ class GreenhouseDesktop(QMainWindow):
         # Add row to table with data from RabbitMQ
         if self.control_table:
             try:
-                # Use table renderer to format command result in a user-friendly way
+                # Store full response for detailed view
+                self.control_history.append(
+                    {
+                        "timestamp": timestamp,
+                        "command": command_name,
+                        "response": response,
+                        "cached": cached,
+                        "error": error,
+                    }
+                )
+
+                # Use table renderer to format a compact, user-friendly summary
                 columns, rows = table_renderers.render_command_result_data(
                     response,
                     command=command_name,

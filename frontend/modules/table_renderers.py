@@ -4,7 +4,8 @@ Each renderer handles a specific data structure and returns rows ready for table
 """
 import json
 from datetime import datetime
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any
+from modules.json_prettifier import build_user_friendly_rows
 
 
 def flatten_dict(d: Dict, parent_key: str = '', sep: str = '.') -> Dict:
@@ -440,30 +441,11 @@ def render_session_log_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
 
 def render_generic_data(data: Any) -> Tuple[List[str], List[List[str]]]:
     """
-    Generic renderer for unknown data structures
-    
-    Args:
-        data: Any data structure
-        
-    Returns:
-        Tuple of (columns, rows)
+    Generic renderer for unknown data structures.
+
+    Delegates to the shared JSON prettifier so that all arbitrary JSON-like
+    payloads are presented consistently in a user-friendly table form.
     """
-    columns = ['Property', 'Value']
-    rows = []
-    
-    if isinstance(data, dict):
-        flat_data = flatten_dict(data)
-        for key, value in sorted(flat_data.items()):
-            rows.append([key, str(value)])
-    elif isinstance(data, list):
-        # If it's a list, show index and value
-        columns = ['Index', 'Value']
-        for idx, item in enumerate(data, 1):
-            if isinstance(item, dict):
-                rows.append([str(idx), json.dumps(item)])
-            else:
-                rows.append([str(idx), str(item)])
-    else:
-        rows.append(['Data', str(data)])
-    
-    return columns, rows
+    # No summary_text here because list/server views that call this already
+    # show only the detailed table, not a short summary column.
+    return build_user_friendly_rows(data, summary_text="")
