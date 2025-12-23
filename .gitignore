@@ -13,3 +13,4 @@ frontend/*.log.*
 
 # But keep .gitkeep files to preserve directory structure
 !**/.gitkeep
+*.cursor

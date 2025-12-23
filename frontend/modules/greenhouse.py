@@ -17,6 +17,7 @@ from modules.styles import GreenhouseTheme, StyleSheetGenerator
 from modules.edge_fog_aggregator import EdgeToFogAggregator, SensorReading, SensorType
 from modules.redis_client import RedisEdgeClient
 from modules.table_widget import SimpleDataTable
+from modules import table_renderers
 
 def setup_logging():
     logging.basicConfig(
@@ -303,7 +304,7 @@ class GreenhouseDesktop(QMainWindow):
     
     def display_data_table(self, title, data, data_type):
         """
-        Display data in table - simply add rows with the data that came from button clicks
+        Display data in table using specialized renderers for each data type.
         
         Args:
             title: Display title/type
@@ -315,23 +316,52 @@ class GreenhouseDesktop(QMainWindow):
             return
         
         try:
-            timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
-            
-            # Convert data to string representation
-            import json
-            if isinstance(data, dict):
-                # Format dict as key-value pairs
-                data_str = json.dumps(data, indent=2)
-            elif isinstance(data, list):
-                # Format list items
-                data_str = json.dumps(data, indent=2)
+            # Choose appropriate renderer based on data_type
+            if data_type == 'health':
+                columns, rows = table_renderers.render_health_data(data)
+            elif data_type == 'stats':
+                columns, rows = table_renderers.render_stats_data(data)
+            elif data_type == 'sessions':
+                columns, rows = table_renderers.render_sessions_data(data)
+            elif data_type == 'cache_keys':
+                columns, rows = table_renderers.render_cache_keys_data(data)
+            elif data_type == 'queues':
+                columns, rows = table_renderers.render_queues_data(data)
+            elif data_type == 'logs':
+                columns, rows = table_renderers.render_logs_data(data)
+            elif data_type == 'session_log':
+                columns, rows = table_renderers.render_session_log_data(data)
+            elif data_type == 'fog_aggregated':
+                columns, rows = table_renderers.render_fog_aggregated_data(data)
+            elif data_type == 'fog_devices':
+                columns, rows = table_renderers.render_fog_devices_data(data)
+            elif data_type == 'fog_anomalies':
+                columns, rows = table_renderers.render_fog_anomalies_data(data)
+            elif data_type == 'command_result':
+                # Use the generic command result renderer
+                timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
+                cached = bool(data.get('cached', False)) if isinstance(data, dict) else False
+                columns, rows = table_renderers.render_command_result_data(
+                    data if isinstance(data, dict) else {'result': data},
+                    command=title,
+                    timestamp=timestamp,
+                    cached=cached,
+                )
             else:
-                data_str = str(data)
-            
-            # Add row with timestamp, type, and data
-            self.server_table.add_row([timestamp, title, data_str])
-            self.logger.info(f"Added row to server table: {title}")
-                
+                # Fallback to generic renderer
+                columns, rows = table_renderers.render_generic_data(data)
+
+            # Reconfigure server table columns to match rendered data
+            self.server_table.clear_data()
+            self.server_table.table.setColumnCount(len(columns))
+            self.server_table.table.setHorizontalHeaderLabels(columns)
+            self.server_table.columns = columns
+
+            for row in rows:
+                self.server_table.add_row(row)
+
+            self.logger.info(f"Rendered data table for '{title}' with type '{data_type}'")
+
         except Exception as e:
             self.logger.error(f"Error displaying data table: {e}", exc_info=True)
     
@@ -778,22 +808,29 @@ class GreenhouseDesktop(QMainWindow):
         # Add row to table with data from RabbitMQ
         if self.control_table:
             try:
-                # Determine status
-                status = "✅ Success" if error is None else f"❌ Error: {error}"
-                
-                # Format result as string
-                import json
-                if isinstance(result, dict):
-                    result_str = json.dumps(result, indent=2)
-                elif isinstance(result, list):
-                    result_str = json.dumps(result, indent=2)
-                else:
-                    result_str = str(result)
-                
-                # Add row with timestamp, command, status, and result
-                cached_str = "Yes" if cached else "No"
-                self.control_table.add_row([timestamp, command_name, status, f"{result_str} (Cached: {cached_str})"])
-                self.logger.info(f"Added row to control table: {command_name} - {status}")
+                # Use table renderer to format command result in a user-friendly way
+                columns, rows = table_renderers.render_command_result_data(
+                    response,
+                    command=command_name,
+                    timestamp=timestamp,
+                    cached=cached,
+                )
+
+                # Our control_table is initialized with 4 columns, so we combine
+                # the renderer's Result + Cached columns into a single Result cell.
+                if rows:
+                    rendered_row = rows[0]
+                    # Expected from renderer: [timestamp, command, status, result_str, cached_str]
+                    if len(rendered_row) >= 5:
+                        _, _, status, result_str, cached_str = rendered_row
+                        display_result = f"{result_str} (Cached: {cached_str})"
+                    else:
+                        # Fallback if renderer shape changes
+                        status = rendered_row[2] if len(rendered_row) > 2 else ""
+                        display_result = rendered_row[3] if len(rendered_row) > 3 else ""
+
+                    self.control_table.add_row([timestamp, command_name, status, display_result])
+                    self.logger.info(f"Added row to control table: {command_name} - {status}")
                     
             except Exception as e:
                 self.logger.error(f"Error displaying command result in table: {e}", exc_info=True)
@@ -807,7 +844,8 @@ class GreenhouseDesktop(QMainWindow):
                 color: {self.theme.colors.error};
                 font-weight: {self.theme.typography.medium};
                 background-color: {self.theme.colors.grey_50};
-                padding: 6px 12px;
+                padding: 10px 16px;
+                min-height: 32px;
                 border-radius: {self.theme.borderRadius.md};
                 border-left: 3px solid {self.theme.colors.error};
             """)
@@ -817,7 +855,8 @@ class GreenhouseDesktop(QMainWindow):
                 color: {self.theme.colors.success};
                 font-weight: {self.theme.typography.medium};
                 background-color: {self.theme.colors.grey_50};
-                padding: 6px 12px;
+                padding: 10px 16px;
+                min-height: 32px;
                 border-radius: {self.theme.borderRadius.md};
                 border-left: 3px solid {self.theme.colors.success};
             """)
