@@ -2,9 +2,35 @@
 Simple responsive table widget for displaying data from RabbitMQ.
 Adds rows dynamically as data arrives, with scrollable support.
 """
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QSizePolicy, QPushButton, QHBoxLayout, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QSizePolicy,
+    QPushButton,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
+    QStyledItemDelegate,
+    QStyle,
+)
 from PyQt5.QtCore import Qt
 from modules.styles import GreenhouseTheme
+
+
+class _NoFocusDelegate(QStyledItemDelegate):
+    """
+    Item delegate that removes the default focus rectangle/editor-looking
+    frame that Qt draws around the current cell.
+
+    This keeps row selection highlighting, but avoids the white rectangle
+    that visually covers the cell contents when a row is clicked.
+    """
+
+    def paint(self, painter, option, index):
+        if option.state & QStyle.State_HasFocus:
+            option.state &= ~QStyle.State_HasFocus
+        super().paint(painter, option, index)
 
 
 class SimpleDataTable(QWidget):
@@ -101,6 +127,9 @@ class SimpleDataTable(QWidget):
         # Set vertical resize mode
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.table.verticalHeader().setDefaultSectionSize(self.ROW_HEIGHT)
+
+        # Remove the focus rectangle / inline editor frame on the current cell
+        self.table.setItemDelegate(_NoFocusDelegate(self.table))
         
         # Enable scrolling
         self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -146,13 +175,21 @@ class SimpleDataTable(QWidget):
                 padding: 6px 10px;
                 border: none;
                 border-bottom: 1px solid {self.theme.colors.grey_200};
+                outline: none;
             }}
             QTableWidget::item:selected {{
                 background-color: {self.theme.colors.primary_light};
                 color: {self.theme.colors.text_light};
+                outline: none;
+                border: none;
+            }}
+            QTableWidget::item:focus {{
+                outline: none;
+                border: none;
             }}
             QTableWidget::item:hover {{
-                background-color: {self.theme.colors.grey_100};
+                background-color: {self.theme.colors.grey_200};
+                color: {self.theme.colors.text_primary};
             }}
             QHeaderView::section {{
                 background-color: {self.theme.colors.primary};

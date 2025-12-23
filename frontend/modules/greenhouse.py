@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QMessageBox,
     QSizePolicy,
+    QLabel,
 )
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5 import uic
@@ -239,6 +240,15 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         # Double-click on a control row opens detailed view (mixin)
         self.control_table.table.cellDoubleClicked.connect(self.show_control_details)
 
+        # Add a small hint below the control table so users know about double-click
+        control_hint = QLabel("Tip: double-click a row in the table to see detailed information.")
+        control_hint.setObjectName("controlTableHintLabel")
+        control_hint.setStyleSheet("color: #666666; font-size: 11px; margin-top: 4px;")
+        layout.addWidget(control_hint, 0)
+
+        # Also set a tooltip on the table itself
+        self.control_table.table.setToolTip("Double-click a row to open a detailed view of the result.")
+
         self.logger.info(f"Control table created: visible={self.control_table.isVisible()}")
 
         # Setup server info table
@@ -272,6 +282,15 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         layout.addWidget(self.server_table, 1)  # Stretch factor 1
         # Double-click on a server row opens detailed view (mixin)
         self.server_table.table.cellDoubleClicked.connect(self.show_server_details)
+
+        # Add a small hint below the server table for discoverability
+        server_hint = QLabel("Tip: double-click a row in the table to see detailed server or fog data.")
+        server_hint.setObjectName("serverTableHintLabel")
+        server_hint.setStyleSheet("color: #666666; font-size: 11px; margin-top: 4px;")
+        layout.addWidget(server_hint, 0)
+
+        # Tooltip on the server table itself
+        self.server_table.table.setToolTip("Double-click a row to open a detailed view of the selected entry.")
 
         self.logger.info(f"Server table created: visible={self.server_table.isVisible()}")
 
