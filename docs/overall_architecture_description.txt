@@ -6,48 +6,57 @@ A distributed greenhouse automation system with a PyQt5 desktop frontend and Nod
 
 ### High-Level Architecture
 
-The Greenhouse Automation Application follows a **microservices architecture** with clear separation between frontend, backend, and infrastructure services:
+The Greenhouse Automation Application follows a **microservices-style architecture** with clear separation between frontend, backend, and infrastructure services. The high‑level topology is shown below in Mermaid format:
 
-```
-┌─────────────────┐
-│  PyQt5 Frontend │  (Desktop GUI Application)
-│   (Python)      │
-│                 │
-│  • Edge-to-Fog  │
-│    Aggregator   │
-│  • Redis Edge   │
-│    Cache        │
-└────────┬────────┘
-         │
-         │ RabbitMQ Messages
-         │ (greenhouse_commands)
-         ▼
-┌─────────────────┐
-│  RabbitMQ       │  (Message Broker)
-│  Message Queue  │
-└────────┬────────┘
-         │
-         │ Command Processing
-         ▼
-┌─────────────────┐
-│  Node.js        │  (Express API Server)
-│  Backend        │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │         │
-    ▼         ▼
-┌────────┐ ┌──────────────────┐
-│ Redis  │ │ Greenhouse Core │
-│ Cache  │ │ (Simulator/Real)│
-└────────┘ └──────────────────┘
-         │
-         │ HTTP API
-         ▼
-┌─────────────────┐
-│ Greenhouse Core │  (Express.js Simulator or Real Core)
-│   Simulator     │
-└─────────────────┘
+```mermaid
+flowchart TD
+    subgraph Desktop["PyQt5 Frontend (Desktop GUI)"]
+        FE[GreenhouseDesktop\n(PyQt5)]
+        AGG[EdgeToFogAggregator]
+        REDIS_EDGE[RedisEdgeClient\n(Local Redis)]
+        FE --> AGG
+        FE --> REDIS_EDGE
+    end
+
+    subgraph Broker["RabbitMQ (Message Broker)"]
+        QCMD["Queue: greenhouse_commands"]
+        QRES["Queue: command_responses"]
+    end
+
+    subgraph Backend["Node.js Backend (Express)"]
+        APP[App / Express Server]
+        CP[CommandProcessor]
+        CE[CommandExecutor]
+        SESS[SessionManager]
+        RCLIENT[RedisClientWrapper]
+        RABBIT[RabbitMQClient]
+
+        APP --> CP
+        APP --> SESS
+        APP --> RCLIENT
+        APP --> RABBIT
+        CP --> CE
+        CP --> RCLIENT
+        CP --> SESS
+    end
+
+    subgraph Infra["Backend Redis"]
+        R_BACKEND[(Redis Cache)]
+    end
+
+    subgraph Core["Greenhouse Core"]
+        CORE[Core Simulator / Real Core\n(HTTP API)]
+    end
+
+    %% Messaging paths
+    FE -->|"publish commands\n(JSON over AMQP)"| QCMD
+    QRES -->|"consume responses\n(JSON over AMQP)"| FE
+
+    QCMD -->|"manual-ack consume"| RABBIT
+    RABBIT --> APP
+
+    CP -->|"cache read/write"| R_BACKEND
+    CE -->|"HTTP commands\n/execute, etc."| CORE
 ```
 
 ## System Components
