@@ -1,37 +1,20 @@
 // config/index.js
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync } from 'fs';
 import dotenv from 'dotenv';
+import ConfigPostgres from './configPostgres.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables based on NODE_ENV
-const nodeEnv = process.env.NODE_ENV || 'development';
-
-if (nodeEnv === 'production') {
-  // Production: load .env file
-  dotenv.config({ path: path.join(__dirname, '..', '.env') });
-} else if (nodeEnv === 'development') {
-  // Development: try .env_dev first, then .env.local, then .env
-  const envDevPath = path.join(__dirname, '..', '.env_dev');
-  const envLocalPath = path.join(__dirname, '..', '.env.local');
-  const envPath = path.join(__dirname, '..', '.env');
-  
-  if (existsSync(envDevPath)) {
-    dotenv.config({ path: envDevPath });
-  } else if (existsSync(envLocalPath)) {
-    dotenv.config({ path: envLocalPath });
-  } else {
-    dotenv.config({ path: envPath });
-  }
-} else {
-  // Fallback: load .env
-  dotenv.config({ path: path.join(__dirname, '..', '.env') });
-}
-
 export default {
+  ConfigPostgres,
+  configEnv: () => {
+    dotenv.config({
+      path: `.env.${process.env.NODE_ENV}`,
+    });
+  },
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379

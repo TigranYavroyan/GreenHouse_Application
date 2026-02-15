@@ -14,6 +14,7 @@ class App {
   constructor() {
     this.app = express();
     this.config = config;
+    this.config.configEnv();
     this.systemLogger = SystemLogger;
 
     // clients
@@ -32,7 +33,12 @@ class App {
     });
 
     this.setupMiddleware();
+    this.setupPostgres();
     this.setupRoutes();
+  }
+
+  async setupPostgres() {
+    await this.config.ConfigPostgres.init();
   }
 
   setupMiddleware() {

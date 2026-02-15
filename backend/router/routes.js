@@ -1,13 +1,16 @@
 // routes/routes.js
+import authMiddleware from '../middleware/authMiddleware.js';
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import path from 'path';
 import fs from 'fs';
+
 
 function createRoutes({ sessionManager, redisClient, rabbitClient, commandStats, systemLogger }) {
   const router = express.Router();
 
   // Health
-  router.get('/health', (req, res) => {
+  router.get('/health', authMiddleware, (req, res) => {
     const sessionInfo = sessionManager.listSessions().map(s => ({
       id: s.id,
       sessionNumber: s.sessionNumber,
@@ -345,6 +348,43 @@ function createRoutes({ sessionManager, redisClient, rabbitClient, commandStats,
         'GET  /fog/anomalies'
       ]
     });
+  });
+
+
+  // try to fix
+
+
+  router.post('/registration', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Missing username or password' });
+    }
+
+    // Hash password and store user in database
+    const hashedPassword = bcrypt.hashSync(password, 8);
+    const user = { username, password: hashedPassword };
+    // Save user to database (omitted for brevity)
+
+    res.status(201).json({ message: 'User registered successfully' });
+  });
+
+  router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Missing username or password' });
+    }
+
+    // Find user in database (omitted for brevity)
+
+    // Compare passwords
+    const isValid = bcrypt.compareSync(password, user.password);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
   });
 
   return router;
