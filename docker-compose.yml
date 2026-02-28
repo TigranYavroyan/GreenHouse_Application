@@ -34,7 +34,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
   greenhouse-core-sim:
     build:
       context: ./sim
@@ -69,13 +68,19 @@ services:
       - GREENHOUSE_CORE_TIMEOUT=10000
       - GREENHOUSE_CORE_RETRIES=2
     depends_on:
-      - redis
-      - rabbitmq
-      - greenhouse-core-sim
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      greenhouse-core-sim:
+        condition: service_healthy
     volumes:
       - ./backend/logs:/app/logs
     networks:
       - greenhouse-network
+      - postgres-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -103,11 +108,31 @@ services:
     stdin_open: true
     tty: true
 
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    networks:
+      - postgres-network 
+    env_file:
+      - ./backend/.env.development
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   redis_data:
   rabbitmq_data:
+  pg_data:
 
 networks:
   greenhouse-network:
+    driver: bridge
+  postgres-network:
     driver: bridge
