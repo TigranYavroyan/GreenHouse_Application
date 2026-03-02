@@ -44,7 +44,7 @@ class GreenhouseCoreClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-      const response = await fetch(`${this.baseUrl}/api/v1/health`, {
+      const response = await fetch(`${this.baseUrl}/api/v1/metadata/health/`, {
         method: 'GET',
         signal: controller.signal,
         headers: {
