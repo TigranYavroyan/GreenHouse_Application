@@ -3,7 +3,7 @@ class CacheController {
     this.cacheService = cacheService;
   }
 
-  async getCacheKeys(req, res) {
+  getCacheKeys = async (req, res) => {
     try {
       const keys = await this.cacheService.getKeys();
       res.json({ keys });
@@ -12,7 +12,7 @@ class CacheController {
     }
   }
 
-  async clearCache(req, res) {
+  clearCache = async (req, res) => {
     try {
       await this.cacheService.clear();
       res.json({ message: 'Cache cleared' });
@@ -21,7 +21,7 @@ class CacheController {
     }
   }
 
-  async clearErrorCache(req, res) {
+  clearErrorCache = async (req, res) => {
     try {
       await this.cacheService.clearErrors();
       res.json({ message: 'Error cache cleared' });

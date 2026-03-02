@@ -9,6 +9,8 @@ import CommandExecutor from './executor/commandExecutor.js';
 import CommandProcessor from './processor/commandProcessor.js';
 import createRoutes from './router/routes.js';
 import config from './config/index.js';
+import createCacheRouter from './routers/cache.js';
+import createFogRouter from './routers/fog.js';
 
 class App {
   constructor() {
@@ -51,6 +53,9 @@ class App {
   }
 
   setupRoutes() {
+    this.app.use('/cache', createCacheRouter(this.redisClient));
+    this.app.use('/fog', createFogRouter(this.redisClient));
+
     const router = createRoutes({
       sessionManager: this.sessionManager,
       redisClient: this.redisClient,
