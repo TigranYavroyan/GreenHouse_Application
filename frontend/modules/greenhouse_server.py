@@ -186,13 +186,13 @@ class ServerPanelMixin:
 
     def check_server_health(self):
         """Check server health status"""
-        result = self.make_server_request('/health')
+        result = self.make_server_request('/metadata/health/')
         if result:
             self.display_data_table("Server Health", result, 'health')
 
     def view_server_stats(self):
         """View server statistics"""
-        result = self.make_server_request('/stats')
+        result = self.make_server_request('/metadata/stats/')
         if result:
             self.display_data_table("Server Statistics", result, 'stats')
 
@@ -225,7 +225,7 @@ class ServerPanelMixin:
 
     def check_queues(self):
         """Check RabbitMQ queue status"""
-        result = self.make_server_request('/queues')
+        result = self.make_server_request('/metadata/queues/')
         if result:
             self.display_data_table("Queue Status", result, 'queues')
 

@@ -212,7 +212,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Technology**: Node.js 18+ with Express.js
 - **Port**: 3000 (exposed to host)
 - **Dependencies**: Redis, RabbitMQ, Greenhouse Core Simulator
-- **Health Check**: HTTP GET `/health` every 30 seconds
+- **Health Check**: HTTP GET `/metadata/health/` every 30 seconds
 - **Greenhouse Core Integration**: Uses `GreenhouseCoreClient` to communicate with greenhouse core via HTTP API
 
 #### **Greenhouse Core Simulator** (`greenhouse-core-sim`)
@@ -231,7 +231,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
     - `POST /api/v1/commands/read_temperature_data` - Read temperature sensor data (alternative endpoint)
     - `POST /api/v1/commands/switch_water_canal` - Control water canal actuator (alternative endpoint)
     - `POST /api/v1/commands/switch_actuator` - Control generic actuators (alternative endpoint)
-    - `GET /api/v1/health` or `GET /health` - Health check endpoint
+    - `GET /api/v1/metadata/health/` or `GET /metadata/health/` - Health check endpoint
     - `GET /api/v1/devices` - Get current device states (debugging/monitoring)
   - **Simulation Features**:
     - **Sensors**:
@@ -248,7 +248,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
       - Heaters with temperature control (default 30°C when on)
     - Device state persistence during simulator lifetime
     - Realistic sensor interactions (e.g., heaters affect temperature, fans affect humidity/CO2)
-- **Health Check**: HTTP GET `/health` every 30 seconds
+- **Health Check**: HTTP GET `/metadata/health/` every 30 seconds
 - **Note**: In production, this will be replaced by the real greenhouse core system. The backend's `GreenhouseCoreClient` can be configured to point to the real core by changing `GREENHOUSE_CORE_URL` environment variable.
 
 #### **Frontend** (`greenhouse-frontend`)
@@ -376,7 +376,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Purpose**: Defines REST API endpoints
 - **Endpoints**:
   - `GET /`: API information and available endpoints
-  - `GET /health`: System health check with Redis/RabbitMQ status
+  - `GET /metadata/health/`: System health check with Redis/RabbitMQ status
   - `GET /sessions`: List all active sessions
   - `GET /sessions/:sessionId/log`: Get session log content
   - `DELETE /sessions/:sessionId`: Terminate a session
@@ -384,8 +384,8 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - `GET /logs/system`: Get system log content
   - `GET /cache/keys`: List all cache keys
   - `DELETE /cache/clear`: Clear all cached entries
-  - `GET /stats`: Get command processing statistics
-  - `GET /queues`: Get RabbitMQ queue status
+  - `GET /metadata/stats/`: Get command processing statistics
+  - `GET /metadata/queues/`: Get RabbitMQ queue status
 
 ### Logging
 
@@ -693,7 +693,7 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 ### Health & Information
 
 - `GET /` - API information and endpoint list
-- `GET /health` - System health check with component status
+- `GET /metadata/health/` - System health check with component status
 
 ### Sessions
 
@@ -731,8 +731,8 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 
 ### Statistics & Monitoring
 
-- `GET /stats` - Get command processing statistics
-- `GET /queues` - Get RabbitMQ queue status
+- `GET /metadata/stats/` - Get command processing statistics
+- `GET /metadata/queues/` - Get RabbitMQ queue status
 
 ---
 
@@ -763,7 +763,7 @@ To switch from simulator to real greenhouse core:
    - `POST /api/v1/commands/execute` with `{ command, parameters, commandId, sessionId }`
    - Returns `{ success, result, error, commandId, timestamp }`
    - Supports all greenhouse commands: sensor readings and actuator controls
-   - `GET /api/v1/health` for health checks
+   - `GET /api/v1/metadata/health/` for health checks
 3. Restart backend service
 
 No code changes required - the abstract interface handles the communication. The `GreenhouseCoreClient` includes:

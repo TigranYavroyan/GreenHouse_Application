@@ -21,7 +21,7 @@ echo "Waiting for backend to be ready..."
 sleep 10
 
 # Check health
-curl -f http://localhost:3000/health && echo "Backend is healthy!" || echo "Backend health check failed"
+curl -f http://localhost:3000/metadata/health/ && echo "Backend is healthy!" || echo "Backend health check failed"
 
 echo "Use 'docker compose logs -f' to view logs"
 echo "Use 'docker compose down' to stop services"

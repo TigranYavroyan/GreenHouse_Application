@@ -759,7 +759,7 @@ Currently, edge nodes communicate with the backend only. Direct edge-to-edge com
    - System continues to function without cache (graceful degradation)
 
 2. **Backend Sync Fails**
-   - Check backend is running: `curl http://localhost:3000/health`
+   - Check backend is running: `curl http://localhost:3000/metadata/health/`
    - Verify `BACKEND_URL` configuration
    - Check network connectivity
    - Errors are logged but don't block aggregation

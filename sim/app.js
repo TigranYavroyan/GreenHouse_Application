@@ -29,8 +29,8 @@ app.use((req, res, next) => {
 const commandController = new CommandController();
 
 // Routes
-app.get('/health', (req, res) => commandController.healthCheck(req, res));
-app.get('/api/v1/health', (req, res) => commandController.healthCheck(req, res));
+app.get('/metadata/health/', (req, res) => commandController.healthCheck(req, res));
+app.get('/api/v1/metadata/health/', (req, res) => commandController.healthCheck(req, res));
 
 // Command execution endpoint
 app.post('/api/v1/commands/execute', (req, res) => commandController.executeCommand(req, res));
@@ -60,8 +60,8 @@ app.get('/', (req, res) => {
     message: 'Greenhouse Core Simulator',
     version: '1.0.0',
     endpoints: [
-      'GET  /health',
-      'GET  /api/v1/health',
+      'GET  /metadata/health/',
+      'GET  /api/v1/metadata/health/',
       'POST /api/v1/commands/execute',
       'POST /api/v1/commands/read_temperature_data',
       'POST /api/v1/commands/switch_water_canal',
@@ -89,9 +89,9 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, () => {
   simulatorLogger.info(`Greenhouse Core Simulator running on port ${PORT}`);
-  simulatorLogger.info(`Health check: http://localhost:${PORT}/health`);
+  simulatorLogger.info(`Health check: http://localhost:${PORT}/metadata/health/`);
   console.log(`Greenhouse Core Simulator running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`Health check: http://localhost:${PORT}/metadata/health/`);
   console.log(`Logs directory: sim/logs/`);
   console.log(`Log file: sim/logs/simulator.log`);
   console.log(`All simulator operations are being logged to: sim/logs/simulator.log`);

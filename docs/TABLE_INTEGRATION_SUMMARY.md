@@ -53,7 +53,7 @@ User Action → API Call → Response → display_data_table() → Renderer → 
 Example:
 1. User clicks "Health" button
 2. `check_server_health()` called
-3. `make_server_request('/health')` executed
+3. `make_server_request('/metadata/health/')` executed
 4. `display_data_table("Server Health", result, 'health')` called
 5. `render_health_data()` processes data
 6. Table created/updated with new rows
