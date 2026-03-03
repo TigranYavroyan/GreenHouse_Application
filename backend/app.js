@@ -14,6 +14,7 @@ import createFogRouter from './routers/fog.js';
 import createSessionRouter from './routers/session.js';
 import createLogsRouter from './routers/logs.js';
 import createMetadataRouter from './routers/metadata.js';
+import { metricsRouter } from './clients/promClient.js';
 
 class App {
   constructor() {
@@ -61,6 +62,8 @@ class App {
     this.app.use('/sessions', createSessionRouter(this.sessionManager));
     this.app.use('/logs', createLogsRouter);
     this.app.use('/metadata', createMetadataRouter);
+
+    this.app.use(metricsRouter);
 
     const router = createRoutes();
     this.app.use('/', router);
