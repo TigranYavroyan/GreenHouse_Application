@@ -638,6 +638,234 @@ QPushButton:disabled {
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="schedulingTab">
+       <attribute name="title">
+        <string>⏱️ Scheduling</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="schedulingTabLayout">
+        <property name="spacing">
+         <number>8</number>
+        </property>
+        <property name="leftMargin">
+         <number>8</number>
+        </property>
+        <property name="topMargin">
+         <number>8</number>
+        </property>
+        <property name="rightMargin">
+         <number>8</number>
+        </property>
+        <property name="bottomMargin">
+         <number>8</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="scheduleGroup">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    margin-top: 16px;
+    padding-top: 8px;
+    font-weight: 500;
+    color: #212121;
+    font-size: 14px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 4px 12px;
+    background-color: #2E7D32;
+    color: #FFFFFF;
+    border-radius: 5px;
+}</string>
+          </property>
+          <property name="title">
+           <string>📅 Schedule One-Time Tasks</string>
+          </property>
+          <layout class="QGridLayout" name="scheduleGridLayout">
+           <property name="leftMargin">
+            <number>12</number>
+           </property>
+           <property name="topMargin">
+            <number>20</number>
+           </property>
+           <property name="rightMargin">
+            <number>12</number>
+           </property>
+           <property name="bottomMargin">
+            <number>12</number>
+           </property>
+           <property name="horizontalSpacing">
+            <number>8</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>8</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="scheduleTargetLabel">
+             <property name="text">
+              <string>Target Action</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" colspan="3">
+            <widget class="QComboBox" name="scheduleTargetCombo"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="scheduleDelayLabel">
+             <property name="text">
+              <string>Delay</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" colspan="3">
+            <widget class="QComboBox" name="scheduleDelayPresetCombo"/>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="scheduleCustomDelayLabel">
+             <property name="text">
+              <string>Custom Delay</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="customDelayLayout">
+             <property name="spacing">
+              <number>6</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QSpinBox" name="scheduleHoursSpin">
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>999</number>
+               </property>
+               <property name="suffix">
+                <string> h</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="scheduleMinutesSpin">
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>59</number>
+               </property>
+               <property name="suffix">
+                <string> m</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="scheduleSecondsSpin">
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>59</number>
+               </property>
+               <property name="suffix">
+                <string> s</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="2" colspan="2">
+            <widget class="QLabel" name="scheduleHintLabel">
+             <property name="text">
+              <string>Use custom delay when preset is set to Custom.</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QPushButton" name="scheduleTaskButton">
+             <property name="text">
+              <string>➕ Schedule Task</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QPushButton" name="cancelScheduledButton">
+             <property name="text">
+              <string>✖ Cancel Selected</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QPushButton" name="clearScheduledButton">
+             <property name="text">
+              <string>🧹 Clear All</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QLabel" name="scheduleCurrentTimeLabel">
+             <property name="text">
+              <string>Current Time: --:--:--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="schedule_output_container">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QVBoxLayout" name="schedule_output_layout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="serverTab">
        <attribute name="title">
         <string>📊 Server</string>

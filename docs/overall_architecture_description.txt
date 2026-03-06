@@ -141,9 +141,10 @@ flowchart TD
   - Headless mode (`--nogui` flag)
 - **Dependencies**: RabbitMQ, Backend API, Redis (for edge caching)
 - **Key Features**:
-  - Three-tab interface (Control, Terminal, Server)
+  - Three-tab interface (Control, Scheduling, Server)
   - Edge-to-fog data aggregation
   - Local Redis caching
+  - One-time task scheduling (in-memory) for delayed command dispatch
   - Non-blocking UI operations
 
 ## Edge-to-Fog Data Aggregation System
@@ -210,7 +211,7 @@ The system implements a complete Edge-to-Fog data aggregation architecture:
 - Edge-to-fog aggregator initialized with device registration
 
 ### 2. Command Submission
-- User interacts with GUI (Control tab, Terminal tab, or Server tab)
+- User interacts with GUI (Control tab, Scheduling tab, or Server tab)
 - Frontend creates command payload with:
   - `commandId` (UUID)
   - `command` (e.g., "read_temperature_data", "switch_water_canal", "read_sensor", "switch_actuator", "switch_fan", "switch_heater")
@@ -218,6 +219,14 @@ The system implements a complete Edge-to-Fog data aggregation architecture:
   - `sessionId` (unique session identifier)
   - `type` ("user" or "developer")
 - Command is sent to RabbitMQ queue: `greenhouse_commands`
+
+### 2.1 Scheduling (Frontend-side Dispatch)
+- Scheduling is implemented in the desktop frontend using `QTimer` (one-time tasks).
+- Users can choose delay presets (`Now`, `15m`, `30m`, `1h`) or custom `hh:mm:ss`.
+- When a scheduled task becomes due, the frontend sends the same command envelope as manual actions:
+  - `commandId`, `command`, `parameters`, `sessionId`, `type`
+- V1 persistence is in-memory only (tasks are not restored after app restart).
+- Design is modular so user-specific database persistence can be introduced later.
 
 ### 3. Backend Command Consumption
 - Backend RabbitMQ consumer listens on `greenhouse_commands` queue

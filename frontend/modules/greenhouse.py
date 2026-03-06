@@ -2,6 +2,7 @@ import sys
 import uuid
 import logging
 import os
+from datetime import datetime
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -18,6 +19,7 @@ from PyQt5 import uic
 from modules.styles import GreenhouseTheme, StyleSheetGenerator
 from modules.edge_fog_aggregator import EdgeToFogAggregator
 from modules.redis_client import RedisEdgeClient
+from modules.scheduler_service import SchedulerService
 from modules.table_widget import SimpleDataTable
 
 from modules.greenhouse_commands import CommandPanelMixin
@@ -44,6 +46,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         # History for detailed views
         self.control_history = []  # One entry per control_table row
         self.server_history = []   # One entry per server_table row
+        self.schedule_table_rows = []  # Maps schedule table row index -> task_id
         
         # Import config after it's initialized
         from modules.config import config
@@ -103,7 +106,10 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
 
         # Initialize table management before setting up tables
         self.control_table = None  # Simple table for control tab - adds rows from RabbitMQ
+        self.schedule_table = None  # Simple table for scheduling tab
         self.server_table = None  # Simple table for server tab - adds rows from button clicks
+        self.scheduler_service = None
+        self.schedule_clock_timer = None
 
         # Ensure layouts are properly set up
         self._ensure_layouts_initialized()
@@ -113,6 +119,9 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
 
         # Setup tables after UI is loaded
         self.setup_tables()
+
+        # Setup scheduling service and controls
+        self.setup_scheduler()
 
     def add_functions(self):
         """Setup signal connections and functionality"""
@@ -161,6 +170,16 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         if hasattr(self, 'auto_refresh'):
             self.auto_refresh.toggled.connect(self.toggle_auto_refresh)
 
+        # Scheduling Tab - One-time task controls
+        if hasattr(self, "scheduleTaskButton"):
+            self.scheduleTaskButton.clicked.connect(self.schedule_selected_task)
+        if hasattr(self, "cancelScheduledButton"):
+            self.cancelScheduledButton.clicked.connect(self.cancel_selected_scheduled_task)
+        if hasattr(self, "clearScheduledButton"):
+            self.clearScheduledButton.clicked.connect(self.clear_all_scheduled_tasks)
+        if hasattr(self, "scheduleDelayPresetCombo"):
+            self.scheduleDelayPresetCombo.currentIndexChanged.connect(self.update_custom_delay_enabled)
+
     def apply_styles(self):
         """Apply custom styles if needed (UI file already has styles)"""
         # The UI file already contains styles, but we can override specific widgets if needed
@@ -206,6 +225,16 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         else:
             self.logger.warning("server_info_container not available for layout initialization")
 
+        if hasattr(self, 'schedule_output_container') and self.schedule_output_container:
+            if not self.schedule_output_container.layout():
+                layout = QVBoxLayout()
+                layout.setContentsMargins(0, 0, 0, 0)
+                layout.setSpacing(0)
+                self.schedule_output_container.setLayout(layout)
+            self.schedule_output_container.setVisible(True)
+        else:
+            self.logger.warning("schedule_output_container not available for layout initialization")
+
     def setup_tables(self):
         """Initialize simple table widgets for displaying RabbitMQ + server data"""
         # Setup control table for command results from RabbitMQ
@@ -250,6 +279,37 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self.control_table.table.setToolTip("Double-click a row to open a detailed view of the result.")
 
         self.logger.info(f"Control table created: visible={self.control_table.isVisible()}")
+
+        # Setup scheduling table
+        if hasattr(self, 'schedule_output_container') and self.schedule_output_container:
+            schedule_layout = self.schedule_output_container.layout()
+            if not schedule_layout:
+                schedule_layout = QVBoxLayout()
+                schedule_layout.setContentsMargins(0, 0, 0, 0)
+                schedule_layout.setSpacing(0)
+                self.schedule_output_container.setLayout(schedule_layout)
+
+            self.schedule_output_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self.schedule_output_container.setMinimumSize(1200, 300)
+            self.schedule_output_container.setVisible(True)
+            self.schedule_output_container.show()
+
+            self.schedule_table = SimpleDataTable(
+                columns=['Task ID', 'Target', 'Run At', 'Delay', 'Remaining', 'Status'],
+                parent=self.schedule_output_container
+            )
+            self.schedule_table.setVisible(True)
+            self.schedule_table.show()
+            self.schedule_table.setMinimumSize(1200, 250)
+            schedule_layout.addWidget(self.schedule_table, 1)
+            self.schedule_table.table.setToolTip("Select a row and click 'Cancel Selected' to stop a pending task.")
+
+            schedule_hint = QLabel("Tip: use preset delay or switch to Custom and set hours/minutes/seconds.")
+            schedule_hint.setObjectName("scheduleTableHintLabel")
+            schedule_hint.setStyleSheet("color: #666666; font-size: 11px; margin-top: 4px;")
+            schedule_layout.addWidget(schedule_hint, 0)
+        else:
+            self.logger.warning("schedule_output_container not found - scheduling table not created")
 
         # Setup server info table
         if not hasattr(self, 'server_info_container') or not self.server_info_container:
@@ -315,6 +375,209 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 elif widget_name == 'infoGroup':
                     self.serverTabLayout.setStretch(i, 1)  # Table takes all remaining space
 
+        if hasattr(self, "schedulingTabLayout"):
+            for i in range(self.schedulingTabLayout.count()):
+                item = self.schedulingTabLayout.itemAt(i)
+                if item and item.widget():
+                    widget_name = item.widget().objectName()
+                    if widget_name == 'scheduleGroup':
+                        self.schedulingTabLayout.setStretch(i, 0)
+                    elif widget_name == 'schedule_output_container':
+                        self.schedulingTabLayout.setStretch(i, 1)
+
+    def setup_scheduler(self):
+        """Initialize scheduling controls and scheduler service."""
+        if not hasattr(self, "scheduleTargetCombo") or not hasattr(self, "scheduleDelayPresetCombo"):
+            self.logger.warning("Scheduling controls not present in UI")
+            return
+
+        self.scheduleTargetCombo.clear()
+        self.scheduleTargetCombo.addItem("🌬️ Read CO2", ("read_sensor", {"sensor": "co2"}))
+        self.scheduleTargetCombo.addItem("🚰 Toggle Water Canal", ("switch_water_canal", {"action": "toggle"}))
+        self.scheduleTargetCombo.addItem("🌀 Toggle Fan", ("switch_fan", {"fanId": "fan_1", "action": "toggle"}))
+        self.scheduleTargetCombo.addItem("🔥 Toggle Heater", ("switch_heater", {"heaterId": "heater_1", "action": "toggle"}))
+        self.scheduleTargetCombo.addItem("⚙️ Toggle Actuator", ("switch_actuator", {"actuatorId": "actuator_1", "action": "toggle"}))
+
+        self.scheduleDelayPresetCombo.clear()
+        self.scheduleDelayPresetCombo.addItem("Now", 0)
+        self.scheduleDelayPresetCombo.addItem("15 minutes", 15 * 60)
+        self.scheduleDelayPresetCombo.addItem("30 minutes", 30 * 60)
+        self.scheduleDelayPresetCombo.addItem("1 hour", 60 * 60)
+        self.scheduleDelayPresetCombo.addItem("Custom (hh:mm:ss)", -1)
+        self.scheduleDelayPresetCombo.setCurrentIndex(0)
+
+        self.scheduler_service = SchedulerService(
+            execute_callback=self.execute_scheduled_command,
+            timer_parent=self,
+            on_task_change=self.on_scheduled_task_changed,
+        )
+        self.schedule_clock_timer = QTimer(self)
+        self.schedule_clock_timer.timeout.connect(self.update_schedule_live_time)
+        self.schedule_clock_timer.start(1000)
+
+        self.update_custom_delay_enabled()
+        self.update_schedule_live_time()
+        self.refresh_schedule_table()
+
+    def update_schedule_live_time(self):
+        """Update live time UI elements in scheduling tab."""
+        now_text = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if hasattr(self, "scheduleCurrentTimeLabel"):
+            self.scheduleCurrentTimeLabel.setText(f"Current Time: {now_text}")
+        self.refresh_schedule_table()
+
+    def update_custom_delay_enabled(self):
+        """Enable custom delay controls only for custom preset."""
+        is_custom = False
+        if hasattr(self, "scheduleDelayPresetCombo"):
+            is_custom = self.scheduleDelayPresetCombo.currentData() == -1
+
+        for spin_name in ("scheduleHoursSpin", "scheduleMinutesSpin", "scheduleSecondsSpin"):
+            if hasattr(self, spin_name):
+                getattr(self, spin_name).setEnabled(is_custom)
+
+    def get_selected_delay_seconds(self):
+        """Resolve delay from preset/custom controls."""
+        if not hasattr(self, "scheduleDelayPresetCombo"):
+            return 0
+
+        preset_value = self.scheduleDelayPresetCombo.currentData()
+        if preset_value != -1:
+            return int(preset_value or 0)
+
+        hours = self.scheduleHoursSpin.value() if hasattr(self, "scheduleHoursSpin") else 0
+        minutes = self.scheduleMinutesSpin.value() if hasattr(self, "scheduleMinutesSpin") else 0
+        seconds = self.scheduleSecondsSpin.value() if hasattr(self, "scheduleSecondsSpin") else 0
+        return int(hours * 3600 + minutes * 60 + seconds)
+
+    def schedule_selected_task(self):
+        """Create one-time scheduled task for the selected action."""
+        if not self.scheduler_service:
+            self.show_error("Scheduling Error", "Scheduler service is not available.")
+            return
+
+        selected_data = self.scheduleTargetCombo.currentData()
+        if not selected_data or len(selected_data) != 2:
+            self.show_error("Scheduling Error", "Please choose a valid target action.")
+            return
+
+        delay_seconds = self.get_selected_delay_seconds()
+        if delay_seconds < 0:
+            self.show_error("Invalid Delay", "Delay cannot be negative.")
+            return
+        if self.scheduleDelayPresetCombo.currentData() == -1 and delay_seconds == 0:
+            self.show_error("Invalid Delay", "Custom delay must be greater than zero.")
+            return
+
+        command, parameters = selected_data
+        target_label = self.scheduleTargetCombo.currentText()
+
+        task = self.scheduler_service.schedule_once(
+            target_label=target_label,
+            command=command,
+            parameters=parameters,
+            delay_seconds=delay_seconds,
+        )
+        self.refresh_schedule_table()
+        self.status_label.setText(f"🗓️ Scheduled task {task.task_id[:8]} for {target_label}")
+
+    def cancel_selected_scheduled_task(self):
+        """Cancel currently selected scheduled task."""
+        if not self.scheduler_service or not self.schedule_table:
+            return
+
+        row = self.schedule_table.table.currentRow()
+        if row < 0 or row >= len(self.schedule_table_rows):
+            self.show_error("Cancel Task", "Please select a scheduled task row to cancel.")
+            return
+
+        task_id = self.schedule_table_rows[row]
+        if self.scheduler_service.cancel_task(task_id):
+            self.status_label.setText(f"✖ Task {task_id[:8]} cancelled")
+            self.refresh_schedule_table()
+        else:
+            self.show_error("Cancel Task", "Selected task cannot be cancelled.")
+
+    def clear_all_scheduled_tasks(self):
+        """Clear all scheduled tasks from memory."""
+        if not self.scheduler_service:
+            return
+
+        self.scheduler_service.clear_all_tasks()
+        self.refresh_schedule_table()
+        self.status_label.setText("🧹 Cleared all scheduled tasks")
+
+    def execute_scheduled_command(self, command, parameters):
+        """Execution callback used by SchedulerService."""
+        self.logger.info(f"Executing scheduled task command: {command}")
+        return self.send_user_command(command, parameters)
+
+    def on_scheduled_task_changed(self, task):
+        """React to task state changes from scheduler service."""
+        self.logger.info(f"Scheduled task {task.task_id} status changed to {task.status}")
+        self.refresh_schedule_table()
+
+        if task.status == "running":
+            self.status_label.setText(f"⏳ Running scheduled task {task.task_id[:8]}...")
+        elif task.status == "completed":
+            self.status_label.setText(f"✅ Scheduled task {task.task_id[:8]} completed")
+        elif task.status == "failed":
+            self.status_label.setText(f"❌ Scheduled task {task.task_id[:8]} failed")
+
+    def refresh_schedule_table(self):
+        """Render all scheduled tasks into the schedule table."""
+        if not self.schedule_table or not self.scheduler_service:
+            return
+
+        selected_row = self.schedule_table.table.currentRow()
+        selected_task_id = None
+        if 0 <= selected_row < len(self.schedule_table_rows):
+            selected_task_id = self.schedule_table_rows[selected_row]
+
+        tasks = self.scheduler_service.list_tasks()
+        self.schedule_table_rows = [task.task_id for task in tasks]
+        self.schedule_table.clear_data()
+
+        for task in tasks:
+            run_at = task.run_at.strftime("%Y-%m-%d %H:%M:%S")
+            delay_text = self._format_delay(task.delay_seconds)
+            remaining_text = self._format_remaining(task)
+            self.schedule_table.add_row([
+                task.task_id[:8],
+                task.target_label,
+                run_at,
+                delay_text,
+                remaining_text,
+                task.status,
+            ])
+
+        if selected_task_id:
+            try:
+                selected_index = self.schedule_table_rows.index(selected_task_id)
+                self.schedule_table.table.selectRow(selected_index)
+            except ValueError:
+                pass
+
+    def _format_delay(self, total_seconds):
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+    def _format_remaining(self, task):
+        if task.status == "pending":
+            remaining = max(0, int((task.run_at - datetime.now()).total_seconds()))
+            return self._format_delay(remaining)
+        if task.status == "running":
+            return "running..."
+        if task.status == "completed":
+            return "done"
+        if task.status == "failed":
+            return "failed"
+        if task.status == "cancelled":
+            return "cancelled"
+        return "-"
+
     def resizeEvent(self, event):
         """Handle window resize - let layout handle sizing naturally"""
         super().resizeEvent(event)
@@ -328,6 +591,10 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             self.auto_refresh_timer.stop()
         if hasattr(self, "sensor_simulator_timer") and self.sensor_simulator_timer.isActive():
             self.sensor_simulator_timer.stop()
+        if self.schedule_clock_timer and self.schedule_clock_timer.isActive():
+            self.schedule_clock_timer.stop()
+        if self.scheduler_service:
+            self.scheduler_service.shutdown()
         if self.redis_edge_client:
             self.redis_edge_client.disconnect()
         event.accept()

@@ -8,33 +8,43 @@ from dotenv import load_dotenv
 
 # Get the base directory (frontend/)
 BASE_DIR = Path(__file__).resolve().parent.parent
+DOCKER_ENV_FILE = Path('/.dockerenv')
+
+
+def is_running_in_docker() -> bool:
+    """Detect Docker runtime to choose proper hostnames."""
+    return DOCKER_ENV_FILE.exists()
+
+
+def load_first_existing(*paths: Path) -> None:
+    """Load the first env file that exists."""
+    for path in paths:
+        if path.exists():
+            load_dotenv(path)
+            return
 
 # Determine environment (defaults to development)
 ENVIRONMENT = os.getenv('ENVIRONMENT', os.getenv('NODE_ENV', 'development')).lower()
+IS_DOCKER = is_running_in_docker()
+
+env_path = BASE_DIR / '.env'
+env_dev_path = BASE_DIR / '.env_dev'
+env_local_path = BASE_DIR / '.env.local'
 
 # Load environment variables based on ENVIRONMENT
 if ENVIRONMENT == 'production':
-    # Production: load .env file
-    env_path = BASE_DIR / '.env'
-    if env_path.exists():
-        load_dotenv(env_path)
+    # Production in Docker should use service names from .env.
+    # Production outside Docker should prefer localhost-friendly values.
+    if IS_DOCKER:
+        load_first_existing(env_path)
+    else:
+        load_first_existing(env_local_path, env_dev_path, env_path)
 elif ENVIRONMENT == 'development':
     # Development: try .env_dev first, then .env.local, then .env
-    env_dev_path = BASE_DIR / '.env_dev'
-    env_local_path = BASE_DIR / '.env.local'
-    env_path = BASE_DIR / '.env'
-    
-    if env_dev_path.exists():
-        load_dotenv(env_dev_path)
-    elif env_local_path.exists():
-        load_dotenv(env_local_path)
-    elif env_path.exists():
-        load_dotenv(env_path)
+    load_first_existing(env_dev_path, env_local_path, env_path)
 else:
     # Fallback: load .env
-    env_path = BASE_DIR / '.env'
-    if env_path.exists():
-        load_dotenv(env_path)
+    load_first_existing(env_path)
 
 # Configuration values with defaults
 class Config:

@@ -68,7 +68,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - GUI displays connection status and session information
 
 #### 2. **Command Submission**
-- User interacts with GUI (Control tab, Terminal tab, or Server tab)
+- User interacts with GUI (Control tab, Scheduling tab, or Server tab)
 - Frontend creates command payload with:
   - `commandId` (UUID)
   - `command` (e.g., "read_temperature_data", "switch_water_canal", "read_sensor", "switch_actuator")
@@ -76,6 +76,12 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - `sessionId` (unique session identifier)
   - `type` ("user" or "developer")
 - Command is sent to RabbitMQ queue: `greenhouse_commands`
+
+#### 2.1 **Scheduling (V1)**
+- The frontend Scheduling tab uses PyQt5 `QTimer` for one-time delayed command execution
+- Delay options: `Now`, `15 minutes`, `30 minutes`, `1 hour`, and custom `hh:mm:ss`
+- Scheduled tasks dispatch through the existing RabbitMQ command flow using the same envelope (`commandId`, `command`, `parameters`, `sessionId`, `type`)
+- V1 task persistence is in-memory only (not restored after restart)
 
 #### 3. **Backend Command Consumption**
 - Backend RabbitMQ consumer listens on `greenhouse_commands` queue
@@ -450,7 +456,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Key Features**:
   - **Three-Tab Interface**:
     1. **Control Tab**: User-friendly greenhouse controls (sensors, system status)
-    2. **Terminal Tab**: Developer terminal for greenhouse commands
+    2. **Scheduling Tab**: One-time delayed command scheduling (`Now`, presets, custom `hh:mm:ss`)
     3. **Server Tab**: Backend monitoring and management
   - **Session Management**:
     - Generates unique session ID on startup
@@ -468,6 +474,15 @@ The Greenhouse Automation Application follows a **microservices architecture** w
     - Log viewing
   - **Styling**: Modern UI with custom theme and stylesheets
   - **Auto-refresh**: Optional periodic server status updates
+
+#### **`modules/scheduler_service.py`** (`SchedulerService`)
+- **Purpose**: In-memory one-time task scheduler for delayed command dispatch
+- **Key Features**:
+  - Per-task `QTimer` management
+  - Pending/running/completed/failed/cancelled task statuses
+  - Cancel selected task and clear-all operations
+  - Callback-based execution to keep scheduling logic decoupled from transport/UI
+  - Future-friendly boundary for user-specific DB-backed persistence
 
 ### Communication
 
