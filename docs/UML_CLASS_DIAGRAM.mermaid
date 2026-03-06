@@ -130,6 +130,102 @@ classDiagram
         +healthCheck() Promise
         +get connected() Boolean
     }
+
+    %% Persistent DB Entities (Sequelize/PostgreSQL)
+    class UserEntity {
+        +UUID id
+        +String username
+        +String email
+        +String password
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    class DeviceEntity {
+        +UUID id
+        +UUID user_id
+        +String name
+        +String type
+        +String status
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    class SensorEntity {
+        +UUID id
+        +UUID device_id
+        +String name
+        +String type
+        +String unit
+        +Boolean is_active
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    class SensorReadingEntity {
+        +UUID id
+        +UUID sensor_id
+        +float value
+        +DateTime timestamp
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    class ActuatorEntity {
+        +UUID id
+        +UUID device_id
+        +String name
+        +String type
+        +String status
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    class ScheduleEntity {
+        +UUID id
+        +UUID device_id
+        +String name
+        +String cron_expression
+        +String action
+        +Boolean enabled
+        +JSONB payload
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    class SensorAlertRuleEntity {
+        +UUID id
+        +UUID sensor_id
+        +String name
+        +String operator
+        +float threshold_value
+        +float threshold_min
+        +float threshold_max
+        +String severity
+        +Boolean enabled
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    class SensorAlertEntity {
+        +UUID id
+        +UUID sensor_alert_rule_id
+        +float value
+        +String message
+        +String status
+        +DateTime triggered_at
+        +DateTime acknowledged_at
+        +JSONB metadata
+        +DateTime created_at
+        +DateTime updated_at
+    }
     
     %% Data Models
     class SensorReading {
@@ -199,6 +295,14 @@ classDiagram
     EdgeToFogAggregator --> AggregatedData : creates
     CommandWorker --> CommandData : creates
     CommandProcessor --> CommandResponse : creates
+
+    UserEntity --> DeviceEntity : owns
+    DeviceEntity --> SensorEntity : owns
+    DeviceEntity --> ActuatorEntity : owns
+    DeviceEntity --> ScheduleEntity : owns
+    SensorEntity --> SensorReadingEntity : hasMany
+    SensorEntity --> SensorAlertRuleEntity : hasMany
+    SensorAlertRuleEntity --> SensorAlertEntity : hasMany
     
     %% Simulator Classes
     class DeviceSimulator {

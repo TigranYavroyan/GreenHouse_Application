@@ -88,13 +88,14 @@ flowchart TD
 #### **Backend** (`greenhouse-backend`)
 - **Technology**: Node.js 18+ with Express.js (ESM modules)
 - **Port**: 3000 (exposed to host)
-- **Dependencies**: Redis, RabbitMQ, Greenhouse Core Simulator
+- **Dependencies**: Redis, RabbitMQ, PostgreSQL, Greenhouse Core Simulator
 - **Health Check**: HTTP GET `/metadata/health/` every 30 seconds
 - **Greenhouse Core Integration**: Uses `GreenhouseCoreClient` to communicate with greenhouse core via HTTP API
 - **Key Features**:
   - Session management with automatic cleanup
   - Command processing with caching
   - Edge-to-fog data aggregation endpoints
+  - Generic IoT persistence with Sequelize models
   - Comprehensive logging (system and session-level)
 
 #### **Greenhouse Core Simulator** (`greenhouse-core-sim`)
@@ -146,6 +147,27 @@ flowchart TD
   - Local Redis caching
   - One-time task scheduling (in-memory) for delayed command dispatch
   - Non-blocking UI operations
+
+## Persistent IoT Data Model (PostgreSQL + Sequelize)
+
+The backend includes an extensible entity model designed to support new sensor and actuator types without schema changes to core tables.
+
+### Core entity hierarchy
+- `User` → owns many `Device`
+- `Device` → owns many `Sensor`
+- `Device` → owns many `Actuator`
+- `Device` → owns many `Schedule`
+- `Sensor` → owns many `SensorReading`
+- `Sensor` → owns many `SensorAlertRule`
+- `SensorAlertRule` → owns many `SensorAlert`
+
+### Extensibility strategy
+- UUID primary keys for all entities.
+- `metadata` uses PostgreSQL `JSONB` for dynamic, per-entity configuration.
+- Sensor category is stored as open string (`Sensor.type`) to allow future sensor families.
+- `SensorReading` stores time-series points as `(sensor_id, timestamp, value)`.
+- `Schedule` uses cron expressions (`cron_expression`) for automation.
+- `SensorAlertRule` supports threshold-based monitoring using operators and threshold values/ranges.
 
 ## Edge-to-Fog Data Aggregation System
 
@@ -361,6 +383,22 @@ No code changes required - the abstract interface handles the communication.
 ### Health & Information
 - `GET /` - API information and endpoint list
 - `GET /metadata/health/` - System health check with component status
+
+### Authentication (JWT only)
+- `POST /auth/register` - Register user with username/password
+- `POST /auth/login` - Login and receive JWT token
+- No refresh token flow is used for desktop-first login simplicity.
+
+### Persistent IoT CRUD
+- `GET|POST /users`, `GET|PATCH|DELETE /users/:id`
+- `GET|POST /devices`, `GET|PATCH|DELETE /devices/:id`
+- `GET|POST /sensors`, `GET|PATCH|DELETE /sensors/:id`
+- `GET|POST /sensor-readings`, `GET|PATCH|DELETE /sensor-readings/:id`
+- `GET|POST /actuators`, `GET|PATCH|DELETE /actuators/:id`
+- `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
+- `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`
+- `GET|POST /sensor-alerts`, `GET|PATCH|DELETE /sensor-alerts/:id`
+- For non-user entities, ownership is enforced through user context (`Authorization` JWT, `X-User-Id`, or default seeded desktop user).
 
 ### Sessions
 - `GET /sessions` - List all active sessions

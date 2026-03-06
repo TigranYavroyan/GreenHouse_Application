@@ -3,25 +3,24 @@ import ConfigPostgres from '../config/configPostgres.js';
 
 const sequelize = await ConfigPostgres.getInstance();
 
-const User = sequelize.define('User', {
+const Actuator = sequelize.define('Actuator', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
-    username: {
+    name: {
+        type: DataTypes.STRING(120),
+        allowNull: false,
+    },
+    type: {
         type: DataTypes.STRING(100),
         allowNull: false,
-        unique: true,
     },
-    email: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-        unique: true,
-    },
-    password: {
-        type: DataTypes.STRING(255),
+    status: {
+        type: DataTypes.STRING(50),
         allowNull: false,
+        defaultValue: 'off',
     },
     metadata: {
         type: DataTypes.JSONB,
@@ -29,9 +28,17 @@ const User = sequelize.define('User', {
         defaultValue: {},
     },
 }, {
-    tableName: 'users',
+    tableName: 'actuators',
     underscored: true,
     timestamps: true,
+    indexes: [
+        {
+            fields: ['device_id'],
+        },
+        {
+            fields: ['type'],
+        },
+    ],
 });
 
-export default User;
+export default Actuator;

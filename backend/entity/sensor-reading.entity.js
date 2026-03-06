@@ -3,25 +3,20 @@ import ConfigPostgres from '../config/configPostgres.js';
 
 const sequelize = await ConfigPostgres.getInstance();
 
-const User = sequelize.define('User', {
+const SensorReading = sequelize.define('SensorReading', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
-    username: {
-        type: DataTypes.STRING(100),
+    value: {
+        type: DataTypes.DOUBLE,
         allowNull: false,
-        unique: true,
     },
-    email: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-        unique: true,
-    },
-    password: {
-        type: DataTypes.STRING(255),
+    timestamp: {
+        type: DataTypes.DATE,
         allowNull: false,
+        defaultValue: DataTypes.NOW,
     },
     metadata: {
         type: DataTypes.JSONB,
@@ -29,9 +24,17 @@ const User = sequelize.define('User', {
         defaultValue: {},
     },
 }, {
-    tableName: 'users',
+    tableName: 'sensor_readings',
     underscored: true,
     timestamps: true,
+    indexes: [
+        {
+            fields: ['sensor_id', 'timestamp'],
+        },
+        {
+            fields: ['timestamp'],
+        },
+    ],
 });
 
-export default User;
+export default SensorReading;

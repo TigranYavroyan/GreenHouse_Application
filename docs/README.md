@@ -217,9 +217,26 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 #### **Backend** (`greenhouse-backend`)
 - **Technology**: Node.js 18+ with Express.js
 - **Port**: 3000 (exposed to host)
-- **Dependencies**: Redis, RabbitMQ, Greenhouse Core Simulator
+- **Dependencies**: Redis, RabbitMQ, PostgreSQL, Greenhouse Core Simulator
 - **Health Check**: HTTP GET `/metadata/health/` every 30 seconds
 - **Greenhouse Core Integration**: Uses `GreenhouseCoreClient` to communicate with greenhouse core via HTTP API
+
+### Backend Persistent IoT Model
+
+The backend uses Sequelize + PostgreSQL to persist a generic IoT entity model:
+
+- `User` has many `Device`
+- `Device` has many `Sensor`, `Actuator`, and `Schedule`
+- `Sensor` has many `SensorReading` and `SensorAlertRule`
+- `SensorAlertRule` has many `SensorAlert`
+
+Extensibility details:
+- UUID primary keys on all entities
+- `JSONB metadata` fields for dynamic configuration and future growth
+- Generic sensor categorization through free-form `Sensor.type`
+- Time-series storage in `SensorReading` with `timestamp` + numeric `value`
+- Automation via cron in `Schedule.cron_expression`
+- Threshold monitoring through `SensorAlertRule` operators/thresholds
 
 #### **Greenhouse Core Simulator** (`greenhouse-core-sim`)
 - **Technology**: Node.js 18+ with Express.js
@@ -294,6 +311,25 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - Sets up RabbitMQ consumer for `greenhouse_commands` queue
   - Manages session cleanup timer (every 5 minutes)
   - Handles graceful startup and error recovery
+
+### Sequelize Entity Layer
+
+#### **`entity/index.js`**
+- **Purpose**: Central model registry and association bootstrap
+- **Responsibilities**:
+  - Imports and initializes all Sequelize entities
+  - Wires foreign key relations (`hasMany` / `belongsTo`)
+  - Ensures associations are loaded before `sequelize.sync()`
+
+#### **Entity Files**
+- `entity/user.entity.js`
+- `entity/device.entity.js`
+- `entity/sensor.entity.js`
+- `entity/sensor-reading.entity.js`
+- `entity/actuator.entity.js`
+- `entity/schedule.entity.js`
+- `entity/sensor-alert-rule.entity.js`
+- `entity/sensor-alert.entity.js`
 
 ### Clients
 
@@ -709,6 +745,24 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 
 - `GET /` - API information and endpoint list
 - `GET /metadata/health/` - System health check with component status
+
+### Authentication (JWT only)
+
+- `POST /auth/register` - Register user account
+- `POST /auth/login` - Login and receive access JWT
+- Desktop-oriented mode uses JWT-only auth (no refresh token flow).
+
+### Persistent IoT CRUD
+
+- `GET|POST /users`, `GET|PATCH|DELETE /users/:id`
+- `GET|POST /devices`, `GET|PATCH|DELETE /devices/:id`
+- `GET|POST /sensors`, `GET|PATCH|DELETE /sensors/:id`
+- `GET|POST /sensor-readings`, `GET|PATCH|DELETE /sensor-readings/:id`
+- `GET|POST /actuators`, `GET|PATCH|DELETE /actuators/:id`
+- `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
+- `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`
+- `GET|POST /sensor-alerts`, `GET|PATCH|DELETE /sensor-alerts/:id`
+- Ownership is user-scoped for non-user entities through JWT identity, `X-User-Id`, or default seeded desktop user.
 
 ### Sessions
 

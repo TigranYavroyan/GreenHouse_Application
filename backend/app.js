@@ -1,4 +1,3 @@
-// app.js
 import express from 'express';
 import SystemLogger from './logger/systemLogger.js';
 import RedisClientWrapper from './clients/redisClient.js';
@@ -7,14 +6,41 @@ import GreenhouseCoreClient from './clients/greenhouseCoreClient.js';
 import SessionManager from './sessions/sessionManager.js';
 import CommandExecutor from './executor/commandExecutor.js';
 import CommandProcessor from './processor/commandProcessor.js';
-import createRoutes from './router/routes.js';
 import config from './config/index.js';
 import createCacheRouter from './routers/cache.js';
 import createFogRouter from './routers/fog.js';
 import createSessionRouter from './routers/session.js';
 import createLogsRouter from './routers/logs.js';
 import createMetadataRouter from './routers/metadata.js';
+import createAuthRouter from './routers/auth.js';
+import createUsersRouter from './routers/users.js';
+import createDevicesRouter from './routers/devices.js';
+import createSensorsRouter from './routers/sensors.js';
+import createSensorReadingsRouter from './routers/sensor-readings.js';
+import createActuatorsRouter from './routers/actuators.js';
+import createSchedulesRouter from './routers/schedules.js';
+import createSensorAlertRulesRouter from './routers/sensor-alert-rules.js';
+import createSensorAlertsRouter from './routers/sensor-alerts.js';
 import { metricsRouter } from './clients/promClient.js';
+import './entity/index.js';
+import createUserContextMiddleware from './middleware/userContextMiddleware.js';
+import UsersRepository from './modules/users/users.repository.js';
+import DevicesRepository from './modules/devices/devices.repository.js';
+import SensorsRepository from './modules/sensors/sensors.repository.js';
+import SensorReadingsRepository from './modules/sensor-readings/sensor-readings.repository.js';
+import ActuatorsRepository from './modules/actuators/actuators.repository.js';
+import SchedulesRepository from './modules/schedules/schedules.repository.js';
+import SensorAlertRulesRepository from './modules/sensor-alert-rules/sensor-alert-rules.repository.js';
+import SensorAlertsRepository from './modules/sensor-alerts/sensor-alerts.repository.js';
+import UsersService from './modules/users/users.service.js';
+import DevicesService from './modules/devices/devices.service.js';
+import SensorsService from './modules/sensors/sensors.service.js';
+import SensorReadingsService from './modules/sensor-readings/sensor-readings.service.js';
+import ActuatorsService from './modules/actuators/actuators.service.js';
+import SchedulesService from './modules/schedules/schedules.service.js';
+import SensorAlertRulesService from './modules/sensor-alert-rules/sensor-alert-rules.service.js';
+import SensorAlertsService from './modules/sensor-alerts/sensor-alerts.service.js';
+import ensureDefaultUser from './modules/users/default-user.bootstrap.js';
 
 class App {
   constructor() {
@@ -37,36 +63,127 @@ class App {
       rabbitClient: this.rabbitClient,
       commandExecutor: this.commandExecutor
     });
+    this.defaultUserId = null;
+
+    // repositories
+    this.usersRepository = new UsersRepository();
+    this.devicesRepository = new DevicesRepository();
+    this.sensorsRepository = new SensorsRepository();
+    this.sensorReadingsRepository = new SensorReadingsRepository();
+    this.actuatorsRepository = new ActuatorsRepository();
+    this.schedulesRepository = new SchedulesRepository();
+    this.sensorAlertRulesRepository = new SensorAlertRulesRepository();
+    this.sensorAlertsRepository = new SensorAlertsRepository();
+
+    // services
+    this.usersService = new UsersService(this.usersRepository);
+    this.devicesService = new DevicesService({
+      devicesRepository: this.devicesRepository,
+      usersRepository: this.usersRepository,
+    });
+    this.sensorsService = new SensorsService({
+      sensorsRepository: this.sensorsRepository,
+      devicesRepository: this.devicesRepository,
+    });
+    this.sensorReadingsService = new SensorReadingsService({
+      sensorReadingsRepository: this.sensorReadingsRepository,
+      sensorsRepository: this.sensorsRepository,
+    });
+    this.actuatorsService = new ActuatorsService({
+      actuatorsRepository: this.actuatorsRepository,
+      devicesRepository: this.devicesRepository,
+    });
+    this.schedulesService = new SchedulesService({
+      schedulesRepository: this.schedulesRepository,
+      devicesRepository: this.devicesRepository,
+    });
+    this.sensorAlertRulesService = new SensorAlertRulesService({
+      sensorAlertRulesRepository: this.sensorAlertRulesRepository,
+      sensorsRepository: this.sensorsRepository,
+    });
+    this.sensorAlertsService = new SensorAlertsService({
+      sensorAlertsRepository: this.sensorAlertsRepository,
+      sensorAlertRulesRepository: this.sensorAlertRulesRepository,
+    });
 
     this.setupMiddleware();
-    this.setupPostgres();
+    this.userContextMiddleware = createUserContextMiddleware({
+      getDefaultUserId: () => this.defaultUserId,
+    });
     this.setupRoutes();
-  }
-
-  async setupPostgres() {
-    await this.config.ConfigPostgres.init();
   }
 
   setupMiddleware() {
     this.app.use(express.json());
     this.app.use((req, res, next) => {
       res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-User-Id');
       next();
     });
   }
 
   setupRoutes() {
+    this.app.get('/', (req, res) => {
+      res.json({
+        message: 'Greenhouse Automation Backend',
+        version: '1.0.0',
+        endpoints: [
+          'POST /auth/register',
+          'POST /auth/login',
+          'GET  /users',
+          'GET  /devices',
+          'GET  /sensors',
+          'GET  /sensor-readings',
+          'GET  /actuators',
+          'GET  /schedules',
+          'GET  /sensor-alert-rules',
+          'GET  /sensor-alerts',
+          'GET  /metadata/health/',
+        ],
+      });
+    });
+
+    this.app.use('/auth', createAuthRouter({ userRepository: this.usersRepository }));
+    this.app.use('/users', createUsersRouter({ usersService: this.usersService }));
+    this.app.use('/devices', createDevicesRouter({
+      devicesService: this.devicesService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/sensors', createSensorsRouter({
+      sensorsService: this.sensorsService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/sensor-readings', createSensorReadingsRouter({
+      sensorReadingsService: this.sensorReadingsService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/actuators', createActuatorsRouter({
+      actuatorsService: this.actuatorsService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/schedules', createSchedulesRouter({
+      schedulesService: this.schedulesService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/sensor-alert-rules', createSensorAlertRulesRouter({
+      sensorAlertRulesService: this.sensorAlertRulesService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/sensor-alerts', createSensorAlertsRouter({
+      sensorAlertsService: this.sensorAlertsService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
     this.app.use('/cache', createCacheRouter(this.redisClient));
-    this.app.use('/fog', createFogRouter(this.redisClient));
-    this.app.use('/sessions', createSessionRouter(this.sessionManager));
-    this.app.use('/logs', createLogsRouter);
-    this.app.use('/metadata', createMetadataRouter);
-
+    this.app.use('/fog', createFogRouter(this.redisClient, this.systemLogger));
+    this.app.use('/sessions', createSessionRouter({ sessionManager: this.sessionManager }));
+    this.app.use('/logs', createLogsRouter());
+    this.app.use('/metadata', createMetadataRouter({
+      sessionManager: this.sessionManager,
+      redisClient: this.redisClient,
+      rabbitClient: this.rabbitClient,
+      commandStats: this.commandProcessor.commandStats,
+    }));
     this.app.use(metricsRouter);
-
-    const router = createRoutes();
-    this.app.use('/', router);
   }
 
   async setupRabbitAndConsumer() {
@@ -115,6 +232,13 @@ class App {
 
   async start(port = this.config.server.port) {
     try {
+      await this.config.ConfigPostgres.init();
+      const defaultUser = await ensureDefaultUser({
+        usersRepository: this.usersRepository,
+        logger: this.systemLogger,
+      });
+      this.defaultUserId = defaultUser?.id || null;
+
       await this.redisClient.connect();
       this.systemLogger.info('Redis connected');
 

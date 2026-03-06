@@ -8,12 +8,13 @@ export default function createAuthRouter({ userRepository }) {
   const authService = new AuthService({
     userRepository,
     jwtSecret: process.env.JWT_SECRET,
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1h',
   });
 
   const authController = new AuthController(authService);
 
-  router.post('/', authController.register);
-  router.post('/', authController.login);
+  router.post('/register', authController.register);
+  router.post('/login', authController.login);
 
   return router;
 }

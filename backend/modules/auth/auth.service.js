@@ -2,12 +2,13 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 class AuthService {
-  constructor({ userRepository, jwtSecret }) {
+  constructor({ userRepository, jwtSecret, jwtExpiresIn = '1h' }) {
     this.userRepository = userRepository; // abstraction for DB
     this.jwtSecret = jwtSecret;
+    this.jwtExpiresIn = jwtExpiresIn;
   }
 
-  async register(username, password) {
+  async register(username, password, email = null) {
     const existingUser = await this.userRepository.findByUsername(username);
     if (existingUser) {
       throw new Error('User already exists');
@@ -18,12 +19,17 @@ class AuthService {
     const user = await this.userRepository.create({
       username,
       password: hashedPassword,
+      email,
     });
 
     return { id: user.id, username: user.username };
   }
 
   async login(username, password) {
+    if (!this.jwtSecret) {
+      throw new Error('JWT secret is not configured');
+    }
+
     const user = await this.userRepository.findByUsername(username);
     if (!user) {
       throw new Error('Invalid username or password');
@@ -37,7 +43,7 @@ class AuthService {
     const token = jwt.sign(
       { id: user.id, username: user.username },
       this.jwtSecret,
-      { expiresIn: '1h' }
+      { expiresIn: this.jwtExpiresIn }
     );
 
     return { token };
