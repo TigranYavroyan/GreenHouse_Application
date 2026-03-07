@@ -69,6 +69,9 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         
         # Setup functionality and signal connections
         self.add_functions()
+        self.setup_core_panel()
+        self.remove_unused_core_controls()
+        self.configure_core_server_buttons()
         
         # No need to connect tab change - layout handles sizing
         
@@ -139,32 +142,25 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self.heaterButton.clicked.connect(lambda: self.send_user_command("switch_heater", {"heaterId": "heater_1", "action": "toggle"}))
         self.actuatorButton.clicked.connect(lambda: self.send_user_command("switch_actuator", {"actuatorId": "actuator_1", "action": "toggle"}))
 
-        # Legacy buttons (kept for backward compatibility, can be removed if not needed)
-        if hasattr(self, 'statusButton'):
-            self.statusButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "temperature"}))
-        if hasattr(self, 'pathButton'):
-            # Remove or repurpose this button
-            pass
-
         # Server Tab - Server management buttons
-        self.healthButton.clicked.connect(self.check_server_health)
-        self.statsButton.clicked.connect(self.view_server_stats)
-        self.sessionsButton.clicked.connect(self.list_sessions)
-        self.cacheKeysButton.clicked.connect(self.list_cache_keys)
-        self.clearCacheButton.clicked.connect(self.clear_all_cache)
-        self.queuesButton.clicked.connect(self.check_queues)
-        self.testCommandButton.clicked.connect(self.test_server_command)
+        self.healthButton.clicked.connect(self.view_core_status)
         self.refreshButton.clicked.connect(self.refresh_all_status)
-        self.logFilesButton.clicked.connect(self.list_log_files)
-        self.viewLogButton.clicked.connect(self.view_session_log)
-
-        # Fog Data buttons (if they exist in UI, otherwise will be added dynamically)
-        if hasattr(self, 'fogAggregatedButton'):
-            self.fogAggregatedButton.clicked.connect(self.view_fog_aggregated_data)
-        if hasattr(self, 'fogDevicesButton'):
-            self.fogDevicesButton.clicked.connect(self.view_fog_devices)
-        if hasattr(self, 'fogAnomaliesButton'):
-            self.fogAnomaliesButton.clicked.connect(self.view_fog_anomalies)
+        if hasattr(self, "statsButton"):
+            self.statsButton.clicked.connect(self.view_getter_schema)
+        if hasattr(self, "sessionsButton"):
+            self.sessionsButton.clicked.connect(self.view_executor_schema)
+        if hasattr(self, "cacheKeysButton"):
+            self.cacheKeysButton.clicked.connect(self.view_getters)
+        if hasattr(self, "queuesButton"):
+            self.queuesButton.clicked.connect(self.view_executors)
+        if hasattr(self, "clearCacheButton"):
+            self.clearCacheButton.clicked.connect(self.prompt_switch_executor_mode)
+        if hasattr(self, "testCommandButton"):
+            self.testCommandButton.clicked.connect(self.prompt_executor_on)
+        if hasattr(self, "logFilesButton"):
+            self.logFilesButton.clicked.connect(self.prompt_executor_off)
+        if hasattr(self, "viewLogButton"):
+            self.viewLogButton.clicked.connect(self.prompt_executor_set)
 
         # Server Tab - Auto-refresh checkbox (if exists in UI)
         if hasattr(self, 'auto_refresh'):
@@ -173,10 +169,6 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         # Scheduling Tab - One-time task controls
         if hasattr(self, "scheduleTaskButton"):
             self.scheduleTaskButton.clicked.connect(self.schedule_selected_task)
-        if hasattr(self, "cancelScheduledButton"):
-            self.cancelScheduledButton.clicked.connect(self.cancel_selected_scheduled_task)
-        if hasattr(self, "clearScheduledButton"):
-            self.clearScheduledButton.clicked.connect(self.clear_all_scheduled_tasks)
         if hasattr(self, "scheduleDelayPresetCombo"):
             self.scheduleDelayPresetCombo.currentIndexChanged.connect(self.update_custom_delay_enabled)
 
@@ -185,6 +177,40 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         # The UI file already contains styles, but we can override specific widgets if needed
         # For example, update connection status and status label styles dynamically
         pass
+
+    def configure_core_server_buttons(self):
+        """Retitle existing server-tab buttons for greenhouse core controls."""
+        server_labels = {
+            "healthButton": "Core Status",
+            "refreshButton": "Refresh Snapshot",
+            "statsButton": "Getter Schema",
+            "sessionsButton": "Executor Schema",
+            "cacheKeysButton": "Getters",
+            "queuesButton": "Executors",
+            "clearCacheButton": "Set Mode",
+            "testCommandButton": "Executor ON",
+            "logFilesButton": "Executor OFF",
+            "viewLogButton": "Executor SET",
+        }
+        for widget_name, label in server_labels.items():
+            if hasattr(self, widget_name):
+                getattr(self, widget_name).setText(label)
+
+    def remove_unused_core_controls(self):
+        """
+        Hide controls that are not connected to active core logic flows.
+        """
+        unused_buttons = (
+            "statusButton",            # legacy duplicate in Control tab
+            "pathButton",              # legacy/no-op control
+            "cancelScheduledButton",   # local-only scheduler operation
+            "clearScheduledButton",    # local-only scheduler operation
+        )
+        for widget_name in unused_buttons:
+            if hasattr(self, widget_name):
+                button = getattr(self, widget_name)
+                button.setVisible(False)
+                button.setEnabled(False)
 
     def _find_containers(self):
         """Find containers from UI"""
@@ -302,7 +328,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             self.schedule_table.show()
             self.schedule_table.setMinimumSize(1200, 250)
             schedule_layout.addWidget(self.schedule_table, 1)
-            self.schedule_table.table.setToolTip("Select a row and click 'Cancel Selected' to stop a pending task.")
+            self.schedule_table.table.setToolTip("Scheduled tasks are displayed here with live status updates.")
 
             schedule_hint = QLabel("Tip: use preset delay or switch to Custom and set hours/minutes/seconds.")
             schedule_hint.setObjectName("scheduleTableHintLabel")
@@ -480,32 +506,6 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         )
         self.refresh_schedule_table()
         self.status_label.setText(f"🗓️ Scheduled task {task.task_id[:8]} for {target_label}")
-
-    def cancel_selected_scheduled_task(self):
-        """Cancel currently selected scheduled task."""
-        if not self.scheduler_service or not self.schedule_table:
-            return
-
-        row = self.schedule_table.table.currentRow()
-        if row < 0 or row >= len(self.schedule_table_rows):
-            self.show_error("Cancel Task", "Please select a scheduled task row to cancel.")
-            return
-
-        task_id = self.schedule_table_rows[row]
-        if self.scheduler_service.cancel_task(task_id):
-            self.status_label.setText(f"✖ Task {task_id[:8]} cancelled")
-            self.refresh_schedule_table()
-        else:
-            self.show_error("Cancel Task", "Selected task cannot be cancelled.")
-
-    def clear_all_scheduled_tasks(self):
-        """Clear all scheduled tasks from memory."""
-        if not self.scheduler_service:
-            return
-
-        self.scheduler_service.clear_all_tasks()
-        self.refresh_schedule_table()
-        self.status_label.setText("🧹 Cleared all scheduled tasks")
 
     def execute_scheduled_command(self, command, parameters):
         """Execution callback used by SchedulerService."""

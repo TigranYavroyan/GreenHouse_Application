@@ -28,7 +28,7 @@ export default {
     port: process.env.PORT ? Number(process.env.PORT) : 3000
   },
   greenhouseCore: {
-    url: process.env.GREENHOUSE_CORE_URL || 'http://localhost:3001',
+    url: process.env.GREENHOUSE_CORE_URL || 'http://192.168.27.16:8080',
     timeout: Number(process.env.GREENHOUSE_CORE_TIMEOUT) || 10000,
     retries: Number(process.env.GREENHOUSE_CORE_RETRIES) || 2
   }

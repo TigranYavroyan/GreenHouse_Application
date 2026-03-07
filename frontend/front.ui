@@ -355,7 +355,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
+          <item row="1" column="0">
             <widget class="QPushButton" name="co2Button">
              <property name="minimumSize">
               <size>
@@ -425,7 +425,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
+          <item row="2" column="0">
             <widget class="QPushButton" name="soilPHButton">
              <property name="minimumSize">
               <size>
@@ -495,7 +495,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
+          <item row="3" column="0">
             <widget class="QPushButton" name="fanButton">
              <property name="minimumSize">
               <size>
@@ -565,7 +565,7 @@ QPushButton:disabled {
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
+          <item row="4" column="0">
             <widget class="QPushButton" name="actuatorButton">
              <property name="minimumSize">
               <size>

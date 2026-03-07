@@ -36,36 +36,180 @@ class GreenhouseCoreClient {
     SystemLogger.info('Greenhouse Core Client disconnected');
   }
 
+  normalizeError(error, fallbackMessage = 'Request failed') {
+    if (!error) return fallbackMessage;
+    if (typeof error === 'string') return error;
+    if (error.message) return error.message;
+    return fallbackMessage;
+  }
+
+  normalizeMode(modeValue) {
+    const normalized = String(modeValue || '').trim().toLowerCase();
+    if (normalized === 'manual' || normalized === '0') return 'manual';
+    if (normalized === 'auto' || normalized === '1') return 'auto';
+    const error = new Error('Mode value must be one of: manual, auto, 0, 1');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  async requestJson(path, options = {}) {
+    const {
+      method = 'GET',
+      body = null,
+      retries = this.maxRetries,
+      timeout = this.timeout
+    } = options;
+
+    let lastError = null;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        if (attempt > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        const requestInit = {
+          method,
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        if (body !== null && body !== undefined) {
+          requestInit.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(`${this.baseUrl}${path}`, requestInit);
+        clearTimeout(timeoutId);
+
+        let payload = null;
+        try {
+          payload = await response.json();
+        } catch (parseError) {
+          payload = null;
+        }
+
+        if (!response.ok) {
+          const message = payload?.error || `HTTP ${response.status}: ${response.statusText}`;
+          const error = new Error(message);
+          error.statusCode = response.status;
+          error.payload = payload;
+          throw error;
+        }
+
+        this.isConnected = true;
+        return payload;
+      } catch (error) {
+        lastError = error;
+        this.isConnected = false;
+
+        const isRetryable =
+          error?.name === 'AbortError' ||
+          (error?.message && error.message.includes('fetch failed'));
+
+        if (!isRetryable || attempt >= retries) {
+          break;
+        }
+      }
+    }
+
+    throw new Error(this.normalizeError(lastError));
+  }
+
   /**
    * Health check
    */
   async healthCheck() {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-      const response = await fetch(`${this.baseUrl}/api/v1/metadata/health/`, {
+      const data = await this.requestJson('/status', {
         method: 'GET',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        retries: 0
       });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        return { success: true, data };
-      } else {
-        return { success: false, error: `Health check failed with status ${response.status}` };
-      }
+      return { success: true, data };
     } catch (error) {
-      if (error.name === 'AbortError') {
-        return { success: false, error: 'Health check timeout' };
-      }
-      return { success: false, error: error.message || 'Health check failed' };
+      return { success: false, error: this.normalizeError(error, 'Health check failed') };
     }
+  }
+
+  /**
+   * Core schema/state APIs
+   */
+  async getStatus() {
+    return this.requestJson('/status');
+  }
+
+  async getGetterSchema() {
+    return this.requestJson('/schema/getters');
+  }
+
+  async getExecutorSchema() {
+    return this.requestJson('/schema/executors');
+  }
+
+  async getGetters() {
+    return this.requestJson('/getters');
+  }
+
+  async getGetter(key) {
+    const safeKey = encodeURIComponent(String(key || '').trim());
+    if (!safeKey) {
+      throw new Error('Getter key is required');
+    }
+    return this.requestJson(`/getters/${safeKey}`);
+  }
+
+  async getExecutors() {
+    return this.requestJson('/executors');
+  }
+
+  async setExecutorMode(name, value) {
+    const safeName = encodeURIComponent(String(name || '').trim());
+    if (!safeName) {
+      throw new Error('Executor name is required');
+    }
+
+    const mode = this.normalizeMode(value);
+    return this.requestJson(`/api/executors/${safeName}/mode`, {
+      method: 'POST',
+      body: { value: mode }
+    });
+  }
+
+  async executorOn(name) {
+    const safeName = encodeURIComponent(String(name || '').trim());
+    if (!safeName) {
+      throw new Error('Executor name is required');
+    }
+
+    return this.requestJson(`/api/executors/${safeName}/on`, {
+      method: 'POST'
+    });
+  }
+
+  async executorOff(name) {
+    const safeName = encodeURIComponent(String(name || '').trim());
+    if (!safeName) {
+      throw new Error('Executor name is required');
+    }
+
+    return this.requestJson(`/api/executors/${safeName}/off`, {
+      method: 'POST'
+    });
+  }
+
+  async executorSet(name, value) {
+    const safeName = encodeURIComponent(String(name || '').trim());
+    if (!safeName) {
+      throw new Error('Executor name is required');
+    }
+
+    return this.requestJson(`/api/executors/${safeName}/set`, {
+      method: 'POST',
+      body: { value: String(value) }
+    });
   }
 
   /**
@@ -83,9 +227,6 @@ class GreenhouseCoreClient {
           await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt)));
         }
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
         const payload = {
           command,
           parameters,
@@ -93,8 +234,8 @@ class GreenhouseCoreClient {
           sessionId
         };
 
-        // Log data being sent to simulator
-        SystemLogger.info(`Sending command to greenhouse core simulator`, {
+        // Log data being sent to core server
+        SystemLogger.info(`Sending command to greenhouse core server`, {
           commandId,
           sessionId,
           command,
@@ -104,30 +245,20 @@ class GreenhouseCoreClient {
           payload: JSON.stringify(payload)
         });
 
-        const response = await fetch(`${this.baseUrl}/api/v1/commands/execute`, {
+        const response = await this.requestJson('/api/v1/commands/execute', {
           method: 'POST',
-          signal: controller.signal,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
+          body: payload,
+          retries: 0
         });
 
-        clearTimeout(timeoutId);
+        const result = response || {};
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        // Log response received from simulator
-        SystemLogger.info(`Received response from greenhouse core simulator`, {
+        // Log response received from core server
+        SystemLogger.info(`Received response from greenhouse core server`, {
           commandId,
           sessionId,
           command,
-          status: response.status,
+          status: 200,
           success: result.success,
           hasError: !!result.error,
           responseData: JSON.stringify(result)
@@ -135,7 +266,7 @@ class GreenhouseCoreClient {
 
         // Check if the result indicates success
         if (result.success === false) {
-          SystemLogger.warn(`Command ${command} failed in simulator`, {
+          SystemLogger.warn(`Command ${command} failed in core server`, {
             commandId,
             error: result.error
           });
@@ -159,7 +290,7 @@ class GreenhouseCoreClient {
         lastError = error;
 
         // Log error details
-        SystemLogger.error(`Error sending command to simulator`, {
+        SystemLogger.error(`Error sending command to core server`, {
           commandId,
           sessionId,
           command,

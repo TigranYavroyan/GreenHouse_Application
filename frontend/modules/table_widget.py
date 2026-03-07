@@ -7,8 +7,6 @@ from PyQt5.QtWidgets import (
     QTableWidgetItem,
     QHeaderView,
     QSizePolicy,
-    QPushButton,
-    QHBoxLayout,
     QVBoxLayout,
     QWidget,
     QStyledItemDelegate,
@@ -34,18 +32,19 @@ class _NoFocusDelegate(QStyledItemDelegate):
 
 
 class SimpleDataTable(QWidget):
-    """Simple responsive table with clear button for displaying RabbitMQ data"""
+    """Simple responsive table for displaying tabular data."""
     
     ROW_HEIGHT = 35
     MAX_VISIBLE_ROWS = 15
     
-    def __init__(self, columns=None, parent=None):
+    def __init__(self, columns=None, parent=None, show_clear_button=False):
         """
         Initialize the simple data table
         
         Args:
             columns: List of column header names (default: Timestamp, Data)
             parent: Parent widget
+            show_clear_button: Whether to render a local UI clear button
         """
         super().__init__(parent)
         self.theme = GreenhouseTheme()
@@ -72,38 +71,41 @@ class SimpleDataTable(QWidget):
             }}
         """)
         
-        # Create clear button container
-        button_layout = QHBoxLayout()
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.setSpacing(0)
-        self.clear_button = QPushButton("🗑️ Clear Table")
-        self.clear_button.setMinimumHeight(36)
-        self.clear_button.setMinimumWidth(120)
-        self.clear_button.clicked.connect(self.clear_data)
-        self.clear_button.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.theme.colors.error};
-                color: {self.theme.colors.text_light};
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                font-weight: 500;
-                font-size: 12px;
-                min-width: 120px;
-            }}
-            QPushButton:hover {{
-                background-color: #D32F2F;
-            }}
-            QPushButton:pressed {{
-                background-color: #B71C1C;
-            }}
-        """)
-        button_layout.addWidget(self.clear_button)
-        button_layout.addStretch()
-        button_widget = QWidget()
-        button_widget.setLayout(button_layout)
-        button_widget.setMaximumHeight(40)
-        layout.addWidget(button_widget)
+        self.clear_button = None
+        if show_clear_button:
+            from PyQt5.QtWidgets import QPushButton, QHBoxLayout
+
+            button_layout = QHBoxLayout()
+            button_layout.setContentsMargins(0, 0, 0, 0)
+            button_layout.setSpacing(0)
+            self.clear_button = QPushButton("🗑️ Clear Table")
+            self.clear_button.setMinimumHeight(36)
+            self.clear_button.setMinimumWidth(120)
+            self.clear_button.clicked.connect(self.clear_data)
+            self.clear_button.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {self.theme.colors.error};
+                    color: {self.theme.colors.text_light};
+                    border: none;
+                    border-radius: 4px;
+                    padding: 8px 16px;
+                    font-weight: 500;
+                    font-size: 12px;
+                    min-width: 120px;
+                }}
+                QPushButton:hover {{
+                    background-color: #D32F2F;
+                }}
+                QPushButton:pressed {{
+                    background-color: #B71C1C;
+                }}
+            """)
+            button_layout.addWidget(self.clear_button)
+            button_layout.addStretch()
+            button_widget = QWidget()
+            button_widget.setLayout(button_layout)
+            button_widget.setMaximumHeight(40)
+            layout.addWidget(button_widget)
         
         # Create table
         self.table = QTableWidget()

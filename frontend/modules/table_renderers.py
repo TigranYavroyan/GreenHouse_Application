@@ -439,6 +439,109 @@ def render_session_log_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     return columns, rows
 
 
+def render_core_status_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
+    columns = ['Field', 'Value']
+    rows = []
+    if isinstance(data, dict):
+        status = str(data.get('status', 'unknown'))
+        rows.append(['status', status])
+        for key, value in sorted(data.items()):
+            if key == 'status':
+                continue
+            rows.append([str(key), str(value)])
+    return columns, rows
+
+
+def render_getter_schema_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
+    columns = ['Getter', 'Type']
+    rows = []
+    if isinstance(data, dict):
+        for key, value in sorted(data.items(), key=lambda item: str(item[0]).lower()):
+            rows.append([str(key), str(value)])
+    return columns, rows
+
+
+def render_executor_schema_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
+    columns = ['Executor', 'Type']
+    rows = []
+    if isinstance(data, dict):
+        for key, value in sorted(data.items(), key=lambda item: str(item[0]).lower()):
+            rows.append([str(key), str(value)])
+    return columns, rows
+
+
+def render_getters_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]:
+    columns = ['Key', 'Valid', 'StampMs', 'Type', 'Value']
+    rows = []
+
+    if isinstance(data, list):
+        for item in data:
+            key = str(getattr(item, 'key', ''))
+            valid = str(getattr(item, 'valid', False))
+            stamp_ms = str(getattr(item, 'stamp_ms', 0))
+            typed_data = getattr(item, 'data', None)
+            value_type = str(getattr(typed_data, 'value_type', 'unknown'))
+            value = getattr(typed_data, 'value', None)
+            rows.append([key, valid, stamp_ms, value_type, str(value)])
+    elif isinstance(data, dict):
+        for key, item in sorted(data.items(), key=lambda entry: str(entry[0]).lower()):
+            if not isinstance(item, dict):
+                rows.append([str(key), 'False', '0', 'unknown', str(item)])
+                continue
+            valid = str(item.get('valid', False))
+            stamp_ms = str(item.get('stampMs', 0))
+            data_obj = item.get('data', {})
+            value_type = str(data_obj.get('type', 'unknown')) if isinstance(data_obj, dict) else 'unknown'
+            value = data_obj.get('value') if isinstance(data_obj, dict) else data_obj
+            rows.append([str(key), valid, stamp_ms, value_type, str(value)])
+
+    return columns, rows
+
+
+def render_executors_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]:
+    columns = ['Id', 'Name', 'Valid', 'StampMs', 'Mode', 'Type', 'Value']
+    rows = []
+
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict):
+                executor_id = str(item.get('id', ''))
+                name = str(item.get('name', ''))
+                valid = str(item.get('valid', False))
+                stamp_ms = str(item.get('stampMs', 0))
+                mode = str(item.get('mode', 'UNKNOWN'))
+                data_obj = item.get('data', {})
+                value_type = str(data_obj.get('type', 'unknown')) if isinstance(data_obj, dict) else 'unknown'
+                value = data_obj.get('value') if isinstance(data_obj, dict) else data_obj
+            else:
+                executor_id = str(getattr(item, 'executor_id', ''))
+                name = str(getattr(item, 'name', ''))
+                valid = str(getattr(item, 'valid', False))
+                stamp_ms = str(getattr(item, 'stamp_ms', 0))
+                mode = str(getattr(item, 'mode', 'UNKNOWN'))
+                typed_data = getattr(item, 'data', None)
+                value_type = str(getattr(typed_data, 'value_type', 'unknown'))
+                value = getattr(typed_data, 'value', None)
+            rows.append([executor_id, name, valid, stamp_ms, mode, value_type, str(value)])
+    elif isinstance(data, tuple):
+        for item in data:
+            rows.append([str(item), '', '', '', '', '', ''])
+
+    return columns, rows
+
+
+def render_core_action_result_data(data: Any) -> Tuple[List[str], List[List[str]]]:
+    columns = ['Field', 'Value']
+    rows = []
+    if isinstance(data, dict):
+        flat_data = flatten_dict(data)
+        for key, value in sorted(flat_data.items()):
+            rows.append([str(key), str(value)])
+    else:
+        rows.append(['result', str(data)])
+    return columns, rows
+
+
 def render_generic_data(data: Any) -> Tuple[List[str], List[List[str]]]:
     """
     Generic renderer for unknown data structures.

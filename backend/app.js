@@ -21,6 +21,7 @@ import createActuatorsRouter from './routers/actuators.js';
 import createSchedulesRouter from './routers/schedules.js';
 import createSensorAlertRulesRouter from './routers/sensor-alert-rules.js';
 import createSensorAlertsRouter from './routers/sensor-alerts.js';
+import createCoreRouter from './routers/core.js';
 import { metricsRouter } from './clients/promClient.js';
 import './entity/index.js';
 import createUserContextMiddleware from './middleware/userContextMiddleware.js';
@@ -139,6 +140,7 @@ class App {
           'GET  /sensor-alert-rules',
           'GET  /sensor-alerts',
           'GET  /metadata/health/',
+          'GET  /status',
         ],
       });
     });
@@ -172,6 +174,9 @@ class App {
     this.app.use('/sensor-alerts', createSensorAlertsRouter({
       sensorAlertsService: this.sensorAlertsService,
       userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/', createCoreRouter({
+      greenhouseCoreClient: this.greenhouseCoreClient
     }));
     this.app.use('/cache', createCacheRouter(this.redisClient));
     this.app.use('/fog', createFogRouter(this.redisClient, this.systemLogger));

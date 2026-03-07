@@ -56,6 +56,31 @@ class RedisClientWrapper {
     if (!keys || keys.length === 0) return 0;
     return await this.client.del(keys);
   }
+
+  async mGet(keys) {
+    if (!keys || keys.length === 0) return [];
+    return await this.client.mGet(keys);
+  }
+
+  scanIterator(options = {}) {
+    return this.client.scanIterator(options);
+  }
+
+  async lPush(key, value) {
+    return await this.client.lPush(key, value);
+  }
+
+  async lTrim(key, start, stop) {
+    return await this.client.lTrim(key, start, stop);
+  }
+
+  async lRange(key, start, stop) {
+    return await this.client.lRange(key, start, stop);
+  }
+
+  async expire(key, ttlSeconds) {
+    return await this.client.expire(key, ttlSeconds);
+  }
 }
 
 export default RedisClientWrapper;

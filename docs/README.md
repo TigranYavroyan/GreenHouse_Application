@@ -220,6 +220,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Dependencies**: Redis, RabbitMQ, PostgreSQL, Greenhouse Core Simulator
 - **Health Check**: HTTP GET `/metadata/health/` every 30 seconds
 - **Greenhouse Core Integration**: Uses `GreenhouseCoreClient` to communicate with greenhouse core via HTTP API
+- **Core HTTP API**: Exposes `/status`, `/schema/*`, `/getters`, `/executors`, and `/api/executors/:name/:action` for desktop polling and executor actions
 
 ### Backend Persistent IoT Model
 
@@ -238,48 +239,31 @@ Extensibility details:
 - Automation via cron in `Schedule.cron_expression`
 - Threshold monitoring through `SensorAlertRule` operators/thresholds
 
-#### **Greenhouse Core Simulator** (`greenhouse-core-sim`)
-- **Technology**: Node.js 18+ with Express.js
-- **Port**: 3001 (exposed to host)
-- **Purpose**: Simulates greenhouse core logic for development and testing
-- **Location**: `sim/` folder
-- **Structure**:
-  - `sim/app.js` - Main Express server
-  - `sim/controllers/commandController.js` - Command handling logic
-  - `sim/services/deviceSimulator.js` - Device and sensor simulation
-  - **APIs**:
-    - `POST /api/v1/commands/execute` - Generic command execution endpoint
-      - Body: `{ command, parameters, commandId, sessionId }`
-      - Returns: `{ success, result, error, commandId, timestamp }`
-    - `POST /api/v1/commands/read_temperature_data` - Read temperature sensor data (alternative endpoint)
-    - `POST /api/v1/commands/switch_water_canal` - Control water canal actuator (alternative endpoint)
-    - `POST /api/v1/commands/switch_actuator` - Control generic actuators (alternative endpoint)
-    - `GET /api/v1/metadata/health/` or `GET /metadata/health/` - Health check endpoint
-    - `GET /api/v1/devices` - Get current device states (debugging/monitoring)
-  - **Simulation Features**:
-    - **Sensors**:
-      - Temperature sensor with realistic variations (±2°C from base 22.5°C, affected by heater status)
-      - Humidity sensor (65% base, affected by water canal and fans)
-      - Light sensor (varies by time of day: 750 lux daytime, 50 lux nighttime)
-      - CO2 sensor (400 ppm base, affected by fan ventilation)
-      - Soil moisture sensor (50% base, affected by water canal)
-      - Soil pH sensor (6.5 base, stable with slight variations)
-    - **Actuators**:
-      - Water canal actuator with state tracking (on/off/toggle)
-      - Generic actuators with dynamic registration
-      - Fans with speed control (default 50% when on)
-      - Heaters with temperature control (default 30°C when on)
-    - Device state persistence during simulator lifetime
-    - Realistic sensor interactions (e.g., heaters affect temperature, fans affect humidity/CO2)
-- **Health Check**: HTTP GET `/metadata/health/` every 30 seconds
-- **Note**: In production, this will be replaced by the real greenhouse core system. The backend's `GreenhouseCoreClient` can be configured to point to the real core by changing `GREENHOUSE_CORE_URL` environment variable.
+#### **Greenhouse Core Server** (External Service)
+- **Technology**: External greenhouse core runtime (network service)
+- **Base URL**: `http://192.168.27.16:8080`
+- **Purpose**: Executes real greenhouse commands and exposes real state/executor APIs
+- **Required APIs**:
+  - `POST /api/v1/commands/execute`
+    - Body: `{ command, parameters, commandId, sessionId }`
+    - Returns: `{ success, result, error, commandId, timestamp }`
+  - `GET /status`
+  - `GET /schema/getters`
+  - `GET /schema/executors`
+  - `GET /getters`
+  - `GET /getters/:key`
+  - `GET /executors`
+  - `POST /api/executors/:name/mode`
+  - `POST /api/executors/:name/on`
+  - `POST /api/executors/:name/off`
+  - `POST /api/executors/:name/set`
 
 #### **Frontend** (`greenhouse-frontend`)
 - **Technology**: Python 3 with PyQt5
 - **Display**: X11 forwarding for GUI (Linux)
 - **Modes**: 
   - GUI mode (default)
-  - Headless mode (`--nogui` flag)
+  - Headless mode is removed (`--nogui` exits with warning)
 - **Dependencies**: RabbitMQ, Backend API
 
 ---
@@ -357,12 +341,13 @@ Extensibility details:
 - **Functionality**:
   - HTTP client for greenhouse core API communication
   - Generic `executeCommand()` method for all greenhouse commands
+  - Core state/executor methods (`/status`, `/schema/*`, `/getters`, `/executors`, `/api/executors/*`)
   - Health check endpoint monitoring
   - Retry logic with exponential backoff
   - Timeout handling
   - Connection status tracking
   - Configurable via environment variables (URL, timeout, retries)
-- **Note**: Can switch between simulator and real core by changing configuration
+- **Default Endpoint**: `http://192.168.27.16:8080` (overridable via `GREENHOUSE_CORE_URL`)
 
 ### Core Services
 
@@ -428,6 +413,14 @@ Extensibility details:
   - `DELETE /cache/clear`: Clear all cached entries
   - `GET /metadata/stats/`: Get command processing statistics
   - `GET /metadata/queues/`: Get RabbitMQ queue status
+  - `GET /status`: Greenhouse core status
+  - `GET /schema/getters`: Getter schema
+  - `GET /schema/executors`: Executor schema
+  - `GET /getters`: Getter snapshots
+  - `GET /getters/:key`: Single getter snapshot
+  - `GET /executors`: Executor snapshots
+  - `POST /api/executors/:name/:action`: Executor command route (`mode|on|off|set`)
+  - Compatibility aliases: none (use root core routes)
 
 ### Logging
 
@@ -491,7 +484,7 @@ Extensibility details:
 - **Purpose**: Main PyQt5 desktop application window
 - **Key Features**:
   - **Three-Tab Interface**:
-    1. **Control Tab**: User-friendly greenhouse controls (sensors, system status)
+    1. **Control Tab**: User-friendly greenhouse controls (sensors and actuators)
     2. **Scheduling Tab**: One-time delayed command scheduling (`Now`, presets, custom `hh:mm:ss`)
     3. **Server Tab**: Backend monitoring and management
   - **Session Management**:
@@ -683,7 +676,7 @@ npm run dev  # Uses nodemon for auto-reload
 cd frontend
 pip install -r requirements.txt
 python main.py  # GUI mode
-python main.py --nogui  # Headless mode
+python main.py --nogui  # Deprecated: exits with warning
 python main.py --debug  # Debug logging
 ```
 
@@ -809,14 +802,13 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 
 ## Greenhouse Core Integration
 
-### Abstract Interface Design
+### Core Client Design
 
-The backend uses an abstract `GreenhouseCoreClient` interface that allows seamless switching between the simulator and the real greenhouse core system. This design provides:
+The backend uses `GreenhouseCoreClient` as a dedicated integration layer for the real greenhouse core server. This design provides:
 
-1. **Flexibility**: Change core system by updating configuration only
-2. **Testability**: Use simulator for development and testing
-3. **Reliability**: Built-in retry logic, timeout handling, and connection status tracking
-4. **Consistency**: Normalized response format regardless of core implementation
+1. **Configurability**: Core endpoint remains configurable through environment variables
+2. **Reliability**: Built-in retry logic, timeout handling, and connection status tracking
+3. **Consistency**: Normalized response format for command execution results
 
 ### Command Routing
 
@@ -825,19 +817,11 @@ The `CommandExecutor` routes all commands to Greenhouse Core via HTTP:
 - **Actuator Control Commands**: `switch_water_canal`, `switch_actuator`, `switch_fan`, `switch_heater` → Greenhouse Core via HTTP
 - **Legacy Command**: `read_sensor` → Automatically routes to appropriate sensor command based on `sensor` parameter
 
-### Switching to Real Core
+### Current Core Configuration
 
-To switch from simulator to real greenhouse core:
+The backend is configured to use the real core server at `http://192.168.27.16:8080` by default. `GREENHOUSE_CORE_URL` can still be overridden when needed.
 
-1. Update `GREENHOUSE_CORE_URL` environment variable to point to real core API
-2. Ensure real core implements the same API contract:
-   - `POST /api/v1/commands/execute` with `{ command, parameters, commandId, sessionId }`
-   - Returns `{ success, result, error, commandId, timestamp }`
-   - Supports all greenhouse commands: sensor readings and actuator controls
-   - `GET /api/v1/metadata/health/` for health checks
-3. Restart backend service
-
-No code changes required - the abstract interface handles the communication. The `GreenhouseCoreClient` includes:
+The `GreenhouseCoreClient` includes:
 - Automatic retry logic with exponential backoff (configurable retries)
 - Timeout handling (configurable timeout)
 - Connection status tracking

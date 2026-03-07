@@ -14,12 +14,12 @@ from modules.command_worker import CommandWorker
 
 def run_headless():
     # Headless mode removed - shell commands are no longer supported
-    # All commands must go through greenhouse core simulator
+    # All commands must go through greenhouse core server
     setup_logging()
     logger = logging.getLogger('GreenhouseDesktop')
     logger.warning("Headless mode is no longer supported. Shell commands have been removed.")
     print("Headless mode is no longer supported.")
-    print("Please use the GUI application or send commands via RabbitMQ to greenhouse core simulator.")
+    print("Please use the GUI application or send commands via RabbitMQ to greenhouse core server.")
     sys.exit(1)
 
 def run_gui(debug=False):

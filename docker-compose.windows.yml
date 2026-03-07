@@ -28,26 +28,6 @@ services:
       timeout: 5s
       retries: 5
 
-  greenhouse-core-sim:
-    build:
-      context: ./sim
-      dockerfile: Dockerfile
-    container_name: greenhouse-core-sim
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-    volumes:
-      - ./sim/logs:/app/logs
-    networks:
-      - greenhouse-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/metadata/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
   backend:
     build:
       context: ./backend
@@ -58,7 +38,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - GREENHOUSE_CORE_URL=http://greenhouse-core-sim:3001
+      - GREENHOUSE_CORE_URL=http://192.168.27.16:8080
       - GREENHOUSE_CORE_TIMEOUT=10000
       - GREENHOUSE_CORE_RETRIES=2
     depends_on:
@@ -67,8 +47,6 @@ services:
       redis:
         condition: service_healthy
       rabbitmq:
-        condition: service_healthy
-      greenhouse-core-sim:
         condition: service_healthy
     volumes:
       - ./backend/logs:/app/logs
@@ -99,7 +77,7 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - "192.168.27.19:5900:5900"
+      - "0.0.0.0:5900:5900"
     networks:
       - greenhouse-network
     stdin_open: true
