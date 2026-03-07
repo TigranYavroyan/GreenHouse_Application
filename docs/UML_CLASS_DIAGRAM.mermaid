@@ -68,7 +68,7 @@ classDiagram
         +processCommand(commandData) Promise
         +generateCacheKey() String
         +isStateful(command) Boolean
-        +getTTLForCommand(command) int
+        +getTTLForCommand(command, parameters) int
     }
     
     class CommandExecutor {

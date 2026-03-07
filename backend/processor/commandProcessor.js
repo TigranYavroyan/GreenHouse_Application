@@ -25,23 +25,27 @@ class CommandProcessor {
     return `cmd:${sessionId}:${command}:${currentPath}:${JSON.stringify(sortedParams)}`;
   }
 
-  getTTLForCommand(command) {
+  getTTLForCommand(command, parameters = {}) {
     const ttlConfig = {
-      // Greenhouse core sensor reading commands (cacheable)
-      read_temperature_data: 5,
-      read_humidity_data: 5,
-      read_light_data: 5,
-      read_co2_data: 5,
-      read_soil_moisture_data: 5,
-      read_soil_ph_data: 5,
-      read_sensor: 5, // Legacy, routes to appropriate sensor
+      // Greenhouse core sensor readings: always live for sync correctness.
+      read_temperature_data: 0,
+      read_humidity_data: 0,
+      read_light_data: 0,
+      read_co2_data: 0,
+      read_soil_moisture_data: 0,
+      read_soil_ph_data: 0,
+      read_sensor: 0, // Legacy sensor read command
       // Device control commands (stateful - don't cache)
       switch_water_canal: 0,
       switch_actuator: 0,
       switch_fan: 0,
       switch_heater: 0
     };
-    return ttlConfig[command] || 8;
+
+    if (Object.prototype.hasOwnProperty.call(ttlConfig, command)) {
+      return ttlConfig[command];
+    }
+    return 8;
   }
 
   isStateful(command) {
@@ -70,8 +74,11 @@ class CommandProcessor {
     // queue per-session sequential execution
     session.commandQueue = session.commandQueue.then(async () => {
       try {
-        // cache lookup for non-stateful commands
-        if (!this.isStateful(command) && this.redis && this.redis.isOpen) {
+        const ttl = this.getTTLForCommand(command, parameters);
+        const shouldCache = !this.isStateful(command) && ttl > 0;
+
+        // cache lookup for cacheable commands
+        if (shouldCache && this.redis && this.redis.isOpen) {
           const cacheKey = this.generateCacheKey(command, parameters, session.currentPath, session.sessionId);
           const cached = await this.redis.get(cacheKey);
           if (cached) {
@@ -106,10 +113,9 @@ class CommandProcessor {
         session.lastCommandId = commandId;
         const result = await this.executor.runCommand(command, parameters, session);
 
-        // caching - only cache successful results (no errors)
-        if (!this.isStateful(command) && !result.error && this.redis && this.redis.isOpen) {
+        // Cache only successful results for commands with positive TTL.
+        if (shouldCache && !result.error && this.redis && this.redis.isOpen) {
           const cacheKey = this.generateCacheKey(command, parameters, session.currentPath, session.sessionId);
-          const ttl = this.getTTLForCommand(command);
           try {
             await this.redis.setEx(cacheKey, ttl, JSON.stringify(result));
             session.logger.command(commandId, 'CACHED', `TTL:${ttl}s`);

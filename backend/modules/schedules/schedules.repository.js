@@ -22,6 +22,33 @@ class SchedulesRepository {
     });
   }
 
+  async findAllEnabled() {
+    return Schedule.findAll({
+      where: { enabled: true },
+      include: [
+        {
+          model: Device,
+          as: 'device',
+          required: true,
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+  }
+
+  async findEnabledById(id) {
+    return Schedule.findOne({
+      where: { id, enabled: true },
+      include: [
+        {
+          model: Device,
+          as: 'device',
+          required: true,
+        },
+      ],
+    });
+  }
+
   async findByIdForUser(id, userId) {
     return Schedule.findOne({
       where: { id },
@@ -50,6 +77,18 @@ class SchedulesRepository {
 
     await schedule.destroy();
     return true;
+  }
+
+  async updateMetadataById(id, metadataPatch) {
+    const schedule = await Schedule.findByPk(id);
+    if (!schedule) return null;
+
+    const mergedMetadata = {
+      ...(schedule.metadata || {}),
+      ...(metadataPatch || {}),
+    };
+    await schedule.update({ metadata: mergedMetadata });
+    return schedule;
   }
 }
 

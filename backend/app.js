@@ -39,6 +39,7 @@ import SensorsService from './modules/sensors/sensors.service.js';
 import SensorReadingsService from './modules/sensor-readings/sensor-readings.service.js';
 import ActuatorsService from './modules/actuators/actuators.service.js';
 import SchedulesService from './modules/schedules/schedules.service.js';
+import SchedulesRuntime from './modules/schedules/schedules.runtime.js';
 import SensorAlertRulesService from './modules/sensor-alert-rules/sensor-alert-rules.service.js';
 import SensorAlertsService from './modules/sensor-alerts/sensor-alerts.service.js';
 import ensureDefaultUser from './modules/users/default-user.bootstrap.js';
@@ -76,6 +77,12 @@ class App {
     this.sensorAlertRulesRepository = new SensorAlertRulesRepository();
     this.sensorAlertsRepository = new SensorAlertsRepository();
 
+    this.schedulesRuntime = new SchedulesRuntime({
+      schedulesRepository: this.schedulesRepository,
+      rabbitClient: this.rabbitClient,
+      logger: this.systemLogger,
+    });
+
     // services
     this.usersService = new UsersService(this.usersRepository);
     this.devicesService = new DevicesService({
@@ -97,6 +104,7 @@ class App {
     this.schedulesService = new SchedulesService({
       schedulesRepository: this.schedulesRepository,
       devicesRepository: this.devicesRepository,
+      schedulesRuntime: this.schedulesRuntime,
     });
     this.sensorAlertRulesService = new SensorAlertRulesService({
       sensorAlertRulesRepository: this.sensorAlertRulesRepository,
@@ -228,6 +236,7 @@ class App {
         }
       }, { noAck: false });
 
+      await this.schedulesRuntime.start();
       this.systemLogger.info('RabbitMQ connected and consumer started');
     } catch (err) {
       this.systemLogger.error(`RabbitMQ setup failed: ${err.message}`);
@@ -266,6 +275,16 @@ class App {
         this.systemLogger.info(`Logs directory: ${this.config.logsDir}`);
         this.systemLogger.info(`API docs available at http://localhost:${port}`);
       });
+
+      const stopRuntime = () => {
+        try {
+          this.schedulesRuntime.stop();
+        } catch (error) {
+          this.systemLogger.warn(`Failed to stop schedules runtime: ${error.message}`);
+        }
+      };
+      process.on('SIGINT', stopRuntime);
+      process.on('SIGTERM', stopRuntime);
 
     } catch (err) {
       this.systemLogger.error(`Failed to start server: ${err.message}`);

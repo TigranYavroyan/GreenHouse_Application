@@ -1,5 +1,6 @@
 import requests
 from typing import Any, Dict, List
+from urllib.parse import quote
 
 from modules.core_dtos import (
     CoreStatusDto,
@@ -25,10 +26,17 @@ class CoreApiClient:
             response = requests.get(url, timeout=self.timeout_seconds)
         elif method == "POST":
             response = requests.post(url, json=data or {}, timeout=self.timeout_seconds)
+        elif method == "PATCH":
+            response = requests.patch(url, json=data or {}, timeout=self.timeout_seconds)
+        elif method == "DELETE":
+            response = requests.delete(url, timeout=self.timeout_seconds)
         else:
             raise ValueError(f"Unsupported method: {method}")
 
-        payload = response.json()
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {"error": response.text or f"HTTP {response.status_code}"}
         if response.status_code >= 400:
             message = payload.get("error") if isinstance(payload, dict) else str(payload)
             raise RuntimeError(message or f"Request failed: {response.status_code}")
@@ -51,7 +59,8 @@ class CoreApiClient:
         return parse_getter_snapshots(payload if isinstance(payload, dict) else {})
 
     def get_getter(self, key: str) -> GetterSnapshotDto:
-        payload = self._request(f"/getters/{key}")
+        safe_key = quote(str(key or "").strip(), safe="")
+        payload = self._request(f"/getters/{safe_key}")
         if not isinstance(payload, dict):
             payload = {}
         key_value = str(payload.get("key", key))
@@ -63,26 +72,77 @@ class CoreApiClient:
 
     def set_executor_mode(self, name: str, value: str) -> Dict[str, Any]:
         dto = SetExecutorModeRequestDto(value=value)
+        safe_name = quote(str(name or "").strip(), safe="")
         payload = self._request(
-            f"/api/executors/{name}/mode",
+            f"/api/executors/{safe_name}/mode",
             method="POST",
             data=dto.to_dict(),
         )
         return payload if isinstance(payload, dict) else {"result": payload}
 
     def executor_on(self, name: str) -> Dict[str, Any]:
-        payload = self._request(f"/api/executors/{name}/on", method="POST")
+        safe_name = quote(str(name or "").strip(), safe="")
+        payload = self._request(f"/api/executors/{safe_name}/on", method="POST")
         return payload if isinstance(payload, dict) else {"result": payload}
 
     def executor_off(self, name: str) -> Dict[str, Any]:
-        payload = self._request(f"/api/executors/{name}/off", method="POST")
+        safe_name = quote(str(name or "").strip(), safe="")
+        payload = self._request(f"/api/executors/{safe_name}/off", method="POST")
         return payload if isinstance(payload, dict) else {"result": payload}
 
     def executor_set(self, name: str, value: str) -> Dict[str, Any]:
         dto = SetExecutorValueRequestDto(value=value)
+        safe_name = quote(str(name or "").strip(), safe="")
         payload = self._request(
-            f"/api/executors/{name}/set",
+            f"/api/executors/{safe_name}/set",
             method="POST",
             data=dto.to_dict(),
         )
         return payload if isinstance(payload, dict) else {"result": payload}
+
+    def list_devices(self) -> List[Dict[str, Any]]:
+        payload = self._request("/devices")
+        if isinstance(payload, dict):
+            data = payload.get("data", [])
+            return data if isinstance(data, list) else []
+        return []
+
+    def list_schedules(self) -> List[Dict[str, Any]]:
+        payload = self._request("/schedules")
+        if isinstance(payload, dict):
+            data = payload.get("data", [])
+            return data if isinstance(data, list) else []
+        return []
+
+    def create_schedule(
+        self,
+        *,
+        device_id: str,
+        name: str,
+        cron_expression: str,
+        action: str,
+        payload: Dict[str, Any],
+        enabled: bool = True,
+        metadata: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        body = {
+            "deviceId": device_id,
+            "name": name,
+            "cronExpression": cron_expression,
+            "action": action,
+            "payload": payload or {},
+            "enabled": bool(enabled),
+            "metadata": metadata or {},
+        }
+        response = self._request("/schedules", method="POST", data=body)
+        return response if isinstance(response, dict) else {"result": response}
+
+    def update_schedule(self, schedule_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+        safe_schedule_id = quote(str(schedule_id or "").strip(), safe="")
+        response = self._request(f"/schedules/{safe_schedule_id}", method="PATCH", data=updates or {})
+        return response if isinstance(response, dict) else {"result": response}
+
+    def delete_schedule(self, schedule_id: str) -> Dict[str, Any]:
+        safe_schedule_id = quote(str(schedule_id or "").strip(), safe="")
+        response = self._request(f"/schedules/{safe_schedule_id}", method="DELETE")
+        return response if isinstance(response, dict) else {"result": response}

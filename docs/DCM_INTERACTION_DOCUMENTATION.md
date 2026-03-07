@@ -630,22 +630,24 @@ This section is derived from current UI wiring and intended to keep the frontend
 From `frontend/modules/greenhouse.py`:
 
 - Connected server-tab actions:
-  - `healthButton` -> `view_core_status` (retitled to `Core Status`)
-  - `refreshButton` -> `refresh_all_status` (retitled to `Refresh Snapshot`)
-  - `statsButton` -> `view_getter_schema` (`Getter Schema`)
-  - `sessionsButton` -> `view_executor_schema` (`Executor Schema`)
-  - `cacheKeysButton` -> `view_getters` (`Getters`)
-  - `queuesButton` -> `view_executors` (`Executors`)
-  - `clearCacheButton` -> `prompt_switch_executor_mode` (`Set Mode`)
-  - `testCommandButton` -> `prompt_executor_on` (`Executor ON`)
-  - `logFilesButton` -> `prompt_executor_off` (`Executor OFF`)
-  - `viewLogButton` -> `prompt_executor_set` (`Executor SET`)
+  - `healthButton` -> `view_core_status` (`System Health`)
+  - `refreshButton` -> `refresh_all_status` (`Refresh All Data`)
+  - `statsButton` -> `view_getter_schema` (`Available Sensor Types`)
+  - `sessionsButton` -> `view_executor_schema` (`Available Device Controls`)
+  - `cacheKeysButton` -> `view_getters` (`All Sensor Readings`)
+  - `queuesButton` -> `view_executors` (`All Device States`)
+  - `clearCacheButton` -> `prompt_switch_executor_mode` (`Change Device Mode`)
+  - `testCommandButton` -> `prompt_executor_on` (`Turn Device ON`)
+  - `logFilesButton` -> `prompt_executor_off` (`Turn Device OFF`)
+  - `viewLogButton` -> `prompt_executor_set` (`Set Device Value`)
 - Connected control-tab actions (RabbitMQ command flow, not executor HTTP API):
   - sensor reads and toggle controls for water/fan/heater/actuator
+- Connected scheduling-tab actions:
+  - `scheduleTaskButton` -> `schedule_selected_task` (create backend recurring schedule)
+  - `cancelScheduledButton` -> `cancel_selected_schedule` (delete selected backend schedule)
+  - `clearScheduledButton` -> `clear_all_schedules` (delete all backend schedules for current user)
 - Hidden/removed from active UI (not connected to core action flow):
   - legacy `statusButton` (`📊 System Status`)
-  - scheduling local-only buttons `cancelScheduledButton` and `clearScheduledButton`
-  - local table-level `Clear Table` button
 
 ### Button behavior details
 
@@ -653,19 +655,33 @@ From `frontend/modules/greenhouse.py`:
 - Mode switching remains explicit (`Set Mode` button).
 - ON/OFF/SET flows do not auto-switch from `AUTO` to `MANUAL`.
 
-### Recommended user-friendly DCM button set (spec)
+### User-friendly DCM button set (implemented)
 
-To align UI with actual DCM logic exposed by root backend API routes, keep server tab focused on:
-- `Core Status`
-- `Refresh Snapshot`
-- `Set Executor Mode`
-- `Executor ON`
-- `Executor OFF`
-- `Executor SET Value`
+Server tab now uses end-user naming and one-action-per-button behavior:
+- `System Health`
+- `Refresh All Data`
+- `Available Sensor Types`
+- `Available Device Controls`
+- `All Sensor Readings`
+- `All Device States`
+- `Change Device Mode`
+- `Turn Device ON`
+- `Turn Device OFF`
+- `Set Device Value`
 
 This keeps:
 - one clear place for DCM state/actions
 - explicit mode-first flow
 - consistent digital vs value action paths
-- reduced user confusion from non-connected controls
+- reduced user confusion from developer-oriented naming
+
+### Scheduling dispatch and waiting boundaries
+
+- Scheduling is persisted with backend `/schedules` records and executed by backend cron runtime.
+- At schedule trigger time, runtime dispatches command envelope to `greenhouse_commands`.
+- Schedule execution status is dispatch-based:
+  - `completed` => command was successfully published to RabbitMQ queue.
+  - `failed` => publish failed and `metadata.lastDispatchError` is populated.
+- Core waiting logic (`timeout`, `retry`, `backoff`) occurs later inside command execution path (`GreenhouseCoreClient.executeCommand`) after queue consumption.
+- Therefore schedule completion is intentionally decoupled from final core response completion.
 

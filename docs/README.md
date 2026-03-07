@@ -77,11 +77,11 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - `type` ("user" or "developer")
 - Command is sent to RabbitMQ queue: `greenhouse_commands`
 
-#### 2.1 **Scheduling (V1)**
-- The frontend Scheduling tab uses PyQt5 `QTimer` for one-time delayed command execution
-- Delay options: `Now`, `15 minutes`, `30 minutes`, `1 hour`, and custom `hh:mm:ss`
-- Scheduled tasks dispatch through the existing RabbitMQ command flow using the same envelope (`commandId`, `command`, `parameters`, `sessionId`, `type`)
-- V1 task persistence is in-memory only (not restored after restart)
+#### 2.1 **Scheduling (Persistent Backend Runtime)**
+- The frontend Scheduling tab writes schedules to backend REST API (`/schedules`)
+- Backend runtime executes enabled cron schedules and dispatches commands to `greenhouse_commands`
+- Scheduler completion is defined as successful queue publish (dispatch), not final core response completion
+- Schedule persistence is database-backed and survives frontend/backend restarts (enabled schedules are reloaded)
 
 #### 3. **Backend Command Consumption**
 - Backend RabbitMQ consumer listens on `greenhouse_commands` queue
@@ -151,13 +151,13 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 #### 7. **Caching Strategy**
 - Redis caches command results with TTL:
   - **Greenhouse Commands**:
-    - `read_temperature_data`: 5 seconds
-    - `read_humidity_data`: 5 seconds
-    - `read_light_data`: 5 seconds
-    - `read_co2_data`: 5 seconds
-    - `read_soil_moisture_data`: 5 seconds
-    - `read_soil_ph_data`: 5 seconds
-    - `read_sensor`: 5 seconds (legacy, routes to appropriate sensor command)
+    - `read_temperature_data`: No caching (TTL 0, live readings)
+    - `read_humidity_data`: No caching (TTL 0, live readings)
+    - `read_light_data`: No caching (TTL 0, live readings)
+    - `read_co2_data`: No caching (TTL 0, live readings)
+    - `read_soil_moisture_data`: No caching (TTL 0, live readings)
+    - `read_soil_ph_data`: No caching (TTL 0, live readings)
+    - `read_sensor`: No caching (TTL 0, live readings)
     - `switch_water_canal`: No caching (stateful)
     - `switch_actuator`: No caching (stateful)
     - `switch_fan`: No caching (stateful)
@@ -504,14 +504,13 @@ Extensibility details:
   - **Styling**: Modern UI with custom theme and stylesheets
   - **Auto-refresh**: Optional periodic server status updates
 
-#### **`modules/scheduler_service.py`** (`SchedulerService`)
-- **Purpose**: In-memory one-time task scheduler for delayed command dispatch
+#### **`modules/schedules/schedules.runtime.js`** (`SchedulesRuntime`)
+- **Purpose**: Backend cron runtime for persistent schedule dispatch
 - **Key Features**:
-  - Per-task `QTimer` management
-  - Pending/running/completed/failed/cancelled task statuses
-  - Cancel selected task and clear-all operations
-  - Callback-based execution to keep scheduling logic decoupled from transport/UI
-  - Future-friendly boundary for user-specific DB-backed persistence
+  - Loads enabled schedules from database at startup
+  - Registers cron jobs per schedule and keeps runtime map in memory
+  - Dispatches command envelopes to `greenhouse_commands`
+  - Updates schedule metadata with dispatch status and last command id
 
 ### Communication
 
