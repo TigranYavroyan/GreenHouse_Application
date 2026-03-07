@@ -715,8 +715,10 @@ python main.py --debug  # Debug logging
 - `REDIS_PORT`: Redis port for edge caching (default: 6379)
 - `REDIS_DB`: Redis database number (default: 0)
 - `ENVIRONMENT`: Environment mode - `production` or `development` (default: development)
-- `DISPLAY`: X11 display (for GUI)
-- `XAUTHORITY`: X11 authority file (for GUI)
+- `DISPLAY`: Display endpoint for GUI mode (Linux example: `:0`, Windows X server example: `host.docker.internal:0.0`)
+- `XVFB_SCREEN`: Optional virtual display geometry fallback (default: `1920x1080x24`)
+- `ENABLE_VNC`: When `true`, starts VNC in Xvfb fallback mode for remote interaction (default: `false`)
+- `VNC_PORT`: VNC port used when `ENABLE_VNC=true` (default: `5900`)
 
 ### Environment Configuration Files
 

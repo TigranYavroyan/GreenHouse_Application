@@ -2,8 +2,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: greenhouse-redis
-    # ports:
-    #   - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -17,9 +15,6 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: greenhouse-rabbitmq
-    # ports:
-    #   - "5672:5672"
-    #   - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -32,6 +27,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   greenhouse-core-sim:
     build:
       context: ./sim
@@ -92,14 +88,18 @@ services:
       dockerfile: Dockerfile
     container_name: greenhouse-frontend
     environment:
-      - DISPLAY=${DISPLAY:-:0}
+      - DISPLAY=${DISPLAY:-host.docker.internal:0.0}
       - QT_X11_NO_MITSHM=1
+      - ENABLE_VNC=true
+      - VNC_PORT=5900
       - ENVIRONMENT=production
     env_file:
       - ./frontend/.env
+    # Windows-safe: remove Linux/X11 mounts that fail with "invalid mount path ':'".
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
       - ./frontend:/app
+    ports:
+      - "192.168.27.19:5900:5900"
     networks:
       - greenhouse-network
     stdin_open: true
@@ -110,7 +110,7 @@ services:
     container_name: postgres
     restart: unless-stopped
     networks:
-      - postgres-network 
+      - postgres-network
     env_file:
       - ./backend/.env.development
     ports:
