@@ -42,21 +42,32 @@ class CoreApiClient:
             raise RuntimeError(message or f"Request failed: {response.status_code}")
         return payload
 
+    def _expect_payload_type(self, payload: Any, expected_type: type, endpoint: str) -> Any:
+        if isinstance(payload, expected_type):
+            return payload
+        raise RuntimeError(
+            f"Unexpected response shape from {endpoint}: expected {expected_type.__name__}, got {type(payload).__name__}"
+        )
+
     def get_status(self) -> CoreStatusDto:
         payload = self._request("/status")
-        return CoreStatusDto.from_dict(payload if isinstance(payload, dict) else {})
+        payload = self._expect_payload_type(payload, dict, "/status")
+        return CoreStatusDto.from_dict(payload)
 
     def get_getter_schema(self) -> Dict[str, str]:
         payload = self._request("/schema/getters")
-        return parse_getter_schema(payload if isinstance(payload, dict) else {})
+        payload = self._expect_payload_type(payload, dict, "/schema/getters")
+        return parse_getter_schema(payload)
 
     def get_executor_schema(self) -> Dict[str, str]:
         payload = self._request("/schema/executors")
-        return parse_executor_schema(payload if isinstance(payload, dict) else {})
+        payload = self._expect_payload_type(payload, dict, "/schema/executors")
+        return parse_executor_schema(payload)
 
     def get_getters(self) -> List[GetterSnapshotDto]:
         payload = self._request("/getters")
-        return parse_getter_snapshots(payload if isinstance(payload, dict) else {})
+        payload = self._expect_payload_type(payload, dict, "/getters")
+        return parse_getter_snapshots(payload)
 
     def get_getter(self, key: str) -> GetterSnapshotDto:
         safe_key = quote(str(key or "").strip(), safe="")
@@ -68,7 +79,8 @@ class CoreApiClient:
 
     def get_executors(self) -> List[ExecutorSnapshotDto]:
         payload = self._request("/executors")
-        return parse_executor_snapshots(payload if isinstance(payload, list) else [])
+        payload = self._expect_payload_type(payload, list, "/executors")
+        return parse_executor_snapshots(payload)
 
     def set_executor_mode(self, name: str, value: str) -> Dict[str, Any]:
         dto = SetExecutorModeRequestDto(value=value)

@@ -1,6 +1,5 @@
 import uuid
 import logging
-import time
 
 from PyQt5.QtCore import QDateTime, QTimer
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QMessageBox
@@ -44,6 +43,11 @@ class CommandPanelMixin:
         self.connection_timer = QTimer()
         self.connection_timer.timeout.connect(self.check_connection)
         self.connection_timer.start(10000)
+
+        self.pending_command_timeout_ms = 30000
+        self.pending_command_check_timer = QTimer()
+        self.pending_command_check_timer.timeout.connect(self.expire_pending_commands)
+        self.pending_command_check_timer.start(1000)
 
     # ------------------------------------------------------------------
     # Control table helpers
@@ -140,27 +144,67 @@ class CommandPanelMixin:
         self.pending_commands[command_id] = {
             "type": "user",
             "command": command,
-            "parameters": parameters or {}
+            "parameters": parameters or {},
+            "command_data": command_data,
+            "created_at_ms": QDateTime.currentMSecsSinceEpoch(),
+            "retries_left": 1,
+            "sent": False
         }
 
         self.logger.info(f"Sending user command {command_id}: {command}")
+        return self._send_pending_command(command_id)
 
-        # Small delay to avoid flooding, kept as in original implementation
-        time.sleep(0.1)
+    def _send_pending_command(self, command_id):
+        command_info = self.pending_commands.get(command_id)
+        if not command_info:
+            return False
+
+        command_data = command_info.get("command_data")
+        if not command_data:
+            self.logger.error(f"Missing command_data for pending command {command_id}")
+            self.pending_commands.pop(command_id, None)
+            return False
 
         if self.command_worker.send_command(command_data):
-            self.logger.info(f"Command sent: {command}")
+            command_info["sent"] = True
+            command_info["sent_at_ms"] = QDateTime.currentMSecsSinceEpoch()
+            self.logger.info(f"Command sent: {command_info.get('command', 'unknown')}")
             return True
-        else:
-            self.logger.warning("First send attempt failed, attempting reconnect...")
-            if self.command_worker.attempt_reconnect():
-                time.sleep(0.1)
-                if self.command_worker.send_command(command_data):
-                    self.logger.info("Command sent successfully after reconnect")
-                    return True
 
-            self.logger.error("Failed to send command after retry")
+        retries_left = int(command_info.get("retries_left", 0))
+        if retries_left <= 0:
+            self.logger.error(f"Failed to send command {command_id} after retry")
+            self.pending_commands.pop(command_id, None)
+            self.status_label.setText("❌ Failed to send command")
             return False
+
+        command_info["retries_left"] = retries_left - 1
+        self.logger.warning(f"Send failed for {command_id}, attempting reconnect retry")
+
+        def _after_reconnect(success):
+            if not success:
+                self.logger.error(f"Reconnect failed for command {command_id}")
+                return
+            self._send_pending_command(command_id)
+
+        self.command_worker.attempt_reconnect(callback=_after_reconnect)
+        return False
+
+    def expire_pending_commands(self):
+        now_ms = QDateTime.currentMSecsSinceEpoch()
+        expired_ids = []
+
+        for command_id, command_info in list(self.pending_commands.items()):
+            created_at_ms = int(command_info.get("created_at_ms", now_ms))
+            if now_ms - created_at_ms <= self.pending_command_timeout_ms:
+                continue
+            expired_ids.append(command_id)
+
+        for command_id in expired_ids:
+            command_info = self.pending_commands.pop(command_id, {})
+            command_name = command_info.get("command", "unknown")
+            self.logger.error(f"Command timed out waiting for response: {command_id} ({command_name})")
+            self.status_label.setText("❌ Command timed out")
 
     def handle_response(self, response):
         command_id = response.get('commandId')

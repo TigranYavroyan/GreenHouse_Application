@@ -55,7 +55,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
          │ HTTP API
          ▼
 ┌─────────────────┐
-│ Greenhouse Core │  (Express.js Simulator or Real Core)
+│ Greenhouse Core │  (FastAPI Simulator or Real Core)
 │   Simulator     │
 └─────────────────┘
 ```

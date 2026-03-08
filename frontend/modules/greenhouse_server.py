@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from copy import deepcopy
 
 from PyQt5.QtCore import QDateTime
 from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox, QVBoxLayout
@@ -55,7 +56,8 @@ class ServerPanelMixin:
             self.server_history.append(
                 {
                     "title": title,
-                    "data": data,
+                    # Keep immutable snapshot for row/detail consistency.
+                    "data": deepcopy(data),
                     "data_type": data_type,
                 }
             )
@@ -141,9 +143,11 @@ class ServerPanelMixin:
 
     def _refresh_getters(self):
         self.core_getters = self.core_api.get_getters()
+        self.logger.info(f"Fetched getters snapshot count: {len(self.core_getters)}")
 
     def _refresh_executors(self):
         self.core_executors = self.core_api.get_executors()
+        self.logger.info(f"Fetched executors snapshot count: {len(self.core_executors)}")
         self._update_executor_action_buttons_state()
 
     def _find_executor(self, name: str) -> Optional[ExecutorSnapshotDto]:

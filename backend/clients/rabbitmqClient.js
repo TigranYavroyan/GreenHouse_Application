@@ -7,33 +7,80 @@ class RabbitMQClient {
   constructor() {
     this.connection = null;
     this.channel = null;
+    this.isConnecting = false;
+    this.connectPromise = null;
+    this.reconnectTimer = null;
+    this.onConnectHandlers = [];
     const { host, port } = config.rabbitmq;
     this.url = `amqp://${host}:${port}`;
   }
 
-  async connect() {
-    try {
-      SystemLogger.info(`Connecting to RabbitMQ at: ${this.url}`);
-      this.connection = await amqp.connect(this.url);
-      this.channel = await this.connection.createChannel();
-      this.channel.on('error', (err) => {
-        SystemLogger.error(`RabbitMQ channel error: ${err.message}`);
-      });
-      this.connection.on('error', (err) => {
-        SystemLogger.error(`RabbitMQ connection error: ${err.message}`);
-      });
-      this.connection.on('close', async () => {
-        SystemLogger.warn('RabbitMQ connection closed, attempting reconnect in 5s...');
-        this.channel = null;
-        this.connection = null;
-        setTimeout(() => this.connect().catch(() => {}), 5000);
-      });
-      return this.channel;
-    } catch (err) {
-      SystemLogger.error(`RabbitMQ connect failed: ${err.message}`);
-      setTimeout(() => this.connect().catch(() => {}), 5000);
-      throw err;
+  addOnConnectHandler(handler) {
+    if (typeof handler === 'function') {
+      this.onConnectHandlers.push(handler);
     }
+  }
+
+  scheduleReconnect() {
+    if (this.reconnectTimer) {
+      return;
+    }
+
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connect().catch(() => {});
+    }, 5000);
+  }
+
+  async notifyConnected() {
+    for (const handler of this.onConnectHandlers) {
+      try {
+        await handler(this.channel);
+      } catch (err) {
+        SystemLogger.error(`RabbitMQ on-connect handler failed: ${err.message}`);
+      }
+    }
+  }
+
+  async connect() {
+    if (this.channel) {
+      return this.channel;
+    }
+
+    if (this.isConnecting) {
+      return this.connectPromise;
+    }
+
+    this.isConnecting = true;
+    this.connectPromise = (async () => {
+      try {
+        SystemLogger.info(`Connecting to RabbitMQ at: ${this.url}`);
+        this.connection = await amqp.connect(this.url);
+        this.channel = await this.connection.createChannel();
+        this.channel.on('error', (err) => {
+          SystemLogger.error(`RabbitMQ channel error: ${err.message}`);
+        });
+        this.connection.on('error', (err) => {
+          SystemLogger.error(`RabbitMQ connection error: ${err.message}`);
+        });
+        this.connection.on('close', async () => {
+          SystemLogger.warn('RabbitMQ connection closed, attempting reconnect in 5s...');
+          this.channel = null;
+          this.connection = null;
+          this.scheduleReconnect();
+        });
+        await this.notifyConnected();
+        return this.channel;
+      } catch (err) {
+        SystemLogger.error(`RabbitMQ connect failed: ${err.message}`);
+        this.scheduleReconnect();
+        throw err;
+      } finally {
+        this.isConnecting = false;
+      }
+    })();
+
+    return this.connectPromise;
   }
 
   async assertQueue(name, opts = { durable: true }) {
@@ -63,6 +110,10 @@ class RabbitMQClient {
 
   ack(msg) {
     if (this.channel && msg) this.channel.ack(msg);
+  }
+
+  nack(msg, requeue = true) {
+    if (this.channel && msg) this.channel.nack(msg, false, requeue);
   }
 }
 

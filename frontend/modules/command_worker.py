@@ -1,8 +1,6 @@
 import pika
 import json
-import uuid
 import logging
-import time
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 from modules.config import config
 
@@ -149,21 +147,28 @@ class CommandWorker(QObject):
             self.connection_status.emit(False)
             return False
     
-    def attempt_reconnect(self):
-        """Attempt to reconnect"""
+    def attempt_reconnect(self, callback=None):
+        """Attempt reconnect asynchronously using Qt timer."""
         if self.reconnect_attempts >= self.max_reconnect_attempts:
             self.logger.error("Max reconnection attempts reached")
+            if callback:
+                callback(False)
             return False
-            
-        delay = 2  # Short delay for quick retry
-        self.logger.info(f"Attempting reconnect in {delay} seconds (attempt {self.reconnect_attempts + 1})")
-        time.sleep(delay)
-        
-        self.reconnect_attempts += 1
-        success = self.setup_rabbitmq()
-        if success:
-            self.reconnect_attempts = 0
-        return success
+
+        delay_ms = 2000
+        attempt_number = self.reconnect_attempts + 1
+        self.logger.info(f"Attempting reconnect in {delay_ms / 1000:.0f} seconds (attempt {attempt_number})")
+
+        def _run_reconnect():
+            self.reconnect_attempts += 1
+            success = self.setup_rabbitmq()
+            if success:
+                self.reconnect_attempts = 0
+            if callback:
+                callback(success)
+
+        QTimer.singleShot(delay_ms, _run_reconnect)
+        return True
     
     def disconnect(self):
         self.logger.info("Disconnecting from RabbitMQ...")

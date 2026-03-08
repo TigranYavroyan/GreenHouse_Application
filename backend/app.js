@@ -82,6 +82,8 @@ class App {
       rabbitClient: this.rabbitClient,
       logger: this.systemLogger,
     });
+    this.rabbitConsumerReady = false;
+    this.rabbitReconnectHandlerAttached = false;
 
     // services
     this.usersService = new UsersService(this.usersRepository);
@@ -201,47 +203,142 @@ class App {
 
   async setupRabbitAndConsumer() {
     try {
+      if (!this.rabbitReconnectHandlerAttached) {
+        this.rabbitClient.addOnConnectHandler(async () => {
+          await this.configureRabbitConsumer();
+        });
+        this.rabbitReconnectHandlerAttached = true;
+      }
+
       await this.rabbitClient.connect();
-      await this.rabbitClient.assertQueue('greenhouse_commands', { durable: true });
-      await this.rabbitClient.assertQueue('command_responses', { durable: true });
-      await this.rabbitClient.prefetch(5);
-
-      // consumer
-      await this.rabbitClient.consume('greenhouse_commands', async (msg) => {
-        if (!msg) return;
-        let commandData = null;
-        try {
-          commandData = JSON.parse(msg.content.toString());
-          this.systemLogger.debug(`Processing command: ${commandData.commandId}`);
-          const result = await this.commandProcessor.processCommand(commandData);
-
-          // send response
-          this.rabbitClient.sendToQueue('command_responses', Buffer.from(JSON.stringify(result)), { persistent: true });
-          this.rabbitClient.ack(msg);
-        } catch (err) {
-          this.commandProcessor.commandStats.errors++;
-          this.systemLogger.error(`Command processing failed: ${err && err.message ? err.message : JSON.stringify(err)}`);
-          const errorResponse = {
-            commandId: commandData ? commandData.commandId : 'unknown',
-            error: err && err.message ? err.message : JSON.stringify(err),
-            timestamp: new Date().toISOString(),
-            sessionId: commandData ? commandData.sessionId : 'unknown'
-          };
-          try {
-            this.rabbitClient.sendToQueue('command_responses', Buffer.from(JSON.stringify(errorResponse)));
-          } catch (e) {
-            this.systemLogger.error(`Failed to send error response: ${e.message}`);
-          }
-          if (msg) this.rabbitClient.ack(msg);
-        }
-      }, { noAck: false });
-
       await this.schedulesRuntime.start();
-      this.systemLogger.info('RabbitMQ connected and consumer started');
+      this.systemLogger.info('RabbitMQ connected and consumer bootstrap complete');
     } catch (err) {
       this.systemLogger.error(`RabbitMQ setup failed: ${err.message}`);
       setTimeout(() => this.setupRabbitAndConsumer().catch(() => {}), 5000);
     }
+  }
+
+  buildErrorResponse(commandData, error) {
+    return {
+      commandId: commandData && commandData.commandId ? commandData.commandId : 'unknown',
+      result: null,
+      cached: false,
+      error: error && error.message ? error.message : JSON.stringify(error),
+      timestamp: new Date().toISOString(),
+      sessionId: commandData && commandData.sessionId ? commandData.sessionId : 'unknown',
+      currentPath: null
+    };
+  }
+
+  validateCommandMessage(commandData) {
+    if (!commandData || typeof commandData !== 'object') {
+      const error = new Error('Invalid command message: payload must be an object');
+      error.isValidationError = true;
+      throw error;
+    }
+
+    if (!commandData.commandId || typeof commandData.commandId !== 'string') {
+      const error = new Error('Invalid command message: commandId is required');
+      error.isValidationError = true;
+      throw error;
+    }
+
+    if (!commandData.command || typeof commandData.command !== 'string') {
+      const error = new Error('Invalid command message: command is required');
+      error.isValidationError = true;
+      throw error;
+    }
+
+    if (!commandData.type || typeof commandData.type !== 'string') {
+      const error = new Error('Invalid command message: type is required');
+      error.isValidationError = true;
+      throw error;
+    }
+
+    if (commandData.parameters === undefined || commandData.parameters === null) {
+      commandData.parameters = {};
+    }
+
+    if (typeof commandData.parameters !== 'object' || Array.isArray(commandData.parameters)) {
+      const error = new Error('Invalid command message: parameters must be an object');
+      error.isValidationError = true;
+      throw error;
+    }
+
+    if (!commandData.sessionId || typeof commandData.sessionId !== 'string') {
+      const error = new Error('Invalid command message: sessionId is required');
+      error.isValidationError = true;
+      throw error;
+    }
+  }
+
+  publishCommandResponse(payload) {
+    const published = this.rabbitClient.sendToQueue(
+      'command_responses',
+      Buffer.from(JSON.stringify(payload)),
+      { persistent: true }
+    );
+
+    if (!published) {
+      throw new Error('Failed to publish response to command_responses');
+    }
+  }
+
+  async configureRabbitConsumer() {
+    await this.rabbitClient.assertQueue('greenhouse_commands', { durable: true });
+    await this.rabbitClient.assertQueue('command_responses', { durable: true });
+    await this.rabbitClient.prefetch(5);
+
+    if (this.rabbitConsumerReady) {
+      this.rabbitConsumerReady = false;
+    }
+
+    await this.rabbitClient.consume('greenhouse_commands', async (msg) => {
+      if (!msg) return;
+
+      let commandData = null;
+
+      try {
+        commandData = JSON.parse(msg.content.toString());
+      } catch (parseError) {
+        const errorResponse = this.buildErrorResponse(commandData, new Error('Invalid JSON command payload'));
+        try {
+          this.publishCommandResponse(errorResponse);
+          this.rabbitClient.ack(msg);
+        } catch (publishError) {
+          this.systemLogger.error(`Failed to publish parse error response: ${publishError.message}`);
+          this.rabbitClient.nack(msg, true);
+        }
+        return;
+      }
+
+      try {
+        this.validateCommandMessage(commandData);
+        this.systemLogger.debug(`Processing command: ${commandData.commandId}`);
+        const result = await this.commandProcessor.processCommand(commandData);
+        this.publishCommandResponse(result);
+        this.rabbitClient.ack(msg);
+      } catch (err) {
+        this.commandProcessor.commandStats.errors++;
+        this.systemLogger.error(`Command processing failed: ${err && err.message ? err.message : JSON.stringify(err)}`);
+        const errorResponse = this.buildErrorResponse(commandData, err);
+        try {
+          this.publishCommandResponse(errorResponse);
+          this.rabbitClient.ack(msg);
+        } catch (publishError) {
+          this.systemLogger.error(`Failed to publish error response: ${publishError.message}`);
+          if (err && err.isValidationError) {
+            this.rabbitClient.nack(msg, false);
+            return;
+          }
+          this.rabbitClient.nack(msg, true);
+        }
+      }
+    }, { noAck: false });
+
+    this.rabbitConsumerReady = true;
+    this.systemLogger.info('RabbitMQ consumer configured');
   }
 
   async start(port = this.config.server.port) {

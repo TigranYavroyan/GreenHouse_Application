@@ -61,6 +61,7 @@ Core base URL from config: `GREENHOUSE_CORE_URL` (default `http://192.168.27.16:
 | POST | `/api/executors/:name/on` | ON action |
 | POST | `/api/executors/:name/off` | OFF action |
 | POST | `/api/executors/:name/set` | SET action |
+| POST | `/api/v1/commands/execute` | Queue-consumed command execution endpoint used by backend processor |
 
 ---
 
@@ -274,6 +275,36 @@ Core base URL from config: `GREENHOUSE_CORE_URL` (default `http://192.168.27.16:
   "value": "120"
 }
 ```
+
+#### POST `/api/v1/commands/execute`
+- **Purpose**: execute command payload forwarded from backend queue consumer.
+- **Required body**:
+```json
+{
+  "command": "read_temperature_data",
+  "parameters": {},
+  "commandId": "uuid",
+  "sessionId": "session-uuid"
+}
+```
+- **Body rules**:
+  - `command` must be string.
+  - `parameters` must be object (backend defaults to `{}` when omitted).
+  - `commandId` and `sessionId` must be strings.
+- **Success response schema**:
+```json
+{
+  "success": true,
+  "result": {},
+  "error": null,
+  "commandId": "uuid",
+  "command": "read_temperature_data",
+  "timestamp": "2026-03-08T12:00:00.000Z"
+}
+```
+- **Failure behavior**:
+  - HTTP transport errors are surfaced by backend as top-level `error` in `command_responses`.
+  - Application-level command failure is represented by `success: false` with `error` message.
 
 ---
 
@@ -595,6 +626,47 @@ Recovery:
 - Verify backend env `GREENHOUSE_CORE_URL`.
 - Verify core service availability.
 - Retry after connectivity is restored.
+
+### 6.6 RabbitMQ command envelope and response contract
+
+Command payload sent to `greenhouse_commands`:
+
+```json
+{
+  "commandId": "uuid",
+  "command": "read_temperature_data",
+  "type": "user",
+  "parameters": {},
+  "sessionId": "session-uuid"
+}
+```
+
+Success response payload from `command_responses`:
+
+```json
+{
+  "commandId": "uuid",
+  "result": {},
+  "cached": false,
+  "sessionId": "session-uuid",
+  "currentPath": "/",
+  "timestamp": "2026-03-08T12:00:00.000Z"
+}
+```
+
+Failure response payload from `command_responses`:
+
+```json
+{
+  "commandId": "uuid",
+  "result": null,
+  "cached": false,
+  "error": "Error message",
+  "sessionId": "session-uuid",
+  "currentPath": null,
+  "timestamp": "2026-03-08T12:00:00.000Z"
+}
+```
 
 ---
 

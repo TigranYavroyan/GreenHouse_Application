@@ -43,6 +43,23 @@ class GreenhouseCoreClient {
     return fallbackMessage;
   }
 
+  toErrorWithMetadata(sourceError, fallbackMessage = 'Request failed') {
+    if (sourceError instanceof Error) {
+      return sourceError;
+    }
+
+    const error = new Error(this.normalizeError(sourceError, fallbackMessage));
+    if (sourceError && typeof sourceError === 'object') {
+      if (Number.isInteger(sourceError.statusCode)) {
+        error.statusCode = sourceError.statusCode;
+      }
+      if (sourceError.payload !== undefined) {
+        error.payload = sourceError.payload;
+      }
+    }
+    return error;
+  }
+
   normalizeMode(modeValue) {
     const normalized = String(modeValue || '').trim().toLowerCase();
     if (normalized === 'manual' || normalized === '0') return 'manual';
@@ -116,7 +133,11 @@ class GreenhouseCoreClient {
       }
     }
 
-    throw new Error(this.normalizeError(lastError));
+    const normalizedError = this.toErrorWithMetadata(lastError);
+    if (!normalizedError.message) {
+      normalizedError.message = this.normalizeError(lastError);
+    }
+    throw normalizedError;
   }
 
   /**
