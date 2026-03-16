@@ -1,13 +1,11 @@
-export default function createUserContextMiddleware({ defaultUserId, getDefaultUserId }) {
+export default function createUserContextMiddleware() {
   return function userContextMiddleware(req, res, next) {
-    const headerUserId = req.headers['x-user-id'];
     const tokenUserId = req.user?.id;
-    const fallbackUserId = getDefaultUserId ? getDefaultUserId() : defaultUserId;
-    req.contextUserId = tokenUserId || headerUserId || fallbackUserId || null;
+    req.contextUserId = tokenUserId || null;
 
     if (!req.contextUserId) {
-      return res.status(400).json({
-        error: 'User context is required',
+      return res.status(401).json({
+        error: 'Unauthorized',
       });
     }
 

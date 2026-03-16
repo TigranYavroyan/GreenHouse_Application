@@ -4,15 +4,15 @@ This backend supports environment-specific configuration files:
 
 ## Environment Files
 
-- **`.env`** - Production/default
 - **`.env.development`** - Development (`npm run dev` / `npm run local`)
-- **`.env.production`** - Explicit production profile (optional)
+- **`.env.production`** - Production (`npm start` / Docker)
+- **`.env.example`** - Template for creating environment files
 
 ## Running the Backend
 
 ### Production (Docker)
 ```bash
-# Uses .env file automatically via docker-compose
+# Uses .env.production via docker-compose
 docker-compose up backend
 ```
 
@@ -58,13 +58,13 @@ EXEC_TIMEOUT_MS=15000
 
 The `config/index.js` file loads:
 
-- `NODE_ENV=production` → `.env.production` (if present) via `dotenv` + Docker env file
+- `NODE_ENV=production` → `.env.production`
 - `NODE_ENV=development` → `.env.development`
 
 ## Notes
 
-- Environment variables in `.env` files are loaded using `dotenv`
-- Docker Compose uses `env_file` directive to load `.env` from the backend directory
+- Environment variables are loaded using `dotenv`
+- Docker Compose uses `env_file` directive with `.env.production`/`.env.development`
 - `DEFAULT_USER_ENABLED=true` will bootstrap a default user on startup (idempotent)
 - Never use weak default passwords in production
 - For local development, ensure Redis, RabbitMQ, and PostgreSQL are running on localhost

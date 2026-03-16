@@ -3,19 +3,36 @@ class UsersController {
     this.usersService = usersService;
   }
 
-  create = async (req, res) => {
-    try {
-      const user = await this.usersService.create(req.body);
-      return res.status(201).json(user);
-    } catch (err) {
-      return res.status(err.status || 400).json({ error: err.message });
+  getAuthenticatedUserId(req) {
+    return req.user?.id || null;
+  }
+
+  ensureSelfAccess(req) {
+    const authUserId = this.getAuthenticatedUserId(req);
+    if (!authUserId) {
+      const error = new Error('Unauthorized');
+      error.status = 401;
+      throw error;
     }
+    if (req.params?.id && req.params.id !== authUserId) {
+      const error = new Error('Forbidden');
+      error.status = 403;
+      throw error;
+    }
+    return authUserId;
+  }
+
+  create = async (req, res) => {
+    return res.status(405).json({
+      error: 'Use POST /auth/register for signup',
+    });
   };
 
   list = async (req, res) => {
     try {
-      const users = await this.usersService.list();
-      return res.json({ count: users.length, data: users });
+      const authUserId = this.ensureSelfAccess(req);
+      const user = await this.usersService.getById(authUserId);
+      return res.json({ count: 1, data: [user] });
     } catch (err) {
       return res.status(err.status || 400).json({ error: err.message });
     }
@@ -23,7 +40,8 @@ class UsersController {
 
   getById = async (req, res) => {
     try {
-      const user = await this.usersService.getById(req.params.id);
+      const authUserId = this.ensureSelfAccess(req);
+      const user = await this.usersService.getById(authUserId);
       return res.json(user);
     } catch (err) {
       return res.status(err.status || 400).json({ error: err.message });
@@ -32,7 +50,8 @@ class UsersController {
 
   update = async (req, res) => {
     try {
-      const user = await this.usersService.update(req.params.id, req.body);
+      const authUserId = this.ensureSelfAccess(req);
+      const user = await this.usersService.update(authUserId, req.body);
       return res.json(user);
     } catch (err) {
       return res.status(err.status || 400).json({ error: err.message });
@@ -41,7 +60,8 @@ class UsersController {
 
   delete = async (req, res) => {
     try {
-      const result = await this.usersService.delete(req.params.id);
+      const authUserId = this.ensureSelfAccess(req);
+      const result = await this.usersService.delete(authUserId);
       return res.json(result);
     } catch (err) {
       return res.status(err.status || 400).json({ error: err.message });

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtGui import QFont
 import sys
 import logging
@@ -6,11 +6,45 @@ import argparse
 import uuid
 import os
 
-# Load configuration first (this loads .env files based on ENVIRONMENT)
+# Load configuration first (.env.development/.env.production based on ENVIRONMENT)
 from modules.config import config
 
 from modules.greenhouse import GreenhouseDesktop, setup_logging
 from modules.command_worker import CommandWorker
+from modules.auth_dialog import AuthDialog
+from modules.auth_session import AuthSessionManager
+from modules.core_api_client import CoreApiClient, UnauthorizedError
+
+
+def ensure_authenticated(app, backend_url, auth_session):
+    validator = CoreApiClient(backend_url, auth_token_provider=auth_session.get_token)
+    existing_token = auth_session.get_token()
+    if existing_token:
+        try:
+            validator.get_current_user()
+            return True
+        except UnauthorizedError:
+            auth_session.clear_token()
+        except Exception as error:
+            logging.getLogger("GreenhouseDesktop").warning(f"Stored token validation failed: {error}")
+            auth_session.clear_token()
+
+    while True:
+        dialog = AuthDialog(CoreApiClient(backend_url), auth_session)
+        result = dialog.exec_()
+        if result == dialog.Accepted:
+            try:
+                validator.get_current_user()
+                return True
+            except Exception as error:
+                auth_session.clear_token()
+                QMessageBox.warning(
+                    None,
+                    "Authentication Failed",
+                    f"Unable to verify authenticated session: {error}",
+                )
+                continue
+        return False
 
 def run_headless():
     # Headless mode removed - shell commands are no longer supported
@@ -44,7 +78,11 @@ def run_gui(debug=False):
     font = QFont("Segoe UI", 10)
     app.setFont(font)
 
-    window = GreenhouseDesktop()
+    auth_session = AuthSessionManager()
+    if not ensure_authenticated(app, config.BACKEND_URL, auth_session):
+        sys.exit(0)
+
+    window = GreenhouseDesktop(auth_session=auth_session)
     window.show()
     sys.exit(app.exec_())
 

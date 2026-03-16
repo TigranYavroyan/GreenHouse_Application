@@ -1,5 +1,5 @@
 import requests
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import quote
 
 from modules.core_dtos import (
@@ -15,21 +15,57 @@ from modules.core_dtos import (
 )
 
 
+class ApiRequestError(RuntimeError):
+    def __init__(self, message: str, status_code: int):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+class UnauthorizedError(ApiRequestError):
+    pass
+
+
 class CoreApiClient:
-    def __init__(self, backend_url: str, timeout_seconds: int = 5):
+    def __init__(
+        self,
+        backend_url: str,
+        timeout_seconds: int = 5,
+        auth_token_provider: Optional[Callable[[], Optional[str]]] = None,
+    ):
         self.backend_url = backend_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
+        self.auth_token_provider = auth_token_provider
 
-    def _request(self, path: str, method: str = "GET", data: Dict[str, Any] = None) -> Any:
+    def _build_headers(self, requires_auth: bool = True) -> Dict[str, str]:
+        headers: Dict[str, str] = {}
+        if not requires_auth:
+            return headers
+
+        if not callable(self.auth_token_provider):
+            return headers
+
+        token = str(self.auth_token_provider() or "").strip()
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        return headers
+
+    def _request(
+        self,
+        path: str,
+        method: str = "GET",
+        data: Dict[str, Any] = None,
+        requires_auth: bool = True,
+    ) -> Any:
         url = f"{self.backend_url}{path}"
+        headers = self._build_headers(requires_auth=requires_auth)
         if method == "GET":
-            response = requests.get(url, timeout=self.timeout_seconds)
+            response = requests.get(url, headers=headers, timeout=self.timeout_seconds)
         elif method == "POST":
-            response = requests.post(url, json=data or {}, timeout=self.timeout_seconds)
+            response = requests.post(url, json=data or {}, headers=headers, timeout=self.timeout_seconds)
         elif method == "PATCH":
-            response = requests.patch(url, json=data or {}, timeout=self.timeout_seconds)
+            response = requests.patch(url, json=data or {}, headers=headers, timeout=self.timeout_seconds)
         elif method == "DELETE":
-            response = requests.delete(url, timeout=self.timeout_seconds)
+            response = requests.delete(url, headers=headers, timeout=self.timeout_seconds)
         else:
             raise ValueError(f"Unsupported method: {method}")
 
@@ -39,7 +75,11 @@ class CoreApiClient:
             payload = {"error": response.text or f"HTTP {response.status_code}"}
         if response.status_code >= 400:
             message = payload.get("error") if isinstance(payload, dict) else str(payload)
-            raise RuntimeError(message or f"Request failed: {response.status_code}")
+            normalized_message = str(message or "").strip().lower()
+            is_auth_context_error = "user context" in normalized_message and "required" in normalized_message
+            if response.status_code in (401, 403) or is_auth_context_error:
+                raise UnauthorizedError(message or "Unauthorized", response.status_code)
+            raise ApiRequestError(message or f"Request failed: {response.status_code}", response.status_code)
         return payload
 
     def _expect_payload_type(self, payload: Any, expected_type: type, endpoint: str) -> Any:
@@ -53,6 +93,40 @@ class CoreApiClient:
         payload = self._request("/status")
         payload = self._expect_payload_type(payload, dict, "/status")
         return CoreStatusDto.from_dict(payload)
+
+    def login(self, username: str, password: str) -> str:
+        payload = self._request(
+            "/auth/login",
+            method="POST",
+            data={"username": str(username or "").strip(), "password": str(password or "")},
+            requires_auth=False,
+        )
+        payload = self._expect_payload_type(payload, dict, "/auth/login")
+        token = str(payload.get("token", "")).strip()
+        if not token:
+            raise RuntimeError("Login succeeded but token is missing from response.")
+        return token
+
+    def register(self, username: str, password: str, email: str = "") -> Dict[str, Any]:
+        request_payload: Dict[str, Any] = {
+            "username": str(username or "").strip(),
+            "password": str(password or ""),
+        }
+        normalized_email = str(email or "").strip()
+        if normalized_email:
+            request_payload["email"] = normalized_email
+        payload = self._request("/auth/register", method="POST", data=request_payload, requires_auth=False)
+        return payload if isinstance(payload, dict) else {"result": payload}
+
+    def get_current_user(self) -> Dict[str, Any]:
+        payload = self._request("/users", method="GET", requires_auth=True)
+        if isinstance(payload, dict):
+            data = payload.get("data", [])
+            if isinstance(data, list) and data:
+                first = data[0]
+                if isinstance(first, dict):
+                    return first
+        raise RuntimeError("Unable to resolve current user from /users response.")
 
     def get_getter_schema(self) -> Dict[str, str]:
         payload = self._request("/schema/getters")

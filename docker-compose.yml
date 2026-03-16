@@ -60,7 +60,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env
+      - ./backend/.env.production
     environment:
       - GREENHOUSE_CORE_URL=http://greenhouse-core-sim:3001
       - GREENHOUSE_CORE_TIMEOUT=10000
@@ -96,7 +96,7 @@ services:
       - QT_X11_NO_MITSHM=1
       - ENVIRONMENT=production
     env_file:
-      - ./frontend/.env
+      - ./frontend/.env.production
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./frontend:/app

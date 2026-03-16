@@ -25,6 +25,7 @@ import createCoreRouter from './routers/core.js';
 import { metricsRouter } from './clients/promClient.js';
 import './entity/index.js';
 import createUserContextMiddleware from './middleware/userContextMiddleware.js';
+import authMiddleware from './middleware/authMiddleware.js';
 import UsersRepository from './modules/users/users.repository.js';
 import DevicesRepository from './modules/devices/devices.repository.js';
 import SensorsRepository from './modules/sensors/sensors.repository.js';
@@ -118,9 +119,7 @@ class App {
     });
 
     this.setupMiddleware();
-    this.userContextMiddleware = createUserContextMiddleware({
-      getDefaultUserId: () => this.defaultUserId,
-    });
+    this.userContextMiddleware = createUserContextMiddleware();
     this.setupRoutes();
   }
 
@@ -128,7 +127,7 @@ class App {
     this.app.use(express.json());
     this.app.use((req, res, next) => {
       res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-User-Id');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
       next();
     });
   }
@@ -156,32 +155,32 @@ class App {
     });
 
     this.app.use('/auth', createAuthRouter({ userRepository: this.usersRepository }));
-    this.app.use('/users', createUsersRouter({ usersService: this.usersService }));
-    this.app.use('/devices', createDevicesRouter({
+    this.app.use('/users', authMiddleware, createUsersRouter({ usersService: this.usersService }));
+    this.app.use('/devices', authMiddleware, createDevicesRouter({
       devicesService: this.devicesService,
       userContextMiddleware: this.userContextMiddleware,
     }));
-    this.app.use('/sensors', createSensorsRouter({
+    this.app.use('/sensors', authMiddleware, createSensorsRouter({
       sensorsService: this.sensorsService,
       userContextMiddleware: this.userContextMiddleware,
     }));
-    this.app.use('/sensor-readings', createSensorReadingsRouter({
+    this.app.use('/sensor-readings', authMiddleware, createSensorReadingsRouter({
       sensorReadingsService: this.sensorReadingsService,
       userContextMiddleware: this.userContextMiddleware,
     }));
-    this.app.use('/actuators', createActuatorsRouter({
+    this.app.use('/actuators', authMiddleware, createActuatorsRouter({
       actuatorsService: this.actuatorsService,
       userContextMiddleware: this.userContextMiddleware,
     }));
-    this.app.use('/schedules', createSchedulesRouter({
+    this.app.use('/schedules', authMiddleware, createSchedulesRouter({
       schedulesService: this.schedulesService,
       userContextMiddleware: this.userContextMiddleware,
     }));
-    this.app.use('/sensor-alert-rules', createSensorAlertRulesRouter({
+    this.app.use('/sensor-alert-rules', authMiddleware, createSensorAlertRulesRouter({
       sensorAlertRulesService: this.sensorAlertRulesService,
       userContextMiddleware: this.userContextMiddleware,
     }));
-    this.app.use('/sensor-alerts', createSensorAlertsRouter({
+    this.app.use('/sensor-alerts', authMiddleware, createSensorAlertsRouter({
       sensorAlertsService: this.sensorAlertsService,
       userContextMiddleware: this.userContextMiddleware,
     }));
@@ -351,7 +350,11 @@ class App {
       this.defaultUserId = defaultUser?.id || null;
 
       await this.redisClient.connect();
-      this.systemLogger.info('Redis connected');
+      if (this.redisClient.isOpen) {
+        this.systemLogger.info('Redis connected');
+      } else {
+        this.systemLogger.warn('Redis is unavailable; backend started in degraded mode');
+      }
 
       // Connect to greenhouse core
       await this.greenhouseCoreClient.connect();

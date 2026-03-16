@@ -7,7 +7,6 @@ from datetime import datetime
 from PyQt5.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
-    QWidget,
     QPushButton,
     QMessageBox,
     QSizePolicy,
@@ -24,6 +23,9 @@ from modules.table_widget import SimpleDataTable
 from modules.greenhouse_commands import CommandPanelMixin
 from modules.greenhouse_server import ServerPanelMixin
 from modules.greenhouse_edge_fog import EdgeFogMixin
+from modules.auth_dialog import AuthDialog
+from modules.auth_session import AuthSessionManager
+from modules.core_api_client import CoreApiClient, UnauthorizedError
 
 def setup_logging():
     logging.basicConfig(
@@ -36,12 +38,16 @@ def setup_logging():
     )
 
 class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFogMixin):
-    def __init__(self):
+    def __init__(self, auth_session=None):
         super().__init__()
         self.pending_commands = {}
         self.session_id = str(uuid.uuid4())
         self.rabbitmq_connected = False
         self.command_worker = None
+        self._auth_recovery_in_progress = False
+        self.auth_session = auth_session or AuthSessionManager()
+        self.auth_user_label = None
+        self.logoutButton = None
         # History for detailed views
         self.control_history = []  # One entry per control_table row
         self.server_history = []   # One entry per server_table row
@@ -68,6 +74,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         
         # Load UI from .ui file
         self.setupUI()
+        self.setup_auth_controls()
         
         # Setup functionality and signal connections
         self.add_functions()
@@ -177,11 +184,119 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         if hasattr(self, "scheduleDelayPresetCombo"):
             self.scheduleDelayPresetCombo.currentIndexChanged.connect(self.update_custom_delay_enabled)
 
+        if self.logoutButton:
+            self.logoutButton.clicked.connect(self.logout_user)
+
     def apply_styles(self):
         """Apply custom styles if needed (UI file already has styles)"""
         # The UI file already contains styles, but we can override specific widgets if needed
         # For example, update connection status and status label styles dynamically
         pass
+
+    def setup_auth_controls(self):
+        if not hasattr(self, "sessionLayout") or not self.sessionLayout:
+            return
+
+        self.auth_user_label = QLabel("")
+        self.auth_user_label.setStyleSheet(
+            f"""
+                color: {self.theme.colors.info};
+                font-weight: {self.theme.typography.medium};
+                background-color: {self.theme.colors.grey_100};
+                padding: 2px 6px;
+                border-radius: {self.theme.borderRadius.sm};
+                border: 1px solid {self.theme.colors.grey_300};
+            """
+        )
+        self.logoutButton = QPushButton("Logout")
+        self.logoutButton.setStyleSheet(self.styler.generate_button_style("outline"))
+        self.logoutButton.setMinimumHeight(24)
+
+        self.sessionLayout.insertWidget(2, self.auth_user_label)
+        self.sessionLayout.addWidget(self.logoutButton)
+        self.update_auth_user_label()
+
+    def update_auth_user_label(self):
+        if not self.auth_user_label:
+            return
+        claims = self.auth_session.decode_claims()
+        username = str(claims.get("username", "")).strip()
+        if username:
+            self.auth_user_label.setText(f"User: {username}")
+            self.auth_user_label.setToolTip("Authenticated user")
+        else:
+            self.auth_user_label.setText("User: -")
+            self.auth_user_label.setToolTip("No authenticated user")
+
+    def get_auth_token(self):
+        return self.auth_session.get_token()
+
+    def _build_auth_api_client(self):
+        return CoreApiClient(self.backend_url, auth_token_provider=self.get_auth_token)
+
+    def _reauthenticate_or_exit(self):
+        while True:
+            dialog = AuthDialog(CoreApiClient(self.backend_url), self.auth_session, parent=self)
+            result = dialog.exec_()
+            if result == dialog.Accepted:
+                try:
+                    self._build_auth_api_client().get_current_user()
+                    self.update_auth_user_label()
+                    return True
+                except Exception as error:
+                    self.auth_session.clear_token()
+                    QMessageBox.warning(
+                        self,
+                        "Authentication Error",
+                        f"Sign in succeeded but session validation failed: {error}",
+                    )
+                    continue
+            return False
+
+    def handle_unauthorized_error(self, message="Unauthorized"):
+        if self._auth_recovery_in_progress:
+            return
+
+        self._auth_recovery_in_progress = True
+        try:
+            self.auth_session.clear_token()
+            self.update_auth_user_label()
+            QMessageBox.warning(
+                self,
+                "Session Expired",
+                f"{message}\n\nPlease sign in again.",
+            )
+
+            if self._reauthenticate_or_exit():
+                self.status_label.setText("✅ Re-authenticated successfully")
+                return
+
+            self.close()
+        finally:
+            self._auth_recovery_in_progress = False
+
+    def logout_user(self):
+        confirm = QMessageBox.question(
+            self,
+            "Logout",
+            "Sign out from this desktop session?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if confirm != QMessageBox.Yes:
+            return
+
+        self.auth_session.clear_token()
+        self.update_auth_user_label()
+        self.status_label.setText("Signed out")
+        if not self._reauthenticate_or_exit():
+            self.close()
+
+    def _handle_api_exception(self, title, error):
+        if isinstance(error, UnauthorizedError):
+            self.handle_unauthorized_error(str(error))
+            return
+        self.show_error(title, str(error))
 
     def configure_core_server_buttons(self):
         """Retitle existing server-tab buttons for greenhouse core controls."""
@@ -452,6 +567,9 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         try:
             executors = self.core_api.get_executors()
         except Exception as error:
+            if isinstance(error, UnauthorizedError):
+                self.handle_unauthorized_error(str(error))
+                return
             self.logger.warning(f"Failed to refresh schedule targets: {error}")
             executors = []
 
@@ -625,7 +743,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             self.status_label.setText(f"🗓️ Created backend schedule {schedule_id} for {target_label}")
             self.refresh_schedule_table()
         except Exception as error:
-            self.show_error("Scheduling Error", str(error))
+            self._handle_api_exception("Scheduling Error", error)
 
     def _get_selected_schedule_id(self):
         if not self.schedule_table:
@@ -653,7 +771,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             self.refresh_schedule_table()
             self.status_label.setText(f"🗑️ Deleted schedule {str(schedule_id)[:8]}")
         except Exception as error:
-            self.show_error("Scheduling Error", str(error))
+            self._handle_api_exception("Scheduling Error", error)
 
     def clear_all_schedules(self):
         """Delete all backend schedules visible to current user context."""
@@ -701,7 +819,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             else:
                 self.status_label.setText(f"🧹 Deleted {deleted} schedule(s)")
         except Exception as error:
-            self.show_error("Scheduling Error", str(error))
+            self._handle_api_exception("Scheduling Error", error)
 
     def refresh_schedule_table(self):
         """Render backend schedules into the schedule table."""
@@ -716,6 +834,9 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         try:
             schedules = self.core_api.list_schedules()
         except Exception as error:
+            if isinstance(error, UnauthorizedError):
+                self.handle_unauthorized_error(str(error))
+                return
             self.logger.error(f"Failed to refresh schedules: {error}")
             return
 

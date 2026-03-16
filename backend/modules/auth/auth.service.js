@@ -30,7 +30,7 @@ class AuthService {
       throw new Error('JWT secret is not configured');
     }
 
-    const user = await this.userRepository.findByUsername(username);
+    const user = await this.userRepository.findAuthByUsername(username);
     if (!user) {
       throw new Error('Invalid username or password');
     }

@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox, QVBoxLayout
 
 from modules.table_widget import SimpleDataTable
 from modules import table_renderers
-from modules.core_api_client import CoreApiClient
+from modules.core_api_client import CoreApiClient, UnauthorizedError
 from modules.core_dtos import ExecutorSnapshotDto, GetterSnapshotDto
 
 
@@ -28,7 +28,8 @@ class ServerPanelMixin:
 
     def setup_core_panel(self):
         """Initialize backend-core API client and local snapshot caches."""
-        self.core_api = CoreApiClient(self.backend_url)
+        token_provider = self.get_auth_token if hasattr(self, "get_auth_token") else None
+        self.core_api = CoreApiClient(self.backend_url, auth_token_provider=token_provider)
         self.core_getter_schema: Dict[str, str] = {}
         self.core_executor_schema: Dict[str, str] = {}
         self.core_getters: List[GetterSnapshotDto] = []
@@ -132,6 +133,9 @@ class ServerPanelMixin:
     # ------------------------------------------------------------------
     def _show_core_error(self, action_label: str, error: Exception):
         message = str(error) or "Unknown error"
+        if isinstance(error, UnauthorizedError) and hasattr(self, "handle_unauthorized_error"):
+            self.handle_unauthorized_error(message)
+            return
         self.logger.error(f"{action_label} failed: {message}")
         self.display_data_table(action_label, {"error": message}, "core_action")
 

@@ -472,11 +472,18 @@ Extensibility details:
 - **Functionality**:
   - Parses command-line arguments (`--nogui`, `--debug`)
   - Initializes logging
+  - Enforces authentication gate before opening the main window
   - Runs in two modes:
     - **GUI Mode**: Launches PyQt5 desktop application
     - **Headless Mode**: CLI interface for command execution
   - Sets up X11 runtime directory for GUI
   - Configures application-wide font (Segoe UI)
+
+#### **Desktop Auth UI**
+- Sign-in / sign-up is presented in a blocking dialog before `GreenhouseDesktop` is shown.
+- JWT is persisted in local desktop settings (`QSettings`) for session restore across restarts.
+- On token validation failure, stored token is cleared and auth dialog is shown again.
+- Main window includes logout action that clears token and prompts re-authentication.
 
 ### Core GUI Module
 
@@ -594,7 +601,7 @@ Extensibility details:
 #### **`modules/config.py`** (`Config`)
 - **Purpose**: Centralized configuration management for frontend
 - **Features**:
-  - Environment-based configuration loading (`.env`, `.env_dev`, `.env.local`)
+  - Environment-based configuration loading (`.env.development`, `.env.production`)
   - Automatic environment detection (`ENVIRONMENT` or `NODE_ENV`)
   - Configuration class with defaults
   - RabbitMQ URL generation helper
@@ -714,20 +721,15 @@ python main.py --debug  # Debug logging
 
 ### Environment Configuration Files
 
-The frontend supports multiple environment configuration files that are loaded based on the `ENVIRONMENT` variable:
+The frontend supports the following environment configuration files:
 
-- **`.env`**: Production environment (used in Docker)
-- **`.env_dev`**: Development environment (Docker development)
-- **`.env.local`**: Local development environment (without Docker)
-
-**Loading Priority** (for development):
-1. `.env_dev` (if exists)
-2. `.env.local` (if exists)
-3. `.env` (fallback)
+- **`.env.development`**: Development environment
+- **`.env.production`**: Production environment
+- **`.env.example`**: Template for creating environment files
 
 **Configuration Loading**:
-- `ENVIRONMENT=production` → loads `.env`
-- `ENVIRONMENT=development` → tries `.env_dev`, then `.env.local`, then `.env`
+- `ENVIRONMENT=production` → loads `.env.production`
+- `ENVIRONMENT=development` → loads `.env.development`
 
 See `frontend/README_ENV.md` for detailed configuration guide.
 
@@ -745,10 +747,14 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 - `POST /auth/register` - Register user account
 - `POST /auth/login` - Login and receive access JWT
 - Desktop-oriented mode uses JWT-only auth (no refresh token flow).
+- Desktop frontend sends JWT via `Authorization: Bearer <jwt>` on backend API requests.
+- Unauthorized/forbidden API responses trigger automatic local session reset and re-auth prompt.
 
 ### Persistent IoT CRUD
 
-- `GET|POST /users`, `GET|PATCH|DELETE /users/:id`
+- `GET /users` - returns only authenticated user in `data[0]`
+- `GET|PATCH|DELETE /users/:id` - allowed only for the authenticated user id
+- `POST /users` is disabled (use `POST /auth/register`)
 - `GET|POST /devices`, `GET|PATCH|DELETE /devices/:id`
 - `GET|POST /sensors`, `GET|PATCH|DELETE /sensors/:id`
 - `GET|POST /sensor-readings`, `GET|PATCH|DELETE /sensor-readings/:id`
@@ -756,7 +762,8 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 - `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
 - `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`
 - `GET|POST /sensor-alerts`, `GET|PATCH|DELETE /sensor-alerts/:id`
-- Ownership is user-scoped for non-user entities through JWT identity, `X-User-Id`, or default seeded desktop user.
+- Protected CRUD endpoints require `Authorization: Bearer <jwt>`.
+- Ownership is enforced by JWT identity only.
 
 ### Sessions
 

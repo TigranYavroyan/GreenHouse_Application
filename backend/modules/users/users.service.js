@@ -1,4 +1,5 @@
 import { serviceError } from '../common/service-error.js';
+import bcrypt from 'bcryptjs';
 
 class UsersService {
   constructor(usersRepository) {
@@ -15,7 +16,11 @@ class UsersService {
       throw serviceError('User already exists', 409);
     }
 
-    return this.usersRepository.create(payload);
+    const hashedPassword = await bcrypt.hash(payload.password, 10);
+    return this.usersRepository.create({
+      ...payload,
+      password: hashedPassword,
+    });
   }
 
   async list() {
@@ -38,7 +43,12 @@ class UsersService {
       }
     }
 
-    const updated = await this.usersRepository.updateById(id, payload);
+    const normalizedPayload = { ...(payload || {}) };
+    if (normalizedPayload.password) {
+      normalizedPayload.password = await bcrypt.hash(normalizedPayload.password, 10);
+    }
+
+    const updated = await this.usersRepository.updateById(id, normalizedPayload);
     if (!updated) {
       throw serviceError('User not found', 404);
     }

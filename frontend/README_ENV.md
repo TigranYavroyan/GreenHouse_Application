@@ -1,35 +1,27 @@
 # Frontend Environment Configuration Guide
 
-This frontend supports three different environment configurations:
+This frontend supports environment-specific configuration files:
 
 ## Environment Files
 
-- **`.env`** - Production environment (used in Docker)
-- **`.env_dev`** - Development environment
-- **`.env.local`** - Local development environment (without Docker)
+- **`.env.development`** - Development environment
+- **`.env.production`** - Production environment
+- **`.env.example`** - Template for creating environment files
 
 ## Running the Frontend
 
 ### Production (Docker)
 ```bash
-# Uses .env file automatically via docker-compose
+# Uses .env.production via docker-compose
 # Set ENVIRONMENT=production in docker-compose.yml
 docker-compose up frontend
 ```
 
 ### Development
 ```bash
-# Uses .env_dev file
+# Uses .env.development file
 export ENVIRONMENT=development
 python3 main.py
-```
-
-### Local (without Docker, localhost services)
-```bash
-# Uses .env.local file
-export ENVIRONMENT=development
-python3 main.py
-# Make sure Redis and RabbitMQ are running locally
 ```
 
 ## Environment Variables
@@ -46,10 +38,10 @@ RABBITMQ_PASS=guest
 
 ## Configuration Loading Logic
 
-The `modules/config.py` file automatically loads the appropriate `.env` file based on `ENVIRONMENT` or `NODE_ENV`:
+The `modules/config.py` file automatically loads:
 
-- `ENVIRONMENT=production` or `NODE_ENV=production` → loads `.env`
-- `ENVIRONMENT=development` or `NODE_ENV=development` → tries `.env_dev`, then `.env.local`, then `.env`
+- `ENVIRONMENT=production` or `NODE_ENV=production` → `.env.production`
+- `ENVIRONMENT=development` or `NODE_ENV=development` → `.env.development`
 
 ## Configuration Module
 
@@ -72,7 +64,7 @@ rabbitmq_port = config.RABBITMQ_PORT
 ## Notes
 
 - Environment variables in `.env` files are loaded using `python-dotenv`
-- Docker Compose uses `env_file` directive to load `.env` from the frontend directory
+- Docker Compose uses `env_file` directive with `.env.production`/`.env.development`
 - For local development, ensure Redis and RabbitMQ are running on localhost
 - The `ENVIRONMENT` variable can be set as an environment variable or in docker-compose.yml
 

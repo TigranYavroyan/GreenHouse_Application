@@ -36,7 +36,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env
+      - ./backend/.env.production
     environment:
       - GREENHOUSE_CORE_URL=http://192.168.27.16:8080
       - GREENHOUSE_CORE_TIMEOUT=10000
@@ -72,7 +72,7 @@ services:
       - VNC_PORT=5900
       - ENVIRONMENT=production
     env_file:
-      - ./frontend/.env
+      - ./frontend/.env.production
     # Windows-safe: remove Linux/X11 mounts that fail with "invalid mount path ':'".
     volumes:
       - ./frontend:/app

@@ -126,6 +126,9 @@ flowchart TD
   - Headless mode is removed (`--nogui` exits with warning)
 - **Dependencies**: RabbitMQ, Backend API, Redis (for edge caching)
 - **Key Features**:
+  - Startup authentication gate (`Sign In` / `Sign Up` dialog before main window)
+  - JWT session persistence using desktop `QSettings`
+  - Automatic re-authentication flow on `401/403` responses
   - Three-tab interface (Control, Scheduling, Server)
   - Edge-to-fog data aggregation
   - Local Redis caching
@@ -212,6 +215,8 @@ The system implements a complete Edge-to-Fog data aggregation architecture:
 
 ### 1. Frontend Initialization
 - PyQt5 desktop application starts with a unique session ID
+- Frontend validates stored JWT (if present) against backend `/users`
+- If token is missing/invalid, auth dialog is shown before opening main UI
 - `CommandWorker` establishes connection to RabbitMQ
 - GUI displays connection status and session information
 - Edge-to-fog aggregator initialized with device registration
@@ -371,9 +376,13 @@ The backend is configured to use the real core server at `http://192.168.27.16:8
 - `POST /auth/register` - Register user with username/password
 - `POST /auth/login` - Login and receive JWT token
 - No refresh token flow is used for desktop-first login simplicity.
+- Desktop frontend sends JWT in `Authorization: Bearer <jwt>` headers.
+- Unauthorized/forbidden responses clear local token and trigger re-authentication dialog.
 
 ### Persistent IoT CRUD
-- `GET|POST /users`, `GET|PATCH|DELETE /users/:id`
+- `GET /users` - returns only authenticated user in `data[0]`
+- `GET|PATCH|DELETE /users/:id` - allowed only for authenticated user id
+- `POST /users` is disabled (use `POST /auth/register`)
 - `GET|POST /devices`, `GET|PATCH|DELETE /devices/:id`
 - `GET|POST /sensors`, `GET|PATCH|DELETE /sensors/:id`
 - `GET|POST /sensor-readings`, `GET|PATCH|DELETE /sensor-readings/:id`
@@ -381,7 +390,8 @@ The backend is configured to use the real core server at `http://192.168.27.16:8
 - `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
 - `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`
 - `GET|POST /sensor-alerts`, `GET|PATCH|DELETE /sensor-alerts/:id`
-- For non-user entities, ownership is enforced through user context (`Authorization` JWT, `X-User-Id`, or default seeded desktop user).
+- Protected CRUD endpoints require `Authorization: Bearer <jwt>`.
+- Ownership is enforced by JWT identity only.
 
 ### Sessions
 - `GET /sessions` - List all active sessions

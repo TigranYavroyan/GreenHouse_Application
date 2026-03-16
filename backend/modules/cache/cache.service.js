@@ -3,11 +3,21 @@ class CacheService {
     this.redisClient = redisClient;
   }
 
+  ensureRedis() {
+    if (!this.redisClient || !this.redisClient.isOpen) {
+      const error = new Error('Redis not available');
+      error.status = 503;
+      throw error;
+    }
+  }
+
   async getKeys() {
     try {
+      this.ensureRedis();
       const keys = await this.redisClient.keys('cmd:*');
       return keys;
     } catch (err) {
+      if (err.status) throw err;
       throw new Error(`Failed to get cache keys: ${err.message}`);
     }
   }

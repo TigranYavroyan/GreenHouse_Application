@@ -1,30 +1,45 @@
 import { User } from '../../entity/index.js';
 
+function sanitizeUser(user) {
+  if (!user) return null;
+  const plain = typeof user.toJSON === 'function' ? user.toJSON() : { ...user };
+  delete plain.password;
+  return plain;
+}
+
 class UsersRepository {
   async create(payload) {
-    return User.create(payload);
+    const user = await User.create(payload);
+    return sanitizeUser(user);
   }
 
   async findAll() {
-    return User.findAll({
+    const users = await User.findAll({
       order: [['created_at', 'DESC']],
     });
+    return users.map((user) => sanitizeUser(user));
   }
 
   async findById(id) {
-    return User.findByPk(id);
+    const user = await User.findByPk(id);
+    return sanitizeUser(user);
   }
 
   async findByUsername(username) {
+    const user = await User.findOne({ where: { username } });
+    return sanitizeUser(user);
+  }
+
+  async findAuthByUsername(username) {
     return User.findOne({ where: { username } });
   }
 
   async updateById(id, payload) {
-    const user = await this.findById(id);
+    const user = await User.findByPk(id);
     if (!user) return null;
 
     await user.update(payload);
-    return user;
+    return sanitizeUser(user);
   }
 
   async deleteById(id) {
