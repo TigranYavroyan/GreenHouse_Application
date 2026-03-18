@@ -15,10 +15,267 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow {
-    background-color: #FAFAFA;
-    color: #212121;
+    background-color: #0B1020;
+    color: #E7E9EE;
     font-family: Segoe UI, Roboto, Arial, sans-serif;
     font-size: 12px;
+}
+
+QWidget#centralwidget {
+    background-color: #0B1020;
+    color: #E7E9EE;
+}
+
+QWidget#userTab,
+QWidget#schedulingTab,
+QWidget#serverTab,
+QWidget#user_output_container,
+QWidget#schedule_output_container,
+QWidget#server_info_container,
+QWidget#simpleDataTable {
+    background-color: transparent;
+}
+
+QLabel {
+    color: #E7E9EE;
+}
+
+QLabel#sessionTitleLabel,
+QLabel#statusTitleLabel,
+QLabel#scheduleHintLabel {
+    color: #A3ADC2;
+    font-size: 11px;
+}
+
+QLabel#session_label,
+QLabel#connection_status,
+QLabel#authUserLabel,
+QLabel#status_label {
+    color: #E7E9EE;
+    background-color: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+QLabel#controlTableHintLabel,
+QLabel#scheduleTableHintLabel,
+QLabel#serverTableHintLabel {
+    color: #A3ADC2;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+QGroupBox {
+    background-color: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    margin-top: 16px;
+    padding-top: 8px;
+    color: #E7E9EE;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+QGroupBox#infoGroup {
+    background-color: transparent;
+    border: none;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 4px 12px;
+    background-color: rgba(255,255,255,0.10);
+    color: #E7E9EE;
+    border-radius: 6px;
+}
+
+QTabWidget::pane {
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    background-color: rgba(255,255,255,0.06);
+    margin-top: -1px;
+}
+
+QTabWidget::tab-bar {
+    alignment: center;
+}
+
+QTabBar::tab {
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 7px 14px;
+    margin-right: 4px;
+    color: #A3ADC2;
+    min-width: 90px;
+}
+
+QTabBar::tab:selected {
+    background-color: rgba(255,255,255,0.12);
+    color: #E7E9EE;
+    border-color: rgba(255,255,255,0.20);
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: rgba(255,255,255,0.10);
+    color: #E7E9EE;
+}
+
+QPushButton {
+    background-color: rgba(255,255,255,0.08);
+    color: #E7E9EE;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-weight: 500;
+    min-height: 22px;
+}
+
+QPushButton:hover {
+    background-color: rgba(255,255,255,0.12);
+}
+
+QPushButton:pressed {
+    background-color: rgba(255,255,255,0.18);
+}
+
+QPushButton:disabled {
+    background-color: rgba(255,255,255,0.04);
+    color: #6B7DA3;
+    border-color: rgba(255,255,255,0.08);
+}
+
+QPushButton#clearCacheButton {
+    background-color: #FF6B6B;
+    color: #0B1020;
+    border: none;
+}
+
+QPushButton#clearCacheButton:hover {
+    background-color: #FF8585;
+}
+
+QPushButton#clearCacheButton:pressed {
+    background-color: #E25555;
+}
+
+QPushButton#clearTableButton {
+    background-color: #FF6B6B;
+    color: #0B1020;
+    border: none;
+}
+
+QPushButton#clearTableButton:hover {
+    background-color: #FF8585;
+}
+
+QPushButton#clearTableButton:pressed {
+    background-color: #E25555;
+}
+
+QPushButton#testCommandButton,
+QPushButton#refreshButton,
+QPushButton#logoutButton {
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid #6ECBFF;
+    color: #9BD3FF;
+}
+
+QPushButton#testCommandButton:hover,
+QPushButton#refreshButton:hover,
+QPushButton#logoutButton:hover {
+    background-color: rgba(110,203,255,0.15);
+    color: #E7E9EE;
+}
+
+QLineEdit, QComboBox, QSpinBox {
+    background-color: #131A2E;
+    color: #E7E9EE;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 6px 10px;
+}
+
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus {
+    border: 1px solid rgba(110,203,255,0.8);
+}
+
+QTableWidget {
+    background-color: #131A2E;
+    alternate-background-color: #1A2238;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    gridline-color: rgba(255,255,255,0.08);
+    color: #E7E9EE;
+    selection-background-color: rgba(110,203,255,0.35);
+    selection-color: #E7E9EE;
+}
+
+QTableWidget::item {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 6px;
+}
+
+QTableWidget::item:hover {
+    background-color: rgba(255,255,255,0.08);
+}
+
+QHeaderView::section {
+    background-color: rgba(255,255,255,0.10);
+    color: #E7E9EE;
+    padding: 8px 10px;
+    border: none;
+    border-right: 1px solid rgba(255,255,255,0.10);
+    font-weight: 600;
+}
+
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+QScrollArea > QWidget > QWidget {
+    background-color: transparent;
+}
+
+QScrollBar:vertical {
+    background-color: #1A2238;
+    width: 11px;
+    margin: 2px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #344266;
+    border-radius: 5px;
+    min-height: 28px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #4B5C84;
+}
+
+QScrollBar:horizontal {
+    background-color: #1A2238;
+    height: 11px;
+    margin: 2px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #344266;
+    border-radius: 5px;
+    min-width: 28px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #4B5C84;
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -42,13 +299,6 @@
      <layout class="QHBoxLayout" name="sessionLayout">
       <item>
        <widget class="QLabel" name="sessionTitleLabel">
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    font-size: 11px;
-    color: #757575;
-    padding: 2px 0;
-}</string>
-        </property>
         <property name="text">
          <string>Session:</string>
         </property>
@@ -58,17 +308,6 @@
        <widget class="QLabel" name="session_label">
         <property name="toolTip">
          <string>Full Session ID</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    font-family: Consolas, Monaco, Courier New, monospace;
-    color: #2E7D32;
-    background-color: #F5F5F5;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-weight: 500;
-    border: 1px solid #E0E0E0;
-}</string>
         </property>
         <property name="text">
          <string>session_id</string>
@@ -90,16 +329,6 @@
       </item>
       <item>
        <widget class="QLabel" name="connection_status">
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    color: #FFA000;
-    font-weight: 500;
-    background-color: #F5F5F5;
-    padding: 2px 6px;
-    border-radius: 3px;
-    border: 1px solid #E0E0E0;
-}</string>
-        </property>
         <property name="text">
          <string>Connecting to RabbitMQ...</string>
         </property>
@@ -109,39 +338,6 @@
     </item>
     <item>
      <widget class="QTabWidget" name="tabWidget">
-      <property name="styleSheet">
-       <string notr="true">QTabWidget::pane {
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    background-color: #FFFFFF;
-    margin-top: -1px;
-}
-QTabWidget::tab-bar {
-    alignment: center;
-}
-QTabBar::tab {
-    background-color: #EEEEEE;
-    border: 1px solid #E0E0E0;
-    border-bottom: none;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    padding: 6px 12px;
-    margin-right: 4px;
-    font-weight: 500;
-    color: #757575;
-    min-width: 80px;
-}
-QTabBar::tab:selected {
-    background-color: #FFFFFF;
-    color: #2E7D32;
-    border-color: #E0E0E0;
-    border-bottom: 1px solid #FFFFFF;
-}
-QTabBar::tab:hover:!selected {
-    background-color: #F5F5F5;
-    color: #212121;
-}</string>
-      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -176,75 +372,27 @@ QTabBar::tab:hover:!selected {
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="styleSheet">
-           <string notr="true">QGroupBox {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    margin-top: 16px;
-    padding-top: 8px;
-    font-weight: 500;
-    color: #212121;
-    font-size: 14px;
-}
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 12px;
-    padding: 4px 12px;
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border-radius: 5px;
-}</string>
-          </property>
           <property name="title">
            <string>🌱 Greenhouse Controls</string>
           </property>
           <layout class="QGridLayout" name="controlGridLayout">
            <property name="leftMargin">
-            <number>10</number>
+            <number>12</number>
            </property>
            <property name="topMargin">
-            <number>16</number>
+            <number>20</number>
            </property>
            <property name="rightMargin">
-            <number>10</number>
+            <number>12</number>
            </property>
            <property name="bottomMargin">
-            <number>10</number>
+            <number>12</number>
            </property>
            <property name="spacing">
-            <number>6</number>
+            <number>8</number>
            </property>
            <item row="0" column="0">
             <widget class="QPushButton" name="tempButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>🌡️ Temperature</string>
              </property>
@@ -252,351 +400,71 @@ QPushButton:disabled {
            </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="humidityButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>💧 Humidity</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QPushButton" name="statusButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
-             <property name="text">
-              <string>📊 System Status</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="lightButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
-             <property name="text">
-              <string>💡 Light</string>
-             </property>
-            </widget>
-           </item>
-          <item row="1" column="0">
+           <item row="0" column="2">
             <widget class="QPushButton" name="co2Button">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>🌬️ CO2</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QPushButton" name="soilMoistureButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="lightButton">
              <property name="text">
-              <string>🌱 Soil Moisture</string>
+              <string>💡 Light</string>
              </property>
             </widget>
            </item>
-          <item row="2" column="0">
+           <item row="1" column="1">
             <widget class="QPushButton" name="soilPHButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>🧪 Soil pH</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
-            <widget class="QPushButton" name="waterCanalButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #1976D2;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2196F3;
-}
-QPushButton:pressed {
-    background-color: #0D47A1;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="soilMoistureButton">
              <property name="text">
-              <string>🚰 Water Canal</string>
+              <string>🌱 Soil Moisture</string>
              </property>
             </widget>
            </item>
-          <item row="3" column="0">
+           <item row="2" column="0">
             <widget class="QPushButton" name="fanButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #1976D2;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2196F3;
-}
-QPushButton:pressed {
-    background-color: #0D47A1;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>🌀 Fan</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
+           <item row="2" column="1">
+            <widget class="QPushButton" name="waterCanalButton">
+             <property name="text">
+              <string>🚰 Water Canal</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QPushButton" name="actuatorButton">
+             <property name="text">
+              <string>⚙️ Actuator</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
             <widget class="QPushButton" name="heaterButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #1976D2;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2196F3;
-}
-QPushButton:pressed {
-    background-color: #0D47A1;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>🔥 Heater</string>
              </property>
             </widget>
            </item>
-          <item row="4" column="0">
-            <widget class="QPushButton" name="actuatorButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #1976D2;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2196F3;
-}
-QPushButton:pressed {
-    background-color: #0D47A1;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
+           <item row="3" column="1" colspan="2">
+            <widget class="QPushButton" name="statusButton">
              <property name="text">
-              <string>⚙️ Actuator</string>
+              <string>📊 System Status</string>
              </property>
             </widget>
            </item>
@@ -607,8 +475,8 @@ QPushButton:disabled {
          <widget class="QWidget" name="user_output_container">
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>0</height>
+            <width>400</width>
+            <height>320</height>
            </size>
           </property>
           <property name="sizePolicy">
@@ -665,26 +533,6 @@ QPushButton:disabled {
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QGroupBox {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    margin-top: 16px;
-    padding-top: 8px;
-    font-weight: 500;
-    color: #212121;
-    font-size: 14px;
-}
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 12px;
-    padding: 4px 12px;
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border-radius: 5px;
-}</string>
           </property>
           <property name="title">
            <string>📅 Schedule One-Time Tasks</string>
@@ -835,8 +683,8 @@ QGroupBox::title {
          <widget class="QWidget" name="schedule_output_container">
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>0</height>
+            <width>400</width>
+            <height>320</height>
            </size>
           </property>
           <property name="sizePolicy">
@@ -894,26 +742,6 @@ QGroupBox::title {
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="styleSheet">
-           <string notr="true">QGroupBox {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    margin-top: 16px;
-    padding-top: 8px;
-    font-weight: 500;
-    color: #212121;
-    font-size: 14px;
-}
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 12px;
-    padding: 4px 12px;
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border-radius: 5px;
-}</string>
-          </property>
           <property name="title">
            <string>🖥️ Server Monitoring &amp; Management</string>
           </property>
@@ -935,28 +763,6 @@ QGroupBox::title {
            </property>
            <item row="0" column="0">
             <widget class="QPushButton" name="healthButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>❤️ Check Health</string>
              </property>
@@ -964,28 +770,6 @@ QPushButton:disabled {
            </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="statsButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>📈 View Statistics</string>
              </property>
@@ -993,28 +777,6 @@ QPushButton:disabled {
            </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="sessionsButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>👥 List Sessions</string>
              </property>
@@ -1022,28 +784,6 @@ QPushButton:disabled {
            </item>
            <item row="1" column="0">
             <widget class="QPushButton" name="cacheKeysButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>🔑 List Cache Keys</string>
              </property>
@@ -1051,24 +791,6 @@ QPushButton:disabled {
            </item>
            <item row="1" column="1">
             <widget class="QPushButton" name="clearCacheButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #FF6F00;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #FF9800;
-}
-QPushButton:pressed {
-    background-color: #E65100;
-}</string>
-             </property>
              <property name="text">
               <string>🧹 Clear All Cache</string>
              </property>
@@ -1076,28 +798,6 @@ QPushButton:pressed {
            </item>
            <item row="1" column="2">
             <widget class="QPushButton" name="queuesButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>📨 Check Queues</string>
              </property>
@@ -1105,26 +805,6 @@ QPushButton:disabled {
            </item>
            <item row="2" column="0">
             <widget class="QPushButton" name="testCommandButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-    border-color: #1B5E20;
-}</string>
-             </property>
              <property name="text">
               <string>⚡ Test Command</string>
              </property>
@@ -1132,26 +812,6 @@ QPushButton:pressed {
            </item>
            <item row="2" column="1">
             <widget class="QPushButton" name="refreshButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-    border-color: #1B5E20;
-}</string>
-             </property>
              <property name="text">
               <string>🔄 Refresh All</string>
              </property>
@@ -1159,28 +819,6 @@ QPushButton:pressed {
            </item>
            <item row="2" column="2">
             <widget class="QPushButton" name="logFilesButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>📋 List Log Files</string>
              </property>
@@ -1188,28 +826,6 @@ QPushButton:disabled {
            </item>
            <item row="3" column="0">
             <widget class="QPushButton" name="viewLogButton">
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 12px;
-    font-weight: 500;
-    font-size: 12px;
-    min-height: 20px;
-}
-QPushButton:hover {
-    background-color: #4CAF50;
-}
-QPushButton:pressed {
-    background-color: #1B5E20;
-}
-QPushButton:disabled {
-    background-color: #BDBDBD;
-    color: #757575;
-}</string>
-             </property>
              <property name="text">
               <string>📖 View Session Log</string>
              </property>
@@ -1231,26 +847,6 @@ QPushButton:disabled {
             <horstretch>1</horstretch>
             <verstretch>1</verstretch>
            </sizepolicy>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QGroupBox {
-    background-color: #FFFFFF;
-    border: none;
-    border-radius: 0px;
-    margin-top: 0px;
-    padding-top: 0px;
-    font-weight: 500;
-    color: #212121;
-    font-size: 14px;
-}
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 12px;
-    padding: 4px 12px;
-    background-color: #2E7D32;
-    color: #FFFFFF;
-    border-radius: 5px;
-}</string>
           </property>
           <property name="title">
            <string></string>
@@ -1287,16 +883,6 @@ QGroupBox::title {
                <horstretch>1</horstretch>
                <verstretch>1</verstretch>
               </sizepolicy>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QScrollArea {
-    background-color: #FFFFFF;
-    border: none;
-    border-radius: 0px;
-}
-QScrollArea > QWidget > QWidget {
-    background-color: #FFFFFF;
-}</string>
              </property>
              <widget class="QWidget" name="server_info_container">
               <property name="minimumSize">
@@ -1342,13 +928,6 @@ QScrollArea > QWidget > QWidget {
      <layout class="QHBoxLayout" name="statusLayout">
       <item>
        <widget class="QLabel" name="statusTitleLabel">
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    font-size: 11px;
-    color: #757575;
-    padding: 2px 0;
-}</string>
-        </property>
         <property name="text">
          <string>Status:</string>
         </property>
@@ -1356,16 +935,6 @@ QScrollArea > QWidget > QWidget {
       </item>
       <item>
        <widget class="QLabel" name="status_label">
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    color: #388E3C;
-    font-weight: 500;
-    background-color: #FAFAFA;
-    padding: 4px 8px;
-    border-radius: 5px;
-    border-left: 2px solid #388E3C;
-}</string>
-        </property>
         <property name="text">
          <string>Ready</string>
         </property>

@@ -4,35 +4,35 @@ from typing import Dict, Any
 @dataclass
 class ColorPalette:
     """Modern color palette for the greenhouse application"""
-    primary: str = "#2E7D32"  # Deep green
-    primary_light: str = "#4CAF50"
-    primary_dark: str = "#1B5E20"
-    secondary: str = "#FF6F00"  # Amber
-    secondary_light: str = "#FF9800"
-    secondary_dark: str = "#E65100"
-    background: str = "#FAFAFA"
-    surface: str = "#FFFFFF"
-    error: str = "#D32F2F"
-    warning: str = "#FFA000"
-    success: str = "#388E3C"
-    info: str = "#1976D2"
+    primary: str = "#49F28A"
+    primary_light: str = "#73F8A4"
+    primary_dark: str = "#2BC96A"
+    secondary: str = "#6ECBFF"
+    secondary_light: str = "#9FDEFF"
+    secondary_dark: str = "#43B7FF"
+    background: str = "#0B1020"
+    surface: str = "#131A2E"
+    error: str = "#FF6B6B"
+    warning: str = "#FFE3A1"
+    success: str = "#B9FFCC"
+    info: str = "#9BD3FF"
     
     # Text colors
-    text_primary: str = "#212121"
-    text_secondary: str = "#757575"
+    text_primary: str = "#E7E9EE"
+    text_secondary: str = "#A3ADC2"
     text_light: str = "#FFFFFF"
     
     # Neutral colors
-    grey_50: str = "#FAFAFA"
-    grey_100: str = "#F5F5F5"
-    grey_200: str = "#EEEEEE"
-    grey_300: str = "#E0E0E0"
-    grey_400: str = "#BDBDBD"
-    grey_500: str = "#9E9E9E"
-    grey_600: str = "#757575"
-    grey_700: str = "#616161"
-    grey_800: str = "#424242"
-    grey_900: str = "#212121"
+    grey_50: str = "#1A2238"
+    grey_100: str = "#202A44"
+    grey_200: str = "#2A3554"
+    grey_300: str = "#344266"
+    grey_400: str = "#4B5C84"
+    grey_500: str = "#6B7DA3"
+    grey_600: str = "#8F9FBE"
+    grey_700: str = "#A7B5CE"
+    grey_800: str = "#C6D0E2"
+    grey_900: str = "#E7E9EE"
 
 @dataclass
 class Typography:
@@ -115,7 +115,7 @@ class StyleSheetGenerator:
             return f"""
                 QPushButton {{
                     background-color: {self.colors.primary};
-                    color: {self.colors.text_light};
+                    color: #0B1020;
                     border: none;
                     border-radius: {self.borderRadius.md};
                     padding: {self.spacing.sm} {self.spacing.lg};
@@ -130,15 +130,15 @@ class StyleSheetGenerator:
                     background-color: {self.colors.primary_dark};
                 }}
                 QPushButton:disabled {{
-                    background-color: {self.colors.grey_400};
-                    color: {self.colors.grey_600};
+                    background-color: {self.colors.grey_200};
+                    color: {self.colors.grey_500};
                 }}
             """
         elif variant == "secondary":
             return f"""
                 QPushButton {{
                     background-color: {self.colors.secondary};
-                    color: {self.colors.text_light};
+                    color: #0B1020;
                     border: none;
                     border-radius: {self.borderRadius.md};
                     padding: {self.spacing.sm} {self.spacing.lg};
@@ -156,9 +156,9 @@ class StyleSheetGenerator:
         elif variant == "outline":
             return f"""
                 QPushButton {{
-                    background-color: transparent;
-                    color: {self.colors.primary};
-                    border: 1px solid {self.colors.primary};
+                    background-color: rgba(255,255,255,0.08);
+                    color: {self.colors.text_primary};
+                    border: 1px solid rgba(255,255,255,0.14);
                     border-radius: {self.borderRadius.md};
                     padding: {self.spacing.sm} {self.spacing.lg};
                     font-weight: {self.typography.medium};
@@ -166,20 +166,18 @@ class StyleSheetGenerator:
                     min-height: 20px;
                 }}
                 QPushButton:hover {{
-                    background-color: {self.colors.primary};
-                    color: {self.colors.text_light};
+                    background-color: rgba(255,255,255,0.12);
                 }}
                 QPushButton:pressed {{
-                    background-color: {self.colors.primary_dark};
-                    border-color: {self.colors.primary_dark};
+                    background-color: rgba(255,255,255,0.18);
                 }}
             """
         else:  # default
             return f"""
                 QPushButton {{
-                    background-color: {self.colors.surface};
+                    background-color: rgba(255,255,255,0.08);
                     color: {self.colors.text_primary};
-                    border: 1px solid {self.colors.grey_300};
+                    border: 1px solid rgba(255,255,255,0.14);
                     border-radius: {self.borderRadius.md};
                     padding: {self.spacing.sm} {self.spacing.lg};
                     font-weight: {self.typography.medium};
@@ -187,11 +185,10 @@ class StyleSheetGenerator:
                     min-height: 20px;
                 }}
                 QPushButton:hover {{
-                    background-color: {self.colors.grey_100};
-                    border-color: {self.colors.grey_400};
+                    background-color: rgba(255,255,255,0.12);
                 }}
                 QPushButton:pressed {{
-                    background-color: {self.colors.grey_200};
+                    background-color: rgba(255,255,255,0.18);
                 }}
             """
     
@@ -199,8 +196,8 @@ class StyleSheetGenerator:
         """Generate style for group boxes"""
         return f"""
             QGroupBox {{
-                background-color: {self.colors.surface};
-                border: 1px solid {self.colors.grey_300};
+                background-color: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,255,255,0.10);
                 border-radius: {self.borderRadius.lg};
                 margin-top: {self.spacing.xl};
                 padding-top: {self.spacing.md};
@@ -212,8 +209,8 @@ class StyleSheetGenerator:
                 subcontrol-origin: margin;
                 left: {self.spacing.lg};
                 padding: {self.spacing.xs} {self.spacing.lg};
-                background-color: {self.colors.primary};
-                color: {self.colors.text_light};
+                background-color: rgba(255,255,255,0.10);
+                color: {self.colors.text_primary};
                 border-radius: {self.borderRadius.md};
             }}
         """
@@ -223,16 +220,16 @@ class StyleSheetGenerator:
         return f"""
             QTextEdit {{
                 background-color: {self.colors.surface};
-                border: 1px solid {self.colors.grey_300};
+                border: 1px solid rgba(255,255,255,0.12);
                 border-radius: {self.borderRadius.md};
                 padding: {self.spacing.sm};
                 font-family: {self.typography.font_family_mono};
                 font-size: {self.typography.caption};
                 color: {self.colors.text_primary};
-                selection-background-color: {self.colors.primary_light};
+                selection-background-color: rgba(73,242,138,0.35);
             }}
             QTextEdit:focus {{
-                border: 1px solid {self.colors.primary};
+                border: 1px solid rgba(110,203,255,0.80);
             }}
         """
     
@@ -241,7 +238,7 @@ class StyleSheetGenerator:
         return f"""
             QLineEdit {{
                 background-color: {self.colors.surface};
-                border: 1px solid {self.colors.grey_300};
+                border: 1px solid rgba(255,255,255,0.12);
                 border-radius: {self.borderRadius.md};
                 padding: {self.spacing.sm} {self.spacing.md};
                 font-size: {self.typography.body};
@@ -249,7 +246,7 @@ class StyleSheetGenerator:
                 min-height: 20px;
             }}
             QLineEdit:focus {{
-                border: 1px solid {self.colors.primary};
+                border: 1px solid rgba(110,203,255,0.80);
             }}
         """
     
@@ -310,17 +307,17 @@ class StyleSheetGenerator:
         """Generate style for tab widgets"""
         return f"""
             QTabWidget::pane {{
-                border: 1px solid {self.colors.grey_300};
+                border: 1px solid rgba(255,255,255,0.10);
                 border-radius: {self.borderRadius.lg};
-                background-color: {self.colors.surface};
+                background-color: rgba(255,255,255,0.06);
                 margin-top: -1px;
             }}
             QTabWidget::tab-bar {{
                 alignment: center;
             }}
             QTabBar::tab {{
-                background-color: {self.colors.grey_200};
-                border: 1px solid {self.colors.grey_300};
+                background-color: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.12);
                 border-bottom: none;
                 border-top-left-radius: {self.borderRadius.md};
                 border-top-right-radius: {self.borderRadius.md};
@@ -331,13 +328,13 @@ class StyleSheetGenerator:
                 min-width: 80px;
             }}
             QTabBar::tab:selected {{
-                background-color: {self.colors.surface};
-                color: {self.colors.primary};
-                border-color: {self.colors.grey_300};
-                border-bottom: 1px solid {self.colors.surface};
+                background-color: rgba(255,255,255,0.12);
+                color: {self.colors.text_primary};
+                border-color: rgba(255,255,255,0.20);
+                border-bottom: 1px solid rgba(255,255,255,0.12);
             }}
             QTabBar::tab:hover:!selected {{
-                background-color: {self.colors.grey_100};
+                background-color: rgba(255,255,255,0.10);
                 color: {self.colors.text_primary};
             }}
         """
@@ -367,5 +364,20 @@ class StyleSheetGenerator:
             }}
             QCheckBox::indicator:hover {{
                 border-color: {self.colors.primary};
+            }}
+        """
+
+    def generate_dialog_style(self) -> str:
+        """Generate style for modal dialogs and form labels."""
+        return f"""
+            QDialog {{
+                background-color: {self.colors.background};
+                color: {self.colors.text_primary};
+            }}
+            QLabel {{
+                color: {self.colors.text_primary};
+            }}
+            QLabel[role="caption"] {{
+                color: {self.colors.text_secondary};
             }}
         """

@@ -130,9 +130,15 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
 
         # Setup tables after UI is loaded
         self.setup_tables()
+        self._setup_layout_stretch()
 
         # Setup scheduling service and controls
         self.setup_scheduler()
+
+    def _setup_layout_stretch(self):
+        """Main layout stretch for tab widget."""
+        if hasattr(self, "mainLayout") and self.mainLayout:
+            self.mainLayout.setStretch(1, 1)
 
     def add_functions(self):
         """Setup signal connections and functionality"""
@@ -198,18 +204,9 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             return
 
         self.auth_user_label = QLabel("")
-        self.auth_user_label.setStyleSheet(
-            f"""
-                color: {self.theme.colors.info};
-                font-weight: {self.theme.typography.medium};
-                background-color: {self.theme.colors.grey_100};
-                padding: 2px 6px;
-                border-radius: {self.theme.borderRadius.sm};
-                border: 1px solid {self.theme.colors.grey_300};
-            """
-        )
+        self.auth_user_label.setObjectName("authUserLabel")
         self.logoutButton = QPushButton("Logout")
-        self.logoutButton.setStyleSheet(self.styler.generate_button_style("outline"))
+        self.logoutButton.setObjectName("logoutButton")
         self.logoutButton.setMinimumHeight(24)
 
         self.sessionLayout.insertWidget(2, self.auth_user_label)
@@ -430,23 +427,15 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             layout.setSpacing(0)
             self.user_output_container.setLayout(layout)
 
-        # Ensure container expands and is visible - override UI file minimum size
         self.user_output_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.user_output_container.setMinimumSize(1200, 300)  # Minimum width 1200px, height 300px
+        self.user_output_container.setMinimumHeight(320)
         self.user_output_container.setVisible(True)
-        self.user_output_container.show()
-        self.user_output_container.raise_()  # Bring to front
 
-        # Create simple table with clear button
         self.control_table = SimpleDataTable(
             columns=['Timestamp', 'Command', 'Status', 'Result'],
             parent=self.user_output_container,
             show_clear_button=True
         )
-        self.control_table.setVisible(True)
-        self.control_table.show()
-        self.control_table.raise_()  # Bring to front
-        self.control_table.setMinimumSize(1200, 250)  # Minimum width 1200px, height 250px
         layout.addWidget(self.control_table, 1)  # Stretch factor 1
         # Double-click on a control row opens detailed view (mixin)
         self.control_table.table.cellDoubleClicked.connect(self.show_control_details)
@@ -454,7 +443,6 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         # Add a small hint below the control table so users know about double-click
         control_hint = QLabel("Tip: double-click a row in the table to see detailed information.")
         control_hint.setObjectName("controlTableHintLabel")
-        control_hint.setStyleSheet("color: #666666; font-size: 11px; margin-top: 4px;")
         layout.addWidget(control_hint, 0)
 
         # Also set a tooltip on the table itself
@@ -472,24 +460,19 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 self.schedule_output_container.setLayout(schedule_layout)
 
             self.schedule_output_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            self.schedule_output_container.setMinimumSize(1200, 300)
+            self.schedule_output_container.setMinimumHeight(320)
             self.schedule_output_container.setVisible(True)
-            self.schedule_output_container.show()
 
             self.schedule_table = SimpleDataTable(
                 columns=['Schedule ID', 'Target', 'Cron', 'Enabled', 'Last Dispatch', 'Dispatch Status'],
                 parent=self.schedule_output_container,
                 show_clear_button=True
             )
-            self.schedule_table.setVisible(True)
-            self.schedule_table.show()
-            self.schedule_table.setMinimumSize(1200, 250)
             schedule_layout.addWidget(self.schedule_table, 1)
             self.schedule_table.table.setToolTip("Backend-persisted schedules are displayed here with live dispatch status.")
 
             schedule_hint = QLabel("Tip: schedules are persisted in backend and run by cron.")
             schedule_hint.setObjectName("scheduleTableHintLabel")
-            schedule_hint.setStyleSheet("color: #666666; font-size: 11px; margin-top: 4px;")
             schedule_layout.addWidget(schedule_hint, 0)
         else:
             self.logger.warning("schedule_output_container not found - scheduling table not created")
@@ -506,23 +489,15 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             layout.setSpacing(0)
             self.server_info_container.setLayout(layout)
 
-        # Ensure container expands and is visible - override UI file minimum size
         self.server_info_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.server_info_container.setMinimumSize(1200, 300)  # Minimum width 1200px, height 300px
+        self.server_info_container.setMinimumHeight(320)
         self.server_info_container.setVisible(True)
-        self.server_info_container.show()
-        self.server_info_container.raise_()  # Bring to front
 
-        # Create simple table with clear button
         self.server_table = SimpleDataTable(
             columns=['Timestamp', 'Type', 'Data'],
             parent=self.server_info_container,
             show_clear_button=True
         )
-        self.server_table.setVisible(True)
-        self.server_table.show()
-        self.server_table.raise_()  # Bring to front
-        self.server_table.setMinimumSize(1200, 250)  # Minimum width 1200px, height 250px
         layout.addWidget(self.server_table, 1)  # Stretch factor 1
         # Double-click on a server row opens detailed view (mixin)
         self.server_table.table.cellDoubleClicked.connect(self.show_server_details)
@@ -530,7 +505,6 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         # Add a small hint below the server table for discoverability
         server_hint = QLabel("Tip: double-click a row in the table to see detailed server or fog data.")
         server_hint.setObjectName("serverTableHintLabel")
-        server_hint.setStyleSheet("color: #666666; font-size: 11px; margin-top: 4px;")
         layout.addWidget(server_hint, 0)
 
         # Tooltip on the server table itself

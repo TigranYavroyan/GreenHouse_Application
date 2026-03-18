@@ -34,6 +34,7 @@ class AuthDialog(QDialog):
         self.setModal(True)
         self.setMinimumWidth(420)
         self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
+        self.setStyleSheet(self.styler.generate_dialog_style())
 
         root = QVBoxLayout(self)
         root.setSpacing(10)
@@ -41,6 +42,7 @@ class AuthDialog(QDialog):
         title = QLabel("Welcome to Greenhouse Automation")
         title.setStyleSheet(self.styler.generate_label_style("title"))
         subtitle = QLabel("Sign in or create an account to continue.")
+        subtitle.setProperty("role", "caption")
         subtitle.setStyleSheet(self.styler.generate_label_style("caption"))
         root.addWidget(title)
         root.addWidget(subtitle)
@@ -53,6 +55,7 @@ class AuthDialog(QDialog):
 
         self.feedback_label = QLabel("")
         self.feedback_label.setWordWrap(True)
+        self.feedback_label.setProperty("role", "caption")
         self.feedback_label.setStyleSheet(self.styler.generate_label_style("caption"))
         root.addWidget(self.feedback_label)
 

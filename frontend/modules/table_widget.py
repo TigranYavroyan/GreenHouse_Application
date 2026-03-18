@@ -8,9 +8,11 @@ from PyQt5.QtWidgets import (
     QHeaderView,
     QSizePolicy,
     QVBoxLayout,
+    QHBoxLayout,
     QWidget,
     QStyledItemDelegate,
     QStyle,
+    QPushButton,
 )
 from PyQt5.QtCore import Qt
 from modules.styles import GreenhouseTheme
@@ -32,252 +34,87 @@ class _NoFocusDelegate(QStyledItemDelegate):
 
 
 class SimpleDataTable(QWidget):
-    """Simple responsive table for displaying tabular data."""
-    
+    """
+    Responsive table for displaying tabular data.
+    Layout: [Clear button row] [Table - expands with window]
+    Min height ensures usability; table grows with available space.
+    """
+
     ROW_HEIGHT = 35
-    MAX_VISIBLE_ROWS = 15
-    
+    MIN_TABLE_HEIGHT = 320
+
     def __init__(self, columns=None, parent=None, show_clear_button=False):
-        """
-        Initialize the simple data table
-        
-        Args:
-            columns: List of column header names (default: Timestamp, Data)
-            parent: Parent widget
-            show_clear_button: Whether to render a local UI clear button
-        """
         super().__init__(parent)
         self.theme = GreenhouseTheme()
-        
-        # Set size policy to expand to fill available space
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
-        # Default columns if not provided
-        if columns is None:
-            columns = ['Timestamp', 'Data']
-        
-        self.columns = columns
-        
-        # Create layout - no margins so table expands to full width
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(4)
-        self.setLayout(layout)
-        
-        # Set widget background to make it visible
-        self.setStyleSheet(f"""
-            QWidget {{
-                background-color: {self.theme.colors.surface};
-            }}
-        """)
-        
-        self.clear_button = None
-        if show_clear_button:
-            from PyQt5.QtWidgets import QPushButton, QHBoxLayout
+        self.columns = columns or ['Timestamp', 'Data']
 
-            button_layout = QHBoxLayout()
-            button_layout.setContentsMargins(0, 0, 0, 0)
-            button_layout.setSpacing(0)
+        self.setObjectName("simpleDataTable")
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setMinimumHeight(self.MIN_TABLE_HEIGHT + (44 if show_clear_button else 0))
+        self.setMinimumWidth(400)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(6)
+
+        if show_clear_button:
+            btn_row = QHBoxLayout()
+            btn_row.setContentsMargins(0, 0, 0, 0)
+            btn_row.addStretch()
             self.clear_button = QPushButton("🗑️ Clear Table")
-            self.clear_button.setMinimumHeight(36)
-            self.clear_button.setMinimumWidth(120)
+            self.clear_button.setObjectName("clearTableButton")
+            self.clear_button.setFixedHeight(32)
+            self.clear_button.setMinimumWidth(100)
             self.clear_button.clicked.connect(self.clear_data)
-            self.clear_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.theme.colors.error};
-                    color: {self.theme.colors.text_light};
-                    border: none;
-                    border-radius: 4px;
-                    padding: 8px 16px;
-                    font-weight: 500;
-                    font-size: 12px;
-                    min-width: 120px;
-                }}
-                QPushButton:hover {{
-                    background-color: #D32F2F;
-                }}
-                QPushButton:pressed {{
-                    background-color: #B71C1C;
-                }}
-            """)
-            button_layout.addWidget(self.clear_button)
-            button_layout.addStretch()
-            button_widget = QWidget()
-            button_widget.setLayout(button_layout)
-            button_widget.setMaximumHeight(40)
-            layout.addWidget(button_widget)
-        
-        # Create table
+            btn_row.addWidget(self.clear_button)
+            layout.addLayout(btn_row)
+        else:
+            self.clear_button = None
+
         self.table = QTableWidget()
-        self.table.setColumnCount(len(columns))
-        self.table.setHorizontalHeaderLabels(columns)
-        
-        # Configure table properties
+        self.table.setObjectName("dataTable")
+        self.table.setColumnCount(len(self.columns))
+        self.table.setHorizontalHeaderLabels(self.columns)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table.verticalHeader().setVisible(False)
         self.table.setShowGrid(True)
-        
-        # Auto-resize columns
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.horizontalHeader().setStretchLastSection(True)
-        
-        # Set size policy to expand to fill available space
-        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
-        # Set vertical resize mode
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.table.verticalHeader().setDefaultSectionSize(self.ROW_HEIGHT)
-
-        # Remove the focus rectangle / inline editor frame on the current cell
         self.table.setItemDelegate(_NoFocusDelegate(self.table))
-        
-        # Enable scrolling
         self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        
-        # Set initial row count
         self.table.setRowCount(0)
-        
-        # Apply styling
-        self.apply_styling()
-        
-        # Add table to layout with stretch factor so it expands
-        layout.addWidget(self.table, 1)  # Stretch factor 1 means it takes all available space
-        
-        # Ensure table expands to fill available space
-        # Increase minimum height so the table visually reaches down towards the status bar
-        self.table.setMinimumSize(1200, 300)  # Minimum width 1200px, height 400px but can grow
-        self.table.setVisible(True)  # Ensure table is visible
-        self.table.show()  # Explicitly show the table
-        self.table.raise_()  # Bring table to front
-        
-        # Ensure the widget itself expands to full width and height (button + table)
-        self.setMinimumSize(1200, 340)  # Minimum width 1200px, height 340px (button + table)
-        self.setVisible(True)  # Ensure widget is visible
-        self.show()  # Explicitly show the widget
-        self.raise_()  # Bring widget to front
-    
-    def apply_styling(self):
-        """Apply theme-based styling to the table"""
-        style = f"""
-            QTableWidget {{
-                background-color: {self.theme.colors.surface};
-                border: 2px solid {self.theme.colors.primary};
-                border-radius: 4px;
-                gridline-color: {self.theme.colors.grey_200};
-                font-family: {self.theme.typography.font_family};
-                font-size: {self.theme.typography.body};
-                color: {self.theme.colors.text_primary};
-                selection-background-color: {self.theme.colors.primary_light};
-                selection-color: {self.theme.colors.text_light};
-            }}
-            QTableWidget::item {{
-                padding: 6px 10px;
-                border: none;
-                border-bottom: 1px solid {self.theme.colors.grey_200};
-                outline: none;
-            }}
-            QTableWidget::item:selected {{
-                background-color: {self.theme.colors.primary_light};
-                color: {self.theme.colors.text_light};
-                outline: none;
-                border: none;
-            }}
-            QTableWidget::item:focus {{
-                outline: none;
-                border: none;
-            }}
-            QTableWidget::item:hover {{
-                background-color: {self.theme.colors.grey_200};
-                color: {self.theme.colors.text_primary};
-            }}
-            QHeaderView::section {{
-                background-color: {self.theme.colors.primary};
-                color: {self.theme.colors.text_light};
-                padding: 8px 12px;
-                border: none;
-                border-right: 1px solid {self.theme.colors.primary_dark};
-                font-weight: {self.theme.typography.medium};
-                font-size: {self.theme.typography.body};
-            }}
-            QHeaderView::section:last {{
-                border-right: none;
-            }}
-            QScrollBar:vertical {{
-                background-color: {self.theme.colors.grey_100};
-                width: 12px;
-                border: none;
-                border-radius: 6px;
-            }}
-            QScrollBar::handle:vertical {{
-                background-color: {self.theme.colors.primary};
-                border-radius: 6px;
-                min-height: 30px;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background-color: {self.theme.colors.primary_light};
-            }}
-            QScrollBar:horizontal {{
-                background-color: {self.theme.colors.grey_100};
-                height: 12px;
-                border: none;
-                border-radius: 6px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background-color: {self.theme.colors.primary};
-                border-radius: 6px;
-                min-width: 30px;
-            }}
-        """
-        self.table.setStyleSheet(style)
-    
+
+        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.table.setMinimumHeight(self.MIN_TABLE_HEIGHT)
+        self.table.setMinimumWidth(400)
+        layout.addWidget(self.table, 1)
+
     def add_row(self, data):
-        """
-        Add a new row to the table with the provided data
-        
-        Args:
-            data: List of values for each column (will be converted to strings)
-        """
-        # Ensure data matches column count
         if len(data) != self.table.columnCount():
-            # Adjust columns if needed
             if len(data) > self.table.columnCount():
                 self.table.setColumnCount(len(data))
-                # Update headers - keep existing or add generic names
                 headers = list(self.columns)
                 while len(headers) < len(data):
                     headers.append(f"Column {len(headers) + 1}")
                 self.table.setHorizontalHeaderLabels(headers)
                 self.columns = headers
-        
-        # Add new row
+
         row = self.table.rowCount()
         self.table.insertRow(row)
         self.table.setRowHeight(row, self.ROW_HEIGHT)
-        
-        # Set cell values
         for col, value in enumerate(data):
             item = QTableWidgetItem(str(value) if value is not None else "")
             item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.table.setItem(row, col, item)
-        
-        # Auto-scroll to bottom to show latest data
         self.table.scrollToBottom()
-    
+
     def clear_data(self):
-        """Clear all rows from the table"""
         self.table.setRowCount(0)
-    
+
     def get_row_count(self):
-        """Get current number of rows"""
         return self.table.rowCount()
-    
-    def showEvent(self, event):
-        """Ensure table expands when shown"""
-        super().showEvent(event)
-        # Force update geometry to ensure proper sizing
-        self.updateGeometry()
-        if hasattr(self, 'table'):
-            self.table.updateGeometry()
