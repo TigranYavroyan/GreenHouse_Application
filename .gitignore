@@ -16,3 +16,5 @@ frontend/*.log.*
 *.cursor
 
 examples/
+
+.env.production
