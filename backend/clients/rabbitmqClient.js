@@ -88,6 +88,16 @@ class RabbitMQClient {
     return this.channel.assertQueue(name, opts);
   }
 
+  async assertExchange(name, type = 'topic', opts = { durable: true }) {
+    if (!this.channel) throw new Error('RabbitMQ channel not available');
+    return this.channel.assertExchange(name, type, opts);
+  }
+
+  async bindQueue(queue, exchange, routingKey = '') {
+    if (!this.channel) throw new Error('RabbitMQ channel not available');
+    return this.channel.bindQueue(queue, exchange, routingKey);
+  }
+
   async prefetch(count) {
     if (!this.channel) throw new Error('RabbitMQ channel not available');
     return this.channel.prefetch(count);
@@ -96,6 +106,11 @@ class RabbitMQClient {
   sendToQueue(queue, buffer, opts) {
     if (!this.channel) throw new Error('RabbitMQ channel not available');
     return this.channel.sendToQueue(queue, buffer, opts);
+  }
+
+  publish(exchange, routingKey, buffer, opts) {
+    if (!this.channel) throw new Error('RabbitMQ channel not available');
+    return this.channel.publish(exchange, routingKey, buffer, opts);
   }
 
   consume(queue, onMessage, opts = { noAck: false }) {

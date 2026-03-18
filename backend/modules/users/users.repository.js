@@ -30,8 +30,26 @@ class UsersRepository {
     return sanitizeUser(user);
   }
 
+  async findByEmail(email) {
+    const user = await User.findOne({ where: { email } });
+    return sanitizeUser(user);
+  }
+
   async findAuthByUsername(username) {
     return User.findOne({ where: { username } });
+  }
+
+  async findAuthById(id) {
+    return User.findByPk(id);
+  }
+
+  async markVerifiedById(id) {
+    const user = await User.findByPk(id);
+    if (!user) return null;
+    if (!user.verified) {
+      await user.update({ verified: true });
+    }
+    return sanitizeUser(user);
   }
 
   async updateById(id, payload) {
@@ -43,7 +61,7 @@ class UsersRepository {
   }
 
   async deleteById(id) {
-    const user = await this.findById(id);
+    const user = await User.findByPk(id);
     if (!user) return false;
 
     await user.destroy();

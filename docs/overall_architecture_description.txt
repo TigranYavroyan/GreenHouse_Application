@@ -82,7 +82,14 @@ flowchart TD
 - **Queues**:
   - `greenhouse_commands`: Commands from frontend to backend (durable)
   - `command_responses`: Responses from backend to frontend (durable)
-- **Durability**: Both queues are durable (survive broker restart)
+  - `notification.email.verification.v1`: Primary queue for verification email events (durable)
+  - `notification.email.verification.retry.v1`: Delayed retry queue for transient SMTP failures (durable, TTL + DL routing)
+  - `notification.email.verification.dlq.v1`: Dead-letter queue for poison/permanent email failures (durable)
+- **Exchange**:
+  - `greenhouse.events.v1` (topic): internal backend domain events
+- **Routing keys**:
+  - `notification.email.verification.requested.v1`
+- **Durability**: All listed queues are durable (survive broker restart)
 - **QoS**: Backend prefetch set to 5 messages
 
 #### **Backend** (`greenhouse-backend`)
@@ -239,6 +246,17 @@ The system implements a complete Edge-to-Fog data aggregation architecture:
 - Schedule run status is based on dispatch acknowledgment (`completed` on successful queue publish, `failed` on publish error).
 - Core command completion remains asynchronous and is handled later in normal command pipeline (`command_responses`).
 
+### 2.2 Signup Email Verification (Auth -> Notification)
+- Frontend signs up via `POST /auth/register` with `username`, `password`, `email`.
+- Auth service persists user with `verified=false`.
+- Auth service generates JWT verification token (`type=email_verification`, exp default 1 hour).
+- Auth service publishes event to `greenhouse.events.v1` using routing key `notification.email.verification.requested.v1`.
+- Notification consumer reads from `notification.email.verification.v1` and sends email via SMTP (`nodemailer`).
+- Transient email failures are republished to `notification.email.verification.retry.v1` with `x-retry-count` header.
+- Retries are delayed by queue TTL and dead-lettered back to primary queue.
+- Max retry overflow or invalid payloads are moved to `notification.email.verification.dlq.v1`.
+- User confirms by opening `GET /auth/verify-email?token=...`; backend verifies token and marks user `verified=true`.
+
 ### 3. Backend Command Consumption
 - Backend RabbitMQ consumer listens on `greenhouse_commands` queue
 - When message arrives:
@@ -373,11 +391,13 @@ The backend is configured to use the real core server at `http://192.168.27.16:8
 - `GET /metadata/health/` - System health check with component status
 
 ### Authentication (JWT only)
-- `POST /auth/register` - Register user with username/password
+- `POST /auth/register` - Register user with username/password/email (`verified=false` initially)
 - `POST /auth/login` - Login and receive JWT token
+- `GET /auth/verify-email?token=<jwt>` - Verify email token and activate account
 - No refresh token flow is used for desktop-first login simplicity.
 - Desktop frontend sends JWT in `Authorization: Bearer <jwt>` headers.
 - Unauthorized/forbidden responses clear local token and trigger re-authentication dialog.
+- Login is denied with `403` until account email is verified.
 
 ### Persistent IoT CRUD
 - `GET /users` - returns only authenticated user in `data[0]`

@@ -178,7 +178,9 @@ services:
     image: kbudde/rabbitmq-exporter:latest
     container_name: greenhouse-rabbitmq-exporter
     environment:
-      - RABBITMQ_URL=http://guest:guest@rabbitmq:15672/
+      - RABBIT_URL=http://rabbitmq:15672
+      - RABBIT_USER=guest
+      - RABBIT_PASSWORD=guest
     ports:
       - "9419:9419"
     networks:

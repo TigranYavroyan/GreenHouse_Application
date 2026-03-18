@@ -95,7 +95,7 @@ class AuthDialog(QDialog):
         self.signup_username = QLineEdit()
         self.signup_username.setPlaceholderText("Username")
         self.signup_email = QLineEdit()
-        self.signup_email.setPlaceholderText("Email (optional)")
+        self.signup_email.setPlaceholderText("Email")
         self.signup_password = QLineEdit()
         self.signup_password.setEchoMode(QLineEdit.Password)
         self.signup_password.setPlaceholderText("Password")
@@ -162,8 +162,8 @@ class AuthDialog(QDialog):
         password = self.signup_password.text()
         confirm = self.signup_confirm_password.text()
 
-        if not username or not password:
-            self._set_feedback("Username and password are required.", "error")
+        if not username or not email or not password:
+            self._set_feedback("Username, email and password are required.", "error")
             return
         if password != confirm:
             self._set_feedback("Password and confirmation do not match.", "error")
@@ -172,12 +172,13 @@ class AuthDialog(QDialog):
         self._set_busy(True)
         try:
             self.api_client.register(username=username, password=password, email=email)
-            token = self.api_client.login(username=username, password=password)
-            self.auth_session.set_token(token)
-            self.authenticated_token = token
-            self.authenticated_user = self.auth_session.decode_claims(token)
-            self._set_feedback("Account created and signed in successfully.", "success")
-            self.accept()
+            self._set_feedback(
+                "Account created. Check your email, verify your account, then sign in.",
+                "success",
+            )
+            self.tabs.setCurrentIndex(0)
+            self.signin_username.setText(username)
+            self.signin_password.clear()
         except UnauthorizedError as error:
             self._set_feedback(str(error), "error")
         except ApiRequestError as error:

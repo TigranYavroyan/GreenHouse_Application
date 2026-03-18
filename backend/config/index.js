@@ -38,6 +38,26 @@ const config = {
       port: process.env.PORT ? Number(process.env.PORT) : 3000,
     };
   },
+  get smtp() {
+    return {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+      secure: String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true',
+      user: process.env.SMTP_USER || '',
+      pass: process.env.SMTP_PASS || '',
+    };
+  },
+  get mail() {
+    return {
+      from: process.env.MAIL_FROM || 'no-reply@greenhouse.local',
+    };
+  },
+  get notification() {
+    return {
+      maxRetries: process.env.NOTIFICATION_MAX_RETRIES ? Number(process.env.NOTIFICATION_MAX_RETRIES) : 5,
+      retryDelayMs: process.env.NOTIFICATION_RETRY_DELAY_MS ? Number(process.env.NOTIFICATION_RETRY_DELAY_MS) : 30000,
+    };
+  },
   get greenhouseCore() {
     return {
       url: process.env.GREENHOUSE_CORE_URL || 'http://192.168.27.16:8080',

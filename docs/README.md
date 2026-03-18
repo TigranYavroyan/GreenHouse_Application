@@ -83,6 +83,16 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - Scheduler completion is defined as successful queue publish (dispatch), not final core response completion
 - Schedule persistence is database-backed and survives frontend/backend restarts (enabled schedules are reloaded)
 
+#### 2.2 **Signup Email Verification (Internal Event Flow)**
+- Frontend sends signup request to `POST /auth/register` with `username`, `password`, and `email`
+- Auth service stores user with `verified=false`
+- Auth service issues expiring JWT verification token (`type=email_verification`, default expiration 1 hour)
+- Auth service publishes `notification.email.verification.requested.v1` to exchange `greenhouse.events.v1`
+- Notification consumer reads `notification.email.verification.v1` and sends email asynchronously through SMTP
+- Transient SMTP failures are retried via `notification.email.verification.retry.v1` with `x-retry-count`
+- Poison/non-retryable messages are moved to `notification.email.verification.dlq.v1`
+- User confirms account using `GET /auth/verify-email?token=...`, then login is allowed
+
 #### 3. **Backend Command Consumption**
 - Backend RabbitMQ consumer listens on `greenhouse_commands` queue
 - When message arrives:
@@ -211,7 +221,14 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - **Queues**:
   - `greenhouse_commands`: Commands from frontend to backend
   - `command_responses`: Responses from backend to frontend
-- **Durability**: Both queues are durable (survive broker restart)
+  - `notification.email.verification.v1`: Verification email requests
+  - `notification.email.verification.retry.v1`: Delayed retries for transient SMTP failures
+  - `notification.email.verification.dlq.v1`: Dead-letter queue for permanent failures
+- **Exchange**:
+  - `greenhouse.events.v1` (topic)
+- **Routing keys**:
+  - `notification.email.verification.requested.v1`
+- **Durability**: All listed queues are durable (survive broker restart)
 - **QoS**: Backend prefetch set to 5 messages
 
 #### **Backend** (`greenhouse-backend`)
@@ -744,11 +761,13 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 
 ### Authentication (JWT only)
 
-- `POST /auth/register` - Register user account
+- `POST /auth/register` - Register user account (`username`, `password`, `email`)
 - `POST /auth/login` - Login and receive access JWT
+- `GET /auth/verify-email?token=<jwt>` - Verify account email and activate user
 - Desktop-oriented mode uses JWT-only auth (no refresh token flow).
 - Desktop frontend sends JWT via `Authorization: Bearer <jwt>` on backend API requests.
 - Unauthorized/forbidden API responses trigger automatic local session reset and re-auth prompt.
+- Unverified users receive `403` on login until email verification is completed.
 
 ### Persistent IoT CRUD
 

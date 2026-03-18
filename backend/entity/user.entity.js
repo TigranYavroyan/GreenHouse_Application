@@ -23,6 +23,11 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING(255),
         allowNull: false,
     },
+    verified: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
     metadata: {
         type: DataTypes.JSONB,
         allowNull: false,

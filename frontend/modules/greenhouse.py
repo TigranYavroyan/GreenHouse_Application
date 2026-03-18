@@ -253,11 +253,36 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                     continue
             return False
 
+    def _pause_authenticated_timers(self):
+        state = {
+            "auto_refresh": bool(
+                hasattr(self, "auto_refresh_timer") and self.auto_refresh_timer.isActive()
+            ),
+            "schedule_clock": bool(
+                getattr(self, "schedule_clock_timer", None)
+                and self.schedule_clock_timer.isActive()
+            ),
+        }
+        if state["auto_refresh"]:
+            self.auto_refresh_timer.stop()
+        if state["schedule_clock"]:
+            self.schedule_clock_timer.stop()
+        return state
+
+    def _resume_authenticated_timers(self, state):
+        if not isinstance(state, dict):
+            return
+        if state.get("auto_refresh") and hasattr(self, "auto_refresh_timer"):
+            self.auto_refresh_timer.start(10000)
+        if state.get("schedule_clock") and getattr(self, "schedule_clock_timer", None):
+            self.schedule_clock_timer.start(5000)
+
     def handle_unauthorized_error(self, message="Unauthorized"):
         if self._auth_recovery_in_progress:
             return
 
         self._auth_recovery_in_progress = True
+        timer_state = self._pause_authenticated_timers()
         try:
             self.auth_session.clear_token()
             self.update_auth_user_label()
@@ -268,6 +293,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             )
 
             if self._reauthenticate_or_exit():
+                self._resume_authenticated_timers(timer_state)
                 self.status_label.setText("✅ Re-authenticated successfully")
                 return
 
@@ -286,11 +312,22 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         if confirm != QMessageBox.Yes:
             return
 
-        self.auth_session.clear_token()
-        self.update_auth_user_label()
-        self.status_label.setText("Signed out")
-        if not self._reauthenticate_or_exit():
+        if self._auth_recovery_in_progress:
+            return
+
+        self._auth_recovery_in_progress = True
+        timer_state = self._pause_authenticated_timers()
+        try:
+            self.auth_session.clear_token()
+            self.update_auth_user_label()
+            self.status_label.setText("Signed out")
+            if self._reauthenticate_or_exit():
+                self._resume_authenticated_timers(timer_state)
+                self.status_label.setText("✅ Signed in again")
+                return
             self.close()
+        finally:
+            self._auth_recovery_in_progress = False
 
     def _handle_api_exception(self, title, error):
         if isinstance(error, UnauthorizedError):

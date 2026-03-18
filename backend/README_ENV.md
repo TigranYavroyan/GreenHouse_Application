@@ -47,10 +47,17 @@ POSTGRES_USER=greenhouse
 POSTGRES_PASSWORD=greenhouse
 JWT_SECRET=replace_with_secure_secret
 JWT_EXPIRES_IN=1h
-DEFAULT_USER_ENABLED=false
-DEFAULT_USER_USERNAME=desktop_default_user
-DEFAULT_USER_PASSWORD=replace_with_strong_password
-DEFAULT_USER_EMAIL=
+EMAIL_VERIFICATION_JWT_SECRET=replace_with_dedicated_secret
+EMAIL_VERIFICATION_EXPIRES_IN=1h
+PUBLIC_BACKEND_URL=http://localhost:3000
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=example@gmail.com
+SMTP_PASS=app_password
+MAIL_FROM=Greenhouse Automation <example@gmail.com>
+NOTIFICATION_MAX_RETRIES=5
+NOTIFICATION_RETRY_DELAY_MS=30000
 EXEC_TIMEOUT_MS=15000
 ```
 
@@ -65,7 +72,9 @@ The `config/index.js` file loads:
 
 - Environment variables are loaded using `dotenv`
 - Docker Compose uses `env_file` directive with `.env.production`/`.env.development`
-- `DEFAULT_USER_ENABLED=true` will bootstrap a default user on startup (idempotent)
+- `PUBLIC_BACKEND_URL` is used to generate `/auth/verify-email` links sent over SMTP
+- Gmail SMTP typically requires an app password in `SMTP_PASS` (do not use your main account password)
+- Notification retry policy uses `NOTIFICATION_MAX_RETRIES` and `NOTIFICATION_RETRY_DELAY_MS`
 - Never use weak default passwords in production
 - For local development, ensure Redis, RabbitMQ, and PostgreSQL are running on localhost
 

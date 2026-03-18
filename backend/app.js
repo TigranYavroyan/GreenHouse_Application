@@ -43,7 +43,13 @@ import SchedulesService from './modules/schedules/schedules.service.js';
 import SchedulesRuntime from './modules/schedules/schedules.runtime.js';
 import SensorAlertRulesService from './modules/sensor-alert-rules/sensor-alert-rules.service.js';
 import SensorAlertsService from './modules/sensor-alerts/sensor-alerts.service.js';
-import ensureDefaultUser from './modules/users/default-user.bootstrap.js';
+import NotificationMailer from './modules/notification/notification.mailer.js';
+import NotificationConsumer from './modules/notification/notification.consumer.js';
+import {
+  MESSAGE_EXCHANGES,
+  MESSAGE_QUEUES,
+  MESSAGE_ROUTING_KEYS,
+} from './modules/common/messaging/messaging.constants.js';
 
 class App {
   constructor() {
@@ -66,7 +72,6 @@ class App {
       rabbitClient: this.rabbitClient,
       commandExecutor: this.commandExecutor
     });
-    this.defaultUserId = null;
 
     // repositories
     this.usersRepository = new UsersRepository();
@@ -85,6 +90,7 @@ class App {
     });
     this.rabbitConsumerReady = false;
     this.rabbitReconnectHandlerAttached = false;
+    this.notificationConsumerReady = false;
 
     // services
     this.usersService = new UsersService(this.usersRepository);
@@ -116,6 +122,16 @@ class App {
     this.sensorAlertsService = new SensorAlertsService({
       sensorAlertsRepository: this.sensorAlertsRepository,
       sensorAlertRulesRepository: this.sensorAlertRulesRepository,
+    });
+    this.notificationMailer = new NotificationMailer({
+      smtpConfig: this.config.smtp,
+      mailFrom: this.config.mail.from,
+    });
+    this.notificationConsumer = new NotificationConsumer({
+      rabbitClient: this.rabbitClient,
+      logger: this.systemLogger,
+      notificationMailer: this.notificationMailer,
+      maxRetries: this.config.notification.maxRetries,
     });
 
     this.setupMiddleware();
@@ -154,7 +170,10 @@ class App {
       });
     });
 
-    this.app.use('/auth', createAuthRouter({ userRepository: this.usersRepository }));
+    this.app.use('/auth', createAuthRouter({
+      userRepository: this.usersRepository,
+      rabbitClient: this.rabbitClient,
+    }));
     this.app.use('/users', authMiddleware, createUsersRouter({ usersService: this.usersService }));
     this.app.use('/devices', authMiddleware, createDevicesRouter({
       devicesService: this.devicesService,
@@ -274,26 +293,45 @@ class App {
 
   publishCommandResponse(payload) {
     const published = this.rabbitClient.sendToQueue(
-      'command_responses',
+      MESSAGE_QUEUES.COMMAND_RESPONSES,
       Buffer.from(JSON.stringify(payload)),
       { persistent: true }
     );
 
     if (!published) {
-      throw new Error('Failed to publish response to command_responses');
+      throw new Error(`Failed to publish response to ${MESSAGE_QUEUES.COMMAND_RESPONSES}`);
     }
   }
 
   async configureRabbitConsumer() {
-    await this.rabbitClient.assertQueue('greenhouse_commands', { durable: true });
-    await this.rabbitClient.assertQueue('command_responses', { durable: true });
+    await this.rabbitClient.assertQueue(MESSAGE_QUEUES.GREENHOUSE_COMMANDS, { durable: true });
+    await this.rabbitClient.assertQueue(MESSAGE_QUEUES.COMMAND_RESPONSES, { durable: true });
+    await this.rabbitClient.assertExchange(MESSAGE_EXCHANGES.EVENTS_V1, 'topic', { durable: true });
+    await this.rabbitClient.assertQueue(MESSAGE_QUEUES.NOTIFICATION_EMAIL_VERIFICATION_V1, { durable: true });
+    await this.rabbitClient.assertQueue(MESSAGE_QUEUES.NOTIFICATION_EMAIL_VERIFICATION_RETRY_V1, {
+      durable: true,
+      arguments: {
+        'x-message-ttl': this.config.notification.retryDelayMs,
+        'x-dead-letter-exchange': '',
+        'x-dead-letter-routing-key': MESSAGE_QUEUES.NOTIFICATION_EMAIL_VERIFICATION_V1,
+      },
+    });
+    await this.rabbitClient.assertQueue(MESSAGE_QUEUES.NOTIFICATION_EMAIL_VERIFICATION_DLQ_V1, { durable: true });
+    await this.rabbitClient.bindQueue(
+      MESSAGE_QUEUES.NOTIFICATION_EMAIL_VERIFICATION_V1,
+      MESSAGE_EXCHANGES.EVENTS_V1,
+      MESSAGE_ROUTING_KEYS.NOTIFICATION_EMAIL_VERIFICATION_REQUESTED_V1
+    );
     await this.rabbitClient.prefetch(5);
 
     if (this.rabbitConsumerReady) {
       this.rabbitConsumerReady = false;
     }
+    if (this.notificationConsumerReady) {
+      this.notificationConsumerReady = false;
+    }
 
-    await this.rabbitClient.consume('greenhouse_commands', async (msg) => {
+    await this.rabbitClient.consume(MESSAGE_QUEUES.GREENHOUSE_COMMANDS, async (msg) => {
       if (!msg) return;
 
       let commandData = null;
@@ -336,6 +374,11 @@ class App {
       }
     }, { noAck: false });
 
+    if (!this.notificationConsumerReady) {
+      await this.notificationConsumer.start();
+      this.notificationConsumerReady = true;
+    }
+
     this.rabbitConsumerReady = true;
     this.systemLogger.info('RabbitMQ consumer configured');
   }
@@ -343,11 +386,6 @@ class App {
   async start(port = this.config.server.port) {
     try {
       await this.config.ConfigPostgres.init();
-      const defaultUser = await ensureDefaultUser({
-        usersRepository: this.usersRepository,
-        logger: this.systemLogger,
-      });
-      this.defaultUserId = defaultUser?.id || null;
 
       await this.redisClient.connect();
       if (this.redisClient.isOpen) {

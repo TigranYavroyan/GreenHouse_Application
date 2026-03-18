@@ -7,10 +7,6 @@ scrape_configs:
     static_configs:
       - targets: ['backend:3000']
 
-  - job_name: 'greenhouse-core-sim'
-    static_configs:
-      - targets: ['greenhouse-core-sim:3001']
-
   - job_name: 'redis'
     static_configs:
       - targets: ['redis-exporter:9121']
