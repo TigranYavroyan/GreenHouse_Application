@@ -40,6 +40,7 @@ Base URL example: `http://localhost:3000`
 | GET | `/getters` | All getter snapshots |
 | GET | `/getters/:key` | One getter snapshot |
 | GET | `/executors` | All executor snapshots |
+| GET | `/sensor-readings` | User-scoped persisted sensor readings (supports filters) |
 | POST | `/api/executors/:name/:action` | Generic executor command route (`mode`, `on`, `off`, `set`) |
 
 Compatibility aliases:
@@ -189,6 +190,53 @@ Core base URL from config: `GREENHOUSE_CORE_URL` (default `http://192.168.27.16:
     }
   }
 ]
+```
+
+#### GET `/sensor-readings`
+- **Purpose**: returns authenticated user sensor readings persisted in database.
+- **Required body**: none.
+- **Optional query params**:
+  - `deviceId` (UUID string) -- filter by device ID
+  - `deviceName` (string) -- filter by exact device name (alternative to `deviceId`)
+  - `sensorId` (UUID string)
+  - `from` (ISO datetime string)
+  - `to` (ISO datetime string)
+  - `limit` (positive integer, max 5000)
+  - `order` (`ASC` or `DESC`)
+- **Success response schema**:
+  - object wrapper:
+    - `count` (number)
+    - `data` (array of reading objects)
+  - each reading includes at least:
+    - `id` (UUID)
+    - `value` (number)
+    - `timestamp` (ISO datetime)
+    - `sensor` object with nested `device`
+- **Status codes**:
+  - `200` on success
+  - `400` on invalid query params (for example invalid dates, invalid order, invalid limit)
+  - `401/403` on auth/user-context failures
+- **Example**:
+```json
+{
+  "count": 2,
+  "data": [
+    {
+      "id": "6e9f6f60-bb2b-4f6a-a1ef-3f3f6cbda290",
+      "value": 24.7,
+      "timestamp": "2026-03-19T09:15:00.000Z",
+      "sensor": {
+        "id": "3e1476a8-c6d1-43a4-b934-44c2383bd2c0",
+        "name": "Temp Sensor A",
+        "type": "temperature",
+        "device": {
+          "id": "0fbc1f72-286f-46da-9cf2-b0177fce9a1c",
+          "name": "Greenhouse Device 1"
+        }
+      }
+    }
+  ]
+}
 ```
 
 #### POST `/api/executors/<name>/mode`
@@ -714,10 +762,21 @@ From `frontend/modules/greenhouse.py`:
   - `viewLogButton` -> `prompt_executor_set` (`Set Device Value`)
 - Connected control-tab actions (RabbitMQ command flow, not executor HTTP API):
   - sensor reads and toggle controls for water/fan/heater/actuator
+  - sensor read responses are additionally persisted (best effort) into authenticated REST entities:
+    - ensure/create device (`/devices`)
+    - ensure/create sensor (`/sensors`)
+    - append time-series row (`/sensor-readings`)
 - Connected scheduling-tab actions:
-  - `scheduleTaskButton` -> `schedule_selected_task` (create backend recurring schedule)
-  - `cancelScheduledButton` -> `cancel_selected_schedule` (delete selected backend schedule)
-  - `clearScheduledButton` -> `clear_all_schedules` (delete all backend schedules for current user)
+  - `scheduleTaskButton` -> `schedule_selected_task` (create backend one-time schedule from delay presets)
+  - `cancelScheduledButton` -> `cancel_selected_schedule` (cancel selected backend schedule by disabling it)
+  - `clearScheduledButton` -> `clear_all_schedules` (cancel all pending backend schedules for current user)
+- Connected statistics-tab actions:
+  - `statisticsDeviceCombo` is populated with concrete sensor names from `GET /sensors` (user-scoped); each item stores the sensor ID, name, and type
+  - On plot load, readings are fetched via `GET /sensor-readings?sensorId=<id>&order=ASC` with optional `from`/`to` time filters; plot title shows sensor name and type
+  - `statisticsLoadButton` -> explicit fetch + plot render
+  - `statisticsDeviceCombo` / time controls / `statisticsAllDataCheck` -> debounced auto-reload of plot data
+  - tab switch to `statisticsTab` -> refresh executor names + auto-load latest plot
+  - if `/sensor-readings` is empty/incomplete, statistics plotting falls back to persisted `/user-logs` sensor-read command history
 - Hidden/removed from active UI (not connected to core action flow):
   - legacy `statusButton` (`📊 System Status`)
 
@@ -749,11 +808,17 @@ This keeps:
 
 ### Scheduling dispatch and waiting boundaries
 
-- Scheduling is persisted with backend `/schedules` records and executed as one-time tasks.
-- At schedule trigger time, runtime dispatches command envelope to `greenhouse_commands`, then disables the schedule.
+- Scheduling is persisted with backend `/schedules` records and supports `scheduleMode` values:
+  - `one_time` => dispatch once, then disable.
+  - `recurring` => dispatch on each cron tick while enabled.
+- At schedule trigger time, runtime dispatches command envelope to `greenhouse_commands`.
 - Schedule execution status is dispatch-based:
-  - `completed` => command was successfully published to RabbitMQ queue.
-  - `not_done` => publish failed and `metadata.lastDispatchError` is populated.
+  - one-time:
+    - `completed` => command was successfully published and schedule was finalized.
+    - `not_done` => publish failed and `metadata.lastDispatchError` is populated.
+  - recurring:
+    - `pending` remains active between dispatches.
+    - `metadata.lastDispatchStatus` tracks latest dispatch result (`completed` or `failed`).
   - `canceled` => schedule was canceled by user before dispatch.
 - Core waiting logic (`timeout`, `retry`, `backoff`) occurs later inside command execution path (`GreenhouseCoreClient.executeCommand`) after queue consumption.
 - Therefore schedule completion is intentionally decoupled from final core response completion.

@@ -6,6 +6,7 @@ A distributed greenhouse automation system with a PyQt5 desktop frontend and Nod
 ## Table of Contents
 
 - [Architecture Overview](#architecture-overview)
+- [Database ERD](#database-erd)
 - [System Components](#system-components)
 - [Backend Modules](#backend-modules)
 - [Frontend Modules](#frontend-modules)
@@ -60,6 +61,11 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 └─────────────────┘
 ```
 
+## Database ERD
+
+- PostgreSQL entity-relationship diagram is available at `docs/ERD_DATABASE.md`.
+- It includes all persisted Sequelize tables and Redis keyspace notes.
+
 ### Step-by-Step Architecture Flow
 
 #### 1. **Frontend Initialization**
@@ -79,7 +85,9 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 
 #### 2.1 **Scheduling (Persistent Backend Runtime)**
 - The frontend Scheduling tab writes schedules to backend REST API (`/schedules`)
-- Scheduling is one-time: each saved task is dispatched once at its planned time, then automatically disabled
+- Scheduling supports `scheduleMode`:
+  - `one_time`: dispatch once at planned time, then automatically disabled
+  - `recurring`: dispatch repeatedly according to cron while enabled
 - Backend runtime executes enabled schedule records and dispatches commands to `greenhouse_commands`
 - Scheduler completion is defined as successful queue publish (dispatch), not final core response completion
 - Schedule persistence is database-backed and survives frontend/backend restarts (enabled schedules are reloaded)
@@ -417,8 +425,8 @@ Extensibility details:
 
 ### Routing
 
-#### **`router/routes.js`**
-- **Purpose**: Defines REST API endpoints
+#### **`backend/app.js` + `backend/routers/*.js`**
+- **Purpose**: Composes and mounts REST API endpoints
 - **Endpoints**:
   - `GET /`: API information and available endpoints
   - `GET /metadata/health/`: System health check with Redis/RabbitMQ status
@@ -508,10 +516,11 @@ Extensibility details:
 #### **`modules/greenhouse.py`** (`GreenhouseDesktop`)
 - **Purpose**: Main PyQt5 desktop application window
 - **Key Features**:
-  - **Three-Tab Interface**:
+  - **Four-Tab Interface**:
     1. **Control Tab**: User-friendly greenhouse controls (sensors and actuators)
     2. **Scheduling Tab**: One-time delayed command scheduling (`Now`, presets, custom `hh:mm:ss`)
     3. **Server Tab**: Backend monitoring and management
+    4. **Statistics Tab**: Sensor history plotting with interactive zoom/pan; concrete sensor names from `GET /sensors`, readings fetched per sensor via `GET /sensor-readings?sensorId=...`
   - **Session Management**:
     - Generates unique session ID on startup
     - Displays session information in header
@@ -529,13 +538,13 @@ Extensibility details:
   - **Styling**: Modern UI with custom theme and stylesheets
   - **Auto-refresh**: Optional periodic server status updates
 
-#### **`modules/schedules/schedules.runtime.js`** (`SchedulesRuntime`)
+#### **`backend/modules/schedules/schedules.runtime.js`** (`SchedulesRuntime`)
 - **Purpose**: Backend cron runtime for persistent schedule dispatch
 - **Key Features**:
   - Loads enabled schedules from database at startup
   - Registers cron jobs per schedule and keeps runtime map in memory
   - Dispatches command envelopes to `greenhouse_commands`
-  - Updates schedule metadata with dispatch status and last command id
+  - Supports both `one_time` finalization and `recurring` dispatch metadata updates
 
 ### Communication
 
@@ -778,6 +787,15 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 - `GET|POST /devices`, `GET|PATCH|DELETE /devices/:id`
 - `GET|POST /sensors`, `GET|PATCH|DELETE /sensors/:id`
 - `GET|POST /sensor-readings`, `GET|PATCH|DELETE /sensor-readings/:id`
+  - `GET /sensor-readings` supports optional query filters:
+    - `deviceId` (UUID),
+    - `deviceName` (string, exact match),
+    - `sensorId` (UUID),
+    - `from` / `to` (ISO datetime),
+    - `limit` (positive integer, capped server-side),
+    - `order` (`ASC` or `DESC`).
+  - Statistics tab populates the combo with concrete sensor names from `GET /sensors` (user-scoped). On plot load, readings are fetched via `GET /sensor-readings?sensorId=<id>&order=ASC` with optional `from`/`to` time filters. Sensor persistence auto-creates DB devices and sensors to ensure data availability.
+  - Frontend command response handling persists sensor read commands into `/sensor-readings` (best effort) by ensuring related `/devices` and `/sensors` records first.
 - `GET|POST /actuators`, `GET|PATCH|DELETE /actuators/:id`
 - `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
 - `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`
@@ -992,6 +1010,7 @@ For detailed documentation on Edge-to-Fog aggregation, see:
 ### Frontend Dependencies
 
 - `PyQt5`: 5.15.9 - GUI framework
+- `pyqtgraph`: 0.13.7 - Interactive time-series plotting in statistics tab
 - `pika`: 1.3.2 - RabbitMQ client
 - `requests`: 2.31.0 - HTTP client
 - `python-dotenv`: 1.0.0 - Environment variable management

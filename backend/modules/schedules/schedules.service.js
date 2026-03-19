@@ -8,6 +8,35 @@ class SchedulesService {
     this.schedulesRuntime = schedulesRuntime;
   }
 
+  _normalizeScheduleMode(rawMode) {
+    const normalized = String(rawMode || '').trim().toLowerCase();
+    if (!normalized || normalized === 'one-time' || normalized === 'one_time' || normalized === 'onetime') {
+      return 'one_time';
+    }
+    if (normalized === 'recurring') {
+      return 'recurring';
+    }
+    throw serviceError('scheduleMode must be one_time or recurring', 400);
+  }
+
+  _normalizeMetadata(payload = {}, existingMetadata = {}) {
+    const payloadMetadata = payload?.metadata;
+    if (payloadMetadata !== undefined && (typeof payloadMetadata !== 'object' || Array.isArray(payloadMetadata))) {
+      throw serviceError('metadata must be an object', 400);
+    }
+
+    const metadata = {
+      ...(existingMetadata || {}),
+      ...(payloadMetadata || {}),
+    };
+
+    const modeCandidate = payload?.scheduleMode !== undefined
+      ? payload.scheduleMode
+      : metadata.scheduleMode;
+    metadata.scheduleMode = this._normalizeScheduleMode(modeCandidate);
+    return metadata;
+  }
+
   validateCronExpression(cronExpression) {
     const normalized = String(cronExpression || '').trim();
     if (!normalized) {
@@ -32,7 +61,12 @@ class SchedulesService {
       throw serviceError('Device not found for current user', 404);
     }
 
-    const created = await this.schedulesRepository.create(payload.deviceId, payload);
+    const normalizedPayload = {
+      ...payload,
+      metadata: this._normalizeMetadata(payload, {}),
+    };
+
+    const created = await this.schedulesRepository.create(payload.deviceId, normalizedPayload);
     if (this.schedulesRuntime) {
       await this.schedulesRuntime.upsert(created);
     }
@@ -62,7 +96,17 @@ class SchedulesService {
       }
     }
 
-    const updated = await this.schedulesRepository.updateByIdForUser(id, userId, payload);
+    const existing = await this.schedulesRepository.findByIdForUser(id, userId);
+    if (!existing) {
+      throw serviceError('Schedule not found', 404);
+    }
+
+    const normalizedPayload = { ...payload };
+    if (payload?.metadata !== undefined || payload?.scheduleMode !== undefined) {
+      normalizedPayload.metadata = this._normalizeMetadata(payload, existing.metadata || {});
+    }
+
+    const updated = await this.schedulesRepository.updateByIdForUser(id, userId, normalizedPayload);
     if (!updated) {
       throw serviceError('Schedule not found', 404);
     }

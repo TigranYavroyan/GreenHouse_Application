@@ -136,7 +136,7 @@ flowchart TD
   - Startup authentication gate (`Sign In` / `Sign Up` dialog before main window)
   - JWT session persistence using desktop `QSettings`
   - Automatic re-authentication flow on `401/403` responses
-  - Three-tab interface (Control, Scheduling, Server)
+  - Four-tab interface (Control, Scheduling, Server, Statistics)
   - Edge-to-fog data aggregation
   - Local Redis caching
   - Backend-persisted cron scheduling via `/schedules`
@@ -243,7 +243,9 @@ The system implements a complete Edge-to-Fog data aggregation architecture:
 - Frontend scheduling tab creates records through `POST /schedules`.
 - Backend runtime (`SchedulesRuntime`) loads enabled cron schedules and executes them.
 - On cron tick, runtime publishes command envelope to `greenhouse_commands`.
-- Schedule run status is based on dispatch acknowledgment (`completed` on successful queue publish, `failed` on publish error).
+- Schedule lifecycle supports `scheduleMode`:
+  - `one_time`: dispatch once, disable schedule, set `scheduleStatus` to `completed` or `not_done`.
+  - `recurring`: keep schedule enabled, keep `scheduleStatus` as `pending`, update `lastDispatchStatus` to `completed` or `failed`.
 - Core command completion remains asynchronous and is handled later in normal command pipeline (`command_responses`).
 
 ### 2.2 Signup Email Verification (Auth -> Notification)
@@ -406,6 +408,8 @@ The backend is configured to use the real core server at `http://192.168.27.16:8
 - `GET|POST /devices`, `GET|PATCH|DELETE /devices/:id`
 - `GET|POST /sensors`, `GET|PATCH|DELETE /sensors/:id`
 - `GET|POST /sensor-readings`, `GET|PATCH|DELETE /sensor-readings/:id`
+  - `GET /sensor-readings` supports optional query filters: `deviceId`, `deviceName`, `sensorId`, `from`, `to`, `limit`, `order`
+  - Statistics tab populates the combo with concrete sensor names from `GET /sensors` (user-scoped). On plot load, readings are fetched via `GET /sensor-readings?sensorId=<id>&order=ASC` with optional time filters. Sensor persistence auto-creates DB devices and sensors.
 - `GET|POST /actuators`, `GET|PATCH|DELETE /actuators/:id`
 - `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
 - `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`

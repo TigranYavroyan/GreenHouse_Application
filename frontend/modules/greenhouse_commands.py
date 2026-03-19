@@ -281,6 +281,12 @@ class CommandPanelMixin:
                             },
                             {"timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()},
                         )
+                    if hasattr(self, "persist_sensor_reading_from_command"):
+                        self.persist_sensor_reading_from_command(
+                            command_name,
+                            response,
+                            command_context=command_info if isinstance(command_info, dict) else {},
+                        )
 
             except Exception as e:
                 self.logger.error(f"Error displaying command result in table: {e}", exc_info=True)

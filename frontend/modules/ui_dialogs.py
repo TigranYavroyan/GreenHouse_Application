@@ -41,6 +41,11 @@ class _BaseStyledDialog(QDialog):
                 padding: 6px 10px;
                 min-height: 20px;
             }
+            QComboBox::drop-down {
+                background-color: #131A2E;
+                border: none;
+                width: 24px;
+            }
             QLineEdit:focus, QComboBox:focus {
                 border: 1px solid #6ECBFF;
             }
@@ -52,9 +57,21 @@ class _BaseStyledDialog(QDialog):
                 selection-color: #E7E9EE;
                 outline: 0;
             }
+            QComboBox QAbstractItemView::item {
+                color: #E7E9EE;
+                background-color: #131A2E;
+                border-bottom: 1px solid #344266;
+                padding: 6px 8px;
+            }
             QComboBox QAbstractItemView::item:hover {
                 background-color: #344266;
                 color: #E7E9EE;
+                border: 1px solid #FFFFFF;
+            }
+            QComboBox QAbstractItemView::item:selected {
+                background-color: #344266;
+                color: #E7E9EE;
+                border: 1px solid #FFFFFF;
             }
             QPushButton {
                 background-color: rgba(255,255,255,0.08);

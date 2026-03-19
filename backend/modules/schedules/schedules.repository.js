@@ -106,6 +106,21 @@ class SchedulesRepository {
     });
     return schedule;
   }
+
+  async updateDispatchMetadataById(id, metadataPatch) {
+    const schedule = await Schedule.findByPk(id);
+    if (!schedule) return null;
+
+    const mergedMetadata = {
+      ...(schedule.metadata || {}),
+      ...(metadataPatch || {}),
+    };
+
+    await schedule.update({
+      metadata: mergedMetadata,
+    });
+    return schedule;
+  }
 }
 
 export default SchedulesRepository;

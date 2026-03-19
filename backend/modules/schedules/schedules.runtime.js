@@ -90,6 +90,7 @@ class SchedulesRuntime {
     const commandId = crypto.randomUUID();
     const fallbackSessionId = `schedule:${schedule.device?.userId || 'default'}:${schedule.id}`;
     const metadata = schedule.metadata || {};
+    const scheduleMode = this._resolveScheduleMode(metadata);
     const payload = schedule.payload || {};
     const parameters =
       payload && typeof payload === 'object' && payload.parameters && typeof payload.parameters === 'object'
@@ -115,28 +116,62 @@ class SchedulesRuntime {
         throw new Error('Queue publish was buffered by RabbitMQ channel');
       }
 
-      await this.schedulesRepository.finalizeOneTimeById(schedule.id, {
-        lastDispatchedAt: new Date().toISOString(),
-        lastDispatchStatus: 'completed',
-        lastDispatchError: '',
-        lastCommandId: commandId,
-        scheduleStatus: 'completed',
-        completedAt: new Date().toISOString(),
-      });
-
-      this._unregisterJob(scheduleId);
-      this.logger.info(`Dispatched schedule ${schedule.id} -> command ${commandId}`);
+      await this._markDispatchSuccess(schedule.id, commandId, scheduleMode);
+      if (scheduleMode === 'one_time') {
+        this._unregisterJob(scheduleId);
+      }
+      this.logger.info(`Dispatched schedule ${schedule.id} -> command ${commandId} (mode=${scheduleMode})`);
     } catch (error) {
-      await this.schedulesRepository.finalizeOneTimeById(schedule.id, {
-        lastDispatchedAt: new Date().toISOString(),
-        lastDispatchStatus: 'failed',
-        lastDispatchError: error.message,
-        scheduleStatus: 'not_done',
-        failedAt: new Date().toISOString(),
-      });
-      this._unregisterJob(scheduleId);
-      this.logger.error(`Failed to dispatch schedule ${schedule.id}: ${error.message}`);
+      await this._markDispatchFailure(schedule.id, scheduleMode, error);
+      if (scheduleMode === 'one_time') {
+        this._unregisterJob(scheduleId);
+      }
+      this.logger.error(`Failed to dispatch schedule ${schedule.id} (mode=${scheduleMode}): ${error.message}`);
     }
+  }
+
+  _resolveScheduleMode(metadata = {}) {
+    const normalized = String(metadata?.scheduleMode || metadata?.mode || '').trim().toLowerCase();
+    if (!normalized || normalized === 'one-time' || normalized === 'one_time' || normalized === 'onetime') {
+      return 'one_time';
+    }
+    if (normalized === 'recurring') {
+      return 'recurring';
+    }
+    return 'one_time';
+  }
+
+  async _markDispatchSuccess(scheduleId, commandId, scheduleMode) {
+    const nowIso = new Date().toISOString();
+    const metadataPatch = {
+      lastDispatchedAt: nowIso,
+      lastDispatchStatus: 'completed',
+      lastDispatchError: '',
+      lastCommandId: commandId,
+      scheduleStatus: scheduleMode === 'one_time' ? 'completed' : 'pending',
+      ...(scheduleMode === 'one_time' ? { completedAt: nowIso } : { lastCompletedAt: nowIso }),
+    };
+    if (scheduleMode === 'one_time') {
+      await this.schedulesRepository.finalizeOneTimeById(scheduleId, metadataPatch);
+      return;
+    }
+    await this.schedulesRepository.updateDispatchMetadataById(scheduleId, metadataPatch);
+  }
+
+  async _markDispatchFailure(scheduleId, scheduleMode, error) {
+    const nowIso = new Date().toISOString();
+    const metadataPatch = {
+      lastDispatchedAt: nowIso,
+      lastDispatchStatus: 'failed',
+      lastDispatchError: error.message,
+      scheduleStatus: scheduleMode === 'one_time' ? 'not_done' : 'pending',
+      ...(scheduleMode === 'one_time' ? { failedAt: nowIso } : { lastFailedAt: nowIso }),
+    };
+    if (scheduleMode === 'one_time') {
+      await this.schedulesRepository.finalizeOneTimeById(scheduleId, metadataPatch);
+      return;
+    }
+    await this.schedulesRepository.updateDispatchMetadataById(scheduleId, metadataPatch);
   }
 }
 

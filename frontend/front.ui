@@ -29,9 +29,11 @@ QWidget#centralwidget {
 QWidget#userTab,
 QWidget#schedulingTab,
 QWidget#serverTab,
+QWidget#statisticsTab,
 QWidget#user_output_container,
 QWidget#schedule_output_container,
 QWidget#server_info_container,
+QWidget#statistics_plot_container,
 QWidget#simpleDataTable {
     background-color: transparent;
 }
@@ -214,8 +216,14 @@ QComboBox {
     padding: 6px 10px 6px 8px;
 }
 
+QComboBox::drop-down {
+    background-color: #131A2E;
+    border: none;
+    width: 24px;
+}
+
 QComboBox:hover {
-    border: 1px solid #4B5C84;
+    border: 1px solid #FFFFFF;
 }
 
 QComboBox QAbstractItemView {
@@ -229,7 +237,7 @@ QComboBox QAbstractItemView {
 
 QComboBox QAbstractItemView::item {
     color: #E7E9EE;
-    background-color: transparent;
+    background-color: #131A2E;
     border-bottom: 1px solid #344266;
     padding: 6px 8px;
 }
@@ -255,9 +263,16 @@ QComboBox#scheduleDelayPresetCombo {
     padding: 6px 10px 6px 8px;
 }
 
+QComboBox#scheduleTargetCombo::drop-down,
+QComboBox#scheduleDelayPresetCombo::drop-down {
+    background-color: #131A2E;
+    border: none;
+    width: 24px;
+}
+
 QComboBox#scheduleTargetCombo:hover,
 QComboBox#scheduleDelayPresetCombo:hover {
-    border: 1px solid #4B5C84;
+    border: 1px solid #FFFFFF;
 }
 
 QComboBox#scheduleTargetCombo QAbstractItemView,
@@ -272,6 +287,7 @@ QComboBox#scheduleDelayPresetCombo QAbstractItemView {
 
 QComboBox#scheduleTargetCombo QAbstractItemView::item,
 QComboBox#scheduleDelayPresetCombo QAbstractItemView::item {
+    background-color: #131A2E;
     border-bottom: 1px solid #344266;
     padding: 6px 8px;
 }
@@ -280,14 +296,14 @@ QComboBox#scheduleTargetCombo QAbstractItemView::item:hover,
 QComboBox#scheduleDelayPresetCombo QAbstractItemView::item:hover {
     color: #E7E9EE;
     background-color: #344266;
-    border: 1px solid #344266;
+    border: 1px solid #FFFFFF;
 }
 
 QComboBox#scheduleTargetCombo QAbstractItemView::item:selected,
 QComboBox#scheduleDelayPresetCombo QAbstractItemView::item:selected {
     color: #E7E9EE;
     background-color: #344266;
-    border: 1px solid #344266;
+    border: 1px solid #FFFFFF;
 }
 
 QListView,
@@ -308,6 +324,21 @@ QListView::item:hover,
 QMenu::item:selected {
     color: #E7E9EE;
     background-color: #344266;
+}
+
+/* Keep combobox popup rows dark and highlighted with white border */
+QComboBox QAbstractItemView::item {
+    color: #E7E9EE;
+    background-color: #131A2E;
+    border-bottom: 1px solid #344266;
+    padding: 6px 8px;
+}
+
+QComboBox QAbstractItemView::item:hover,
+QComboBox QAbstractItemView::item:selected {
+    color: #E7E9EE;
+    background-color: #344266;
+    border: 1px solid #FFFFFF;
 }
 
 QTableWidget {
@@ -1029,6 +1060,211 @@ QScrollBar::handle:horizontal:hover {
              </widget>
             </widget>
            </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="statisticsTab">
+       <attribute name="title">
+        <string>📊 Statistics</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="statisticsTabLayout">
+        <property name="spacing">
+         <number>8</number>
+        </property>
+        <property name="leftMargin">
+         <number>8</number>
+        </property>
+        <property name="topMargin">
+         <number>8</number>
+        </property>
+        <property name="rightMargin">
+         <number>8</number>
+        </property>
+        <property name="bottomMargin">
+         <number>8</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="statisticsGroup">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Device Statistics</string>
+          </property>
+          <layout class="QGridLayout" name="statisticsGridLayout">
+           <property name="leftMargin">
+            <number>12</number>
+           </property>
+           <property name="topMargin">
+            <number>20</number>
+           </property>
+           <property name="rightMargin">
+            <number>12</number>
+           </property>
+           <property name="bottomMargin">
+            <number>12</number>
+           </property>
+           <property name="horizontalSpacing">
+            <number>8</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>8</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="statisticsDeviceLabel">
+             <property name="text">
+              <string>Device</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="statisticsDeviceCombo"/>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="statisticsSensorLabel">
+             <property name="text">
+              <string>Sensor</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QComboBox" name="statisticsSensorCombo"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="statisticsFromLabel">
+             <property name="text">
+              <string>From</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDateTimeEdit" name="statisticsFromDateTime">
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+             <property name="displayFormat">
+              <string>yyyy-MM-dd HH:mm:ss</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="statisticsToLabel">
+             <property name="text">
+              <string>To</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QDateTimeEdit" name="statisticsToDateTime">
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+             <property name="displayFormat">
+              <string>yyyy-MM-dd HH:mm:ss</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="4">
+            <layout class="QHBoxLayout" name="statisticsActionsLayout">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QCheckBox" name="statisticsAllDataCheck">
+               <property name="text">
+                <string>All Data</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="statisticsLoadButton">
+               <property name="text">
+                <string>Load Statistics</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="statisticsRefreshIntervalLabel">
+               <property name="text">
+                <string>Refresh</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="statisticsRefreshIntervalCombo"/>
+             </item>
+             <item>
+              <widget class="QLabel" name="statisticsHintLabel">
+               <property name="text">
+                <string>Mouse controls: wheel zoom, drag to pan.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="statisticsActionsSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="statistics_plot_container">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>240</height>
+           </size>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QVBoxLayout" name="statistics_plot_layout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
           </layout>
          </widget>
         </item>
