@@ -1,5 +1,6 @@
 import uuid
 import logging
+import datetime
 
 from PyQt5.QtCore import QDateTime, QTimer
 from PyQt5.QtWidgets import QDialog, QVBoxLayout
@@ -266,6 +267,20 @@ class CommandPanelMixin:
 
                     self.control_table.add_row([timestamp, command_name, status, display_result])
                     self.logger.info(f"Added row to control table: {command_name} - {status}")
+                    if hasattr(self, "persist_user_log"):
+                        self.persist_user_log(
+                            "control",
+                            command_name,
+                            {
+                                "command": command_name,
+                                "status": status,
+                                "result": display_result,
+                                "response": response if isinstance(response, dict) else {},
+                                "cached": cached,
+                                "error": error,
+                            },
+                            {"timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()},
+                        )
 
             except Exception as e:
                 self.logger.error(f"Error displaying command result in table: {e}", exc_info=True)

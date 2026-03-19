@@ -21,6 +21,7 @@ import createActuatorsRouter from './routers/actuators.js';
 import createSchedulesRouter from './routers/schedules.js';
 import createSensorAlertRulesRouter from './routers/sensor-alert-rules.js';
 import createSensorAlertsRouter from './routers/sensor-alerts.js';
+import createUserLogsRouter from './routers/user-logs.js';
 import createCoreRouter from './routers/core.js';
 import { metricsRouter } from './clients/promClient.js';
 import './entity/index.js';
@@ -34,6 +35,7 @@ import ActuatorsRepository from './modules/actuators/actuators.repository.js';
 import SchedulesRepository from './modules/schedules/schedules.repository.js';
 import SensorAlertRulesRepository from './modules/sensor-alert-rules/sensor-alert-rules.repository.js';
 import SensorAlertsRepository from './modules/sensor-alerts/sensor-alerts.repository.js';
+import UserLogsRepository from './modules/user-logs/user-logs.repository.js';
 import UsersService from './modules/users/users.service.js';
 import DevicesService from './modules/devices/devices.service.js';
 import SensorsService from './modules/sensors/sensors.service.js';
@@ -43,6 +45,7 @@ import SchedulesService from './modules/schedules/schedules.service.js';
 import SchedulesRuntime from './modules/schedules/schedules.runtime.js';
 import SensorAlertRulesService from './modules/sensor-alert-rules/sensor-alert-rules.service.js';
 import SensorAlertsService from './modules/sensor-alerts/sensor-alerts.service.js';
+import UserLogsService from './modules/user-logs/user-logs.service.js';
 import NotificationMailer from './modules/notification/notification.mailer.js';
 import NotificationConsumer from './modules/notification/notification.consumer.js';
 import {
@@ -82,6 +85,7 @@ class App {
     this.schedulesRepository = new SchedulesRepository();
     this.sensorAlertRulesRepository = new SensorAlertRulesRepository();
     this.sensorAlertsRepository = new SensorAlertsRepository();
+    this.userLogsRepository = new UserLogsRepository();
 
     this.schedulesRuntime = new SchedulesRuntime({
       schedulesRepository: this.schedulesRepository,
@@ -122,6 +126,9 @@ class App {
     this.sensorAlertsService = new SensorAlertsService({
       sensorAlertsRepository: this.sensorAlertsRepository,
       sensorAlertRulesRepository: this.sensorAlertRulesRepository,
+    });
+    this.userLogsService = new UserLogsService({
+      userLogsRepository: this.userLogsRepository,
     });
     this.notificationMailer = new NotificationMailer({
       smtpConfig: this.config.smtp,
@@ -164,6 +171,7 @@ class App {
           'GET  /schedules',
           'GET  /sensor-alert-rules',
           'GET  /sensor-alerts',
+          'GET  /user-logs',
           'GET  /metadata/health/',
           'GET  /status',
         ],
@@ -201,6 +209,10 @@ class App {
     }));
     this.app.use('/sensor-alerts', authMiddleware, createSensorAlertsRouter({
       sensorAlertsService: this.sensorAlertsService,
+      userContextMiddleware: this.userContextMiddleware,
+    }));
+    this.app.use('/user-logs', authMiddleware, createUserLogsRouter({
+      userLogsService: this.userLogsService,
       userContextMiddleware: this.userContextMiddleware,
     }));
     this.app.use('/', createCoreRouter({

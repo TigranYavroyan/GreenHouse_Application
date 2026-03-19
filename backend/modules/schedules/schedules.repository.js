@@ -90,6 +90,22 @@ class SchedulesRepository {
     await schedule.update({ metadata: mergedMetadata });
     return schedule;
   }
+
+  async finalizeOneTimeById(id, metadataPatch) {
+    const schedule = await Schedule.findByPk(id);
+    if (!schedule) return null;
+
+    const mergedMetadata = {
+      ...(schedule.metadata || {}),
+      ...(metadataPatch || {}),
+    };
+
+    await schedule.update({
+      enabled: false,
+      metadata: mergedMetadata,
+    });
+    return schedule;
+  }
 }
 
 export default SchedulesRepository;

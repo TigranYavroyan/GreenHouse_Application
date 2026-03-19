@@ -2,7 +2,7 @@ import sys
 import uuid
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -55,6 +55,10 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self.schedule_rows = []  # Raw backend schedule rows
         self.schedule_device_id = None
         self.schedule_target_keys = []
+        self._schedule_refresh_tick_count = 0
+        self.hidden_schedule_ids = set()
+        self.include_historical_user_data = True
+        self.schedule_visibility_cutoff_utc = None
         
         # Import config after it's initialized
         from modules.config import config
@@ -92,6 +96,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         
         # Apply custom styles (UI file already has styles, but we can override if needed)
         self.apply_styles()
+        self._prompt_restore_user_data_preference()
         
     def setupUI(self):
         """Load UI from .ui file in frontend directory"""
@@ -239,6 +244,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 try:
                     self._build_auth_api_client().get_current_user()
                     self.update_auth_user_label()
+                    self._prompt_restore_user_data_preference()
                     return True
                 except Exception as error:
                     self.auth_session.clear_token()
@@ -272,7 +278,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         if state.get("auto_refresh") and hasattr(self, "auto_refresh_timer"):
             self.auto_refresh_timer.start(10000)
         if state.get("schedule_clock") and getattr(self, "schedule_clock_timer", None):
-            self.schedule_clock_timer.start(5000)
+            self.schedule_clock_timer.start(1000)
 
     def _reset_user_scoped_tables(self):
         """Clear user-scoped table data before switching authentication context."""
@@ -289,6 +295,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self.schedule_rows = []
         self.schedule_device_id = None
         self.schedule_target_keys = []
+        self.hidden_schedule_ids = set()
 
     def handle_unauthorized_error(self, message="Unauthorized"):
         if self._auth_recovery_in_progress:
@@ -442,6 +449,8 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             columns=["Timestamp", "Command", "Status", "Result"],
             parent=self.userTab,
             show_clear_button=True,
+            on_clear_requested=self.clear_control_table,
+            on_remove_selected_requested=self._remove_selected_control_row,
         )
         control_insert_index = self.userTabLayout.count()
         if hasattr(self, "user_output_container") and self.user_output_container:
@@ -468,9 +477,11 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         # Setup scheduling table
         if hasattr(self, "schedulingTabLayout") and self.schedulingTabLayout:
             self.schedule_table = SimpleDataTable(
-                columns=["Schedule ID", "Target", "Cron", "Enabled", "Last Dispatch", "Dispatch Status"],
+                columns=["Task", "Time Remaining", "Starts At", "Ends At", "Status"],
                 parent=self.schedulingTab,
                 show_clear_button=True,
+                on_clear_requested=self.hide_all_schedule_rows_from_view,
+                on_remove_selected_requested=self.remove_selected_schedule_row_from_view,
             )
             schedule_insert_index = self.schedulingTabLayout.count()
             if hasattr(self, "schedule_output_container") and self.schedule_output_container:
@@ -482,9 +493,9 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                     self.schedule_output_container.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
             self.schedulingTabLayout.insertWidget(schedule_insert_index, self.schedule_table, 1)
-            self.schedule_table.table.setToolTip("Backend-persisted schedules are displayed here with live dispatch status.")
+            self.schedule_table.table.setToolTip("One-time tasks with live countdown and status.")
 
-            schedule_hint = QLabel("Tip: schedules are persisted in backend and run by cron.")
+            schedule_hint = QLabel("Tip: one-time tasks update countdown every second. Hide rows if needed.")
             schedule_hint.setObjectName("scheduleTableHintLabel")
             self.schedulingTabLayout.insertWidget(schedule_insert_index + 1, schedule_hint, 0)
         else:
@@ -499,6 +510,8 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             columns=["Timestamp", "Type", "Data"],
             parent=self.infoGroup,
             show_clear_button=True,
+            on_clear_requested=self.clear_server_tables,
+            on_remove_selected_requested=self._remove_selected_server_row,
         )
 
         server_insert_index = self.infoGroupLayout.count()
@@ -564,16 +577,16 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self._refresh_schedule_targets()
 
         self.scheduleDelayPresetCombo.clear()
-        self.scheduleDelayPresetCombo.addItem("Every minute", 60)
-        self.scheduleDelayPresetCombo.addItem("Every 15 minutes", 15 * 60)
-        self.scheduleDelayPresetCombo.addItem("Every 30 minutes", 30 * 60)
-        self.scheduleDelayPresetCombo.addItem("Every 1 hour", 60 * 60)
-        self.scheduleDelayPresetCombo.addItem("Custom recurring interval (hh:mm:ss)", -1)
+        self.scheduleDelayPresetCombo.addItem("After 1 minute", 60)
+        self.scheduleDelayPresetCombo.addItem("After 15 minutes", 15 * 60)
+        self.scheduleDelayPresetCombo.addItem("After 30 minutes", 30 * 60)
+        self.scheduleDelayPresetCombo.addItem("After 1 hour", 60 * 60)
+        self.scheduleDelayPresetCombo.addItem("Custom delay (hh:mm:ss)", -1)
         self.scheduleDelayPresetCombo.setCurrentIndex(0)
 
         self.schedule_clock_timer = QTimer(self)
         self.schedule_clock_timer.timeout.connect(self.update_schedule_live_time)
-        self.schedule_clock_timer.start(5000)
+        self.schedule_clock_timer.start(1000)
 
         self.update_custom_delay_enabled()
         self.update_schedule_live_time()
@@ -664,8 +677,140 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         now_text = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if hasattr(self, "scheduleCurrentTimeLabel"):
             self.scheduleCurrentTimeLabel.setText(f"Current Time: {now_text}")
-        self.refresh_schedule_table()
-        self._refresh_schedule_targets()
+        self._schedule_refresh_tick_count += 1
+        if self._schedule_refresh_tick_count >= 5:
+            self._schedule_refresh_tick_count = 0
+            self.refresh_schedule_table()
+            self._refresh_schedule_targets()
+            return
+        self._render_schedule_rows()
+
+    def _prompt_restore_user_data_preference(self):
+        """
+        Ask whether user wants to load previously stored user-specific data.
+        """
+        load_previous = StyledMessageDialog.ask_yes_no(
+            self,
+            "Load Previous Data",
+            "Load your previously saved logs and schedules from database?",
+            yes_text="Load",
+            no_text="Start Fresh",
+        )
+        self.include_historical_user_data = bool(load_previous)
+        self.hidden_schedule_ids = set()
+
+        if load_previous:
+            self.schedule_visibility_cutoff_utc = None
+            self.load_user_logs_from_database()
+            self.refresh_schedule_table()
+            return
+
+        self.schedule_visibility_cutoff_utc = datetime.now(timezone.utc)
+        self._reset_user_scoped_tables()
+
+    def persist_user_log(self, category, title, payload, metadata=None):
+        """Persist user-visible event to backend database (best effort)."""
+        if not hasattr(self, "core_api"):
+            return
+        try:
+            self.core_api.create_user_log(
+                category=str(category or "control"),
+                title=str(title or "Event"),
+                payload=payload if isinstance(payload, dict) else {"value": str(payload)},
+                metadata=metadata if isinstance(metadata, dict) else {},
+            )
+        except Exception as error:
+            self.logger.warning(f"Failed to persist user log: {error}")
+
+    def load_user_logs_from_database(self):
+        """Load persisted logs from database into control table only."""
+        if not hasattr(self, "core_api"):
+            return
+        if not self.control_table:
+            return
+
+        try:
+            entries = self.core_api.list_user_logs()
+        except Exception as error:
+            self.logger.warning(f"Failed to load user logs: {error}")
+            return
+
+        self.control_table.clear_data()
+        self.control_history = []
+
+        for entry in reversed(entries):
+            if not isinstance(entry, dict):
+                continue
+            category = str(entry.get("category", "")).strip().lower()
+            if category != "control":
+                continue
+            title = str(entry.get("title", "")).strip()
+            payload = entry.get("payload", {}) or {}
+            metadata = entry.get("metadata", {}) or {}
+            timestamp = str(metadata.get("timestamp") or entry.get("createdAt") or "")
+            if timestamp.endswith("Z"):
+                timestamp = timestamp[:-1] + "+00:00"
+            try:
+                ts_dt = datetime.fromisoformat(timestamp) if timestamp else None
+            except ValueError:
+                ts_dt = None
+            display_time = ts_dt.astimezone().strftime("%H:%M:%S") if ts_dt else "-"
+
+            command = str(payload.get("command", title or "command"))
+            status = str(payload.get("status", "OK"))
+            result = str(payload.get("result", ""))
+            response = payload.get("response", {})
+            cached = bool(payload.get("cached", False))
+            self.control_history.append(
+                {
+                    "timestamp": display_time,
+                    "command": command,
+                    "response": response if isinstance(response, dict) else {"result": result},
+                    "cached": cached,
+                    "error": payload.get("error"),
+                }
+            )
+            self.control_table.add_row([display_time, command, status, result])
+
+    def hide_all_schedule_rows_from_view(self):
+        """Hide all currently visible rows from schedule table view."""
+        self.hidden_schedule_ids.update(self.schedule_table_rows)
+        if self.schedule_table:
+            self.schedule_table.clear_data()
+        self.schedule_table_rows = []
+
+    def remove_selected_schedule_row_from_view(self, row=None):
+        """Hide selected row from schedule table view."""
+        schedule_id = None
+        if isinstance(row, int) and 0 <= row < len(self.schedule_table_rows):
+            schedule_id = self.schedule_table_rows[row]
+        else:
+            schedule_id = self._get_selected_schedule_id()
+        if not schedule_id:
+            StyledMessageDialog.show_warning(self, "No Selection", "Select a schedule row to remove.")
+            return
+        self.hidden_schedule_ids.add(schedule_id)
+        self._render_schedule_rows()
+
+    def _remove_selected_control_row(self, row):
+        """Remove selected control-table row and keep history mapping aligned."""
+        if not self.control_table:
+            return
+        if not isinstance(row, int) or row < 0 or row >= self.control_table.table.rowCount():
+            return
+        self.control_table.table.removeRow(row)
+        if 0 <= row < len(self.control_history):
+            self.control_history.pop(row)
+
+    def _remove_selected_server_row(self, row):
+        """Remove selected server-table row and keep history mapping aligned."""
+        if not self.server_table:
+            return
+        if not isinstance(row, int) or row < 0 or row >= self.server_table.table.rowCount():
+            return
+        self.server_table.table.removeRow(row)
+        if 0 <= row < len(self.server_history):
+            self.server_history.pop(row)
 
     def update_custom_delay_enabled(self):
         """Enable custom delay controls only for custom preset."""
@@ -678,7 +823,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 getattr(self, spin_name).setEnabled(is_custom)
 
     def get_selected_interval_seconds(self):
-        """Resolve recurring interval from preset/custom controls."""
+        """Resolve one-time delay interval from preset/custom controls."""
         if not hasattr(self, "scheduleDelayPresetCombo"):
             return 60
 
@@ -691,29 +836,14 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         seconds = self.scheduleSecondsSpin.value() if hasattr(self, "scheduleSecondsSpin") else 0
         return int(hours * 3600 + minutes * 60 + seconds)
 
-    def _build_cron_expression(self, interval_seconds):
-        """
-        Build a recurring cron expression for supported fixed intervals.
-
-        Supported:
-        - Every N seconds (1..59)
-        - Every N minutes (1..59, second 0)
-        - Every N hours (1..23, minute 0, second 0)
-        """
-        if interval_seconds <= 0:
-            raise ValueError("Interval must be greater than zero.")
-        if interval_seconds < 60:
-            return f"*/{interval_seconds} * * * * *"
-        if interval_seconds % 3600 == 0:
-            hours = interval_seconds // 3600
-            if 1 <= hours <= 23:
-                return f"0 0 */{hours} * * *"
-        if interval_seconds % 60 == 0:
-            minutes = interval_seconds // 60
-            if 1 <= minutes <= 59:
-                return f"0 */{minutes} * * * *"
-        raise ValueError(
-            "Unsupported custom interval. Use seconds (1-59), whole minutes (1-59), or whole hours (1-23)."
+    def _build_one_time_cron_expression(self, run_at_local):
+        """Build cron expression for a single planned timestamp."""
+        return (
+            f"{run_at_local.second} "
+            f"{run_at_local.minute} "
+            f"{run_at_local.hour} "
+            f"{run_at_local.day} "
+            f"{run_at_local.month} *"
         )
 
     def _get_or_resolve_schedule_device_id(self, preferred_name="Scheduled Device"):
@@ -761,7 +891,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         return self.schedule_device_id
 
     def schedule_selected_task(self):
-        """Create recurring backend-persisted schedule for the selected action."""
+        """Create one-time backend-persisted schedule for the selected action."""
         if not hasattr(self, "core_api"):
             self.show_error("Scheduling Error", "Core API client is not available.")
             return
@@ -785,14 +915,19 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 self.show_error("Scheduling Error", "No device is available. Create a device first.")
                 return
 
-            cron_expression = self._build_cron_expression(interval_seconds)
+            run_at_local = datetime.now().astimezone() + timedelta(seconds=interval_seconds)
+            cron_expression = self._build_one_time_cron_expression(run_at_local)
             now_text = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            schedule_name = f"{target_label} @ {now_text}"[:120]
+            schedule_name = f"{target_label} at {run_at_local.strftime('%Y-%m-%d %H:%M:%S')}"[:120]
             payload = dict(parameters) if isinstance(parameters, dict) else {}
             metadata = {
                 "sessionId": self.session_id,
                 "createdFrom": "frontend-scheduling-tab",
                 "intervalSeconds": interval_seconds,
+                "runAt": run_at_local.isoformat(),
+                "createdAt": datetime.now(timezone.utc).isoformat(),
+                "scheduleStatus": "pending",
+                "oneTime": True,
             }
             created = self.core_api.create_schedule(
                 device_id=device_id,
@@ -811,7 +946,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                     if isinstance(nested, dict):
                         schedule_id = str(nested.get("id", "")).strip()[:8]
             schedule_label = schedule_id or "created"
-            self.status_label.setText(f"🗓️ Created backend schedule {schedule_label} for {target_label}")
+            self.status_label.setText(f"🗓️ One-time task {schedule_label} scheduled for {target_label}")
             self.refresh_schedule_table()
         except Exception as error:
             self._handle_api_exception("Scheduling Error", error)
@@ -826,8 +961,14 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             return None
         return self.schedule_table_rows[selected_row]
 
+    def _get_schedule_by_id(self, schedule_id):
+        for schedule in self.schedule_rows:
+            if isinstance(schedule, dict) and str(schedule.get("id", "")) == str(schedule_id):
+                return schedule
+        return None
+
     def cancel_selected_schedule(self):
-        """Delete currently selected backend schedule."""
+        """Mark selected schedule as canceled."""
         if not hasattr(self, "core_api"):
             self.show_error("Scheduling Error", "Core API client is not available.")
             return
@@ -838,14 +979,24 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             return
 
         try:
-            self.core_api.delete_schedule(schedule_id)
+            schedule = self._get_schedule_by_id(schedule_id) or {}
+            metadata = dict(schedule.get("metadata") or {})
+            metadata["scheduleStatus"] = "canceled"
+            metadata["canceledAt"] = datetime.now(timezone.utc).isoformat()
+            self.core_api.update_schedule(
+                schedule_id,
+                {
+                    "enabled": False,
+                    "metadata": metadata,
+                },
+            )
             self.refresh_schedule_table()
-            self.status_label.setText(f"🗑️ Deleted schedule {str(schedule_id)[:8]}")
+            self.status_label.setText(f"🚫 Canceled task {str(schedule_id)[:8]}")
         except Exception as error:
             self._handle_api_exception("Scheduling Error", error)
 
     def clear_all_schedules(self):
-        """Delete all backend schedules visible to current user context."""
+        """Cancel all pending schedules visible to current user context."""
         if not hasattr(self, "core_api"):
             self.show_error("Scheduling Error", "Core API client is not available.")
             return
@@ -853,7 +1004,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         confirmation = StyledMessageDialog.ask_yes_no(
             self,
             "Delete All Schedules",
-            "Delete all schedules for the current user?",
+            "Cancel all pending schedules for the current user?",
             yes_text="Yes",
             no_text="No",
         )
@@ -862,21 +1013,41 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
 
         try:
             schedules = self.core_api.list_schedules()
-            schedule_ids = [
-                str(schedule.get("id", ""))
-                for schedule in schedules
-                if isinstance(schedule, dict) and schedule.get("id")
-            ]
+            schedule_ids = []
+            schedule_map = {}
+            for schedule in schedules:
+                if not isinstance(schedule, dict):
+                    continue
+                sid = str(schedule.get("id", "")).strip()
+                if not sid:
+                    continue
+                metadata = dict(schedule.get("metadata") or {})
+                status = str(metadata.get("scheduleStatus", "pending")).strip().lower()
+                enabled = bool(schedule.get("enabled", False))
+                if enabled or status == "pending":
+                    schedule_ids.append(sid)
+                    schedule_map[sid] = schedule
+
             if not schedule_ids:
-                self.status_label.setText("ℹ️ No schedules to delete")
+                self.status_label.setText("ℹ️ No pending schedules to cancel")
                 return
 
-            deleted = 0
+            canceled = 0
             errors = []
             for schedule_id in schedule_ids:
                 try:
-                    self.core_api.delete_schedule(schedule_id)
-                    deleted += 1
+                    schedule = schedule_map.get(schedule_id) or {}
+                    metadata = dict(schedule.get("metadata") or {})
+                    metadata["scheduleStatus"] = "canceled"
+                    metadata["canceledAt"] = datetime.now(timezone.utc).isoformat()
+                    self.core_api.update_schedule(
+                        schedule_id,
+                        {
+                            "enabled": False,
+                            "metadata": metadata,
+                        },
+                    )
+                    canceled += 1
                 except Exception as error:
                     errors.append(f"{schedule_id[:8]}: {error}")
 
@@ -885,10 +1056,10 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 summary = "\n".join(errors[:5])
                 self.show_error(
                     "Scheduling Error",
-                    f"Deleted {deleted} schedule(s), but some failed:\n{summary}",
+                    f"Canceled {canceled} schedule(s), but some failed:\n{summary}",
                 )
             else:
-                self.status_label.setText(f"🧹 Deleted {deleted} schedule(s)")
+                self.status_label.setText(f"🧹 Canceled {canceled} pending schedule(s)")
         except Exception as error:
             self._handle_api_exception("Scheduling Error", error)
 
@@ -912,36 +1083,49 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             return
 
         self.schedule_rows = schedules
+        self._render_schedule_rows(preferred_selected_id=selected_schedule_id)
+
+    def _render_schedule_rows(self, preferred_selected_id=None):
+        """Render cached schedules into the user-friendly one-time schedule table."""
+        if not self.schedule_table:
+            return
+
+        selected_schedule_id = preferred_selected_id
+        if selected_schedule_id is None:
+            selected_row = self.schedule_table.table.currentRow()
+            if 0 <= selected_row < len(self.schedule_table_rows):
+                selected_schedule_id = self.schedule_table_rows[selected_row]
+
         self.schedule_table_rows = []
         self.schedule_table.clear_data()
 
-        for schedule in schedules:
+        for schedule in self.schedule_rows:
             if not isinstance(schedule, dict):
                 continue
+
             schedule_id = str(schedule.get("id", ""))
             action = str(schedule.get("action", ""))
             cron_expression = str(schedule.get("cronExpression", ""))
             enabled = bool(schedule.get("enabled", False))
             metadata = schedule.get("metadata", {}) or {}
-            last_dispatched = metadata.get("lastDispatchedAt", "-")
-            dispatch_status = metadata.get("lastDispatchStatus", "pending")
-            dispatch_error = metadata.get("lastDispatchError", "")
-            if dispatch_error:
-                dispatch_status = f"{dispatch_status}: {dispatch_error}"
-
             payload = schedule.get("payload", {}) or {}
             parameters = payload if isinstance(payload, dict) else {}
-            target_label = self._format_schedule_target_label(action, parameters)
+
+            task_label = self._format_schedule_target_label(action, parameters)
+            started_at = self._format_schedule_start_time(schedule, metadata)
+            ended_at = self._format_schedule_end_time(metadata)
+            status = self._format_schedule_status(enabled, metadata)
+            time_remaining = self._format_schedule_time_remaining(schedule, cron_expression, enabled, metadata, status)
+
+            if status == "completed":
+                continue
+            if schedule_id in self.hidden_schedule_ids:
+                continue
+            if not self._is_schedule_visible_for_current_login(schedule, metadata):
+                continue
 
             self.schedule_table_rows.append(schedule_id)
-            self.schedule_table.add_row([
-                schedule_id[:8],
-                target_label,
-                cron_expression,
-                "yes" if enabled else "no",
-                str(last_dispatched),
-                str(dispatch_status),
-            ])
+            self.schedule_table.add_row([task_label, time_remaining, started_at, ended_at, status])
 
         if selected_schedule_id:
             try:
@@ -949,6 +1133,138 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 self.schedule_table.table.selectRow(selected_index)
             except ValueError:
                 pass
+
+    def _parse_datetime(self, value):
+        text = str(value or "").strip()
+        if not text:
+            return None
+        if text.endswith("Z"):
+            text = text[:-1] + "+00:00"
+        try:
+            dt = datetime.fromisoformat(text)
+        except ValueError:
+            return None
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+
+    def _format_local_datetime(self, dt):
+        if not dt:
+            return "-"
+        return dt.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+
+    def _format_duration(self, seconds):
+        total = max(0, int(seconds))
+        hours, rem = divmod(total, 3600)
+        minutes, secs = divmod(rem, 60)
+        if hours > 0:
+            return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+        return f"{minutes:02d}:{secs:02d}"
+
+    def _resolve_interval_seconds(self, schedule, cron_expression, metadata):
+        interval_value = metadata.get("intervalSeconds")
+        try:
+            interval = int(interval_value)
+            if interval > 0:
+                return interval
+        except (TypeError, ValueError):
+            pass
+
+        expression = str(cron_expression or "").strip()
+        if expression.startswith("*/") and expression.endswith(" * * * * *"):
+            chunk = expression.split(" ")[0]
+            try:
+                seconds = int(chunk.replace("*/", ""))
+                return seconds if seconds > 0 else None
+            except ValueError:
+                return None
+        if expression.startswith("0 */") and expression.endswith(" * * * *"):
+            chunk = expression.split(" ")[1]
+            try:
+                minutes = int(chunk.replace("*/", ""))
+                return minutes * 60 if minutes > 0 else None
+            except ValueError:
+                return None
+        if expression.startswith("0 0 */") and expression.endswith(" * * *"):
+            chunk = expression.split(" ")[2]
+            try:
+                hours = int(chunk.replace("*/", ""))
+                return hours * 3600 if hours > 0 else None
+            except ValueError:
+                return None
+        return None
+
+    def _resolve_run_at(self, schedule, cron_expression, metadata):
+        run_at = self._parse_datetime(metadata.get("runAt"))
+        if run_at:
+            return run_at
+
+        created_at = (
+            self._parse_datetime(metadata.get("createdAt"))
+            or self._parse_datetime(schedule.get("createdAt"))
+            or self._parse_datetime(schedule.get("created_at"))
+        )
+        interval_seconds = self._resolve_interval_seconds(schedule, cron_expression, metadata)
+        if created_at and interval_seconds:
+            return created_at + timedelta(seconds=interval_seconds)
+        return None
+
+    def _format_schedule_start_time(self, schedule, metadata):
+        start_dt = self._resolve_run_at(schedule, str(schedule.get("cronExpression", "")), metadata)
+        return self._format_local_datetime(start_dt)
+
+    def _format_schedule_end_time(self, metadata):
+        ended_raw = (
+            metadata.get("completedAt")
+            or metadata.get("failedAt")
+            or metadata.get("canceledAt")
+            or metadata.get("lastDispatchedAt")
+        )
+        return self._format_local_datetime(self._parse_datetime(ended_raw))
+
+    def _format_schedule_status(self, enabled, metadata):
+        status = str(metadata.get("scheduleStatus", "")).strip().lower()
+        if status in {"pending", "completed", "canceled", "not_done"}:
+            return status.replace("_", " ")
+        if enabled:
+            return "pending"
+        dispatch_status = str(metadata.get("lastDispatchStatus", "")).strip().lower()
+        if dispatch_status == "completed":
+            return "completed"
+        if dispatch_status == "failed":
+            return "not done"
+        return "canceled"
+
+    def _format_schedule_time_remaining(self, schedule, cron_expression, enabled, metadata, status):
+        if status in {"completed", "canceled", "not done"}:
+            return "-"
+        if not enabled:
+            return "-"
+
+        run_at = self._resolve_run_at(schedule, cron_expression, metadata)
+        if not run_at:
+            return "-"
+
+        now = datetime.now(timezone.utc)
+        seconds_left = int((run_at - now).total_seconds())
+        if seconds_left <= 0:
+            return "Running..."
+        return self._format_duration(seconds_left)
+
+    def _is_schedule_visible_for_current_login(self, schedule, metadata):
+        if self.include_historical_user_data:
+            return True
+        if not self.schedule_visibility_cutoff_utc:
+            return True
+
+        created_at = (
+            self._parse_datetime(metadata.get("createdAt"))
+            or self._parse_datetime(schedule.get("createdAt"))
+            or self._parse_datetime(schedule.get("created_at"))
+        )
+        if not created_at:
+            return False
+        return created_at >= self.schedule_visibility_cutoff_utc
 
     def _format_schedule_target_label(self, action, parameters):
         if action == "read_sensor":

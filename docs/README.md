@@ -79,7 +79,8 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 
 #### 2.1 **Scheduling (Persistent Backend Runtime)**
 - The frontend Scheduling tab writes schedules to backend REST API (`/schedules`)
-- Backend runtime executes enabled cron schedules and dispatches commands to `greenhouse_commands`
+- Scheduling is one-time: each saved task is dispatched once at its planned time, then automatically disabled
+- Backend runtime executes enabled schedule records and dispatches commands to `greenhouse_commands`
 - Scheduler completion is defined as successful queue publish (dispatch), not final core response completion
 - Schedule persistence is database-backed and survives frontend/backend restarts (enabled schedules are reloaded)
 
@@ -781,6 +782,7 @@ See `frontend/README_ENV.md` for detailed configuration guide.
 - `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
 - `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`
 - `GET|POST /sensor-alerts`, `GET|PATCH|DELETE /sensor-alerts/:id`
+- `GET|POST /user-logs`, `GET|PATCH|DELETE /user-logs/:id`
 - Protected CRUD endpoints require `Authorization: Bearer <jwt>`.
 - Ownership is enforced by JWT identity only.
 

@@ -72,7 +72,6 @@ class ServerPanelMixin:
 
             # Append a compact summary row; detailed view is available on double-click
             self.server_table.add_row([timestamp, title, status])
-
             self.logger.info(f"Added server summary row for '{title}' ({data_type})")
 
         except Exception as e:

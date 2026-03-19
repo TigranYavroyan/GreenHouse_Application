@@ -115,20 +115,26 @@ class SchedulesRuntime {
         throw new Error('Queue publish was buffered by RabbitMQ channel');
       }
 
-      await this.schedulesRepository.updateMetadataById(schedule.id, {
+      await this.schedulesRepository.finalizeOneTimeById(schedule.id, {
         lastDispatchedAt: new Date().toISOString(),
         lastDispatchStatus: 'completed',
         lastDispatchError: '',
         lastCommandId: commandId,
+        scheduleStatus: 'completed',
+        completedAt: new Date().toISOString(),
       });
 
+      this._unregisterJob(scheduleId);
       this.logger.info(`Dispatched schedule ${schedule.id} -> command ${commandId}`);
     } catch (error) {
-      await this.schedulesRepository.updateMetadataById(schedule.id, {
+      await this.schedulesRepository.finalizeOneTimeById(schedule.id, {
         lastDispatchedAt: new Date().toISOString(),
         lastDispatchStatus: 'failed',
         lastDispatchError: error.message,
+        scheduleStatus: 'not_done',
+        failedAt: new Date().toISOString(),
       });
+      this._unregisterJob(scheduleId);
       this.logger.error(`Failed to dispatch schedule ${schedule.id}: ${error.message}`);
     }
   }

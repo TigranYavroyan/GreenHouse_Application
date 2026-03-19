@@ -749,11 +749,18 @@ This keeps:
 
 ### Scheduling dispatch and waiting boundaries
 
-- Scheduling is persisted with backend `/schedules` records and executed by backend cron runtime.
-- At schedule trigger time, runtime dispatches command envelope to `greenhouse_commands`.
+- Scheduling is persisted with backend `/schedules` records and executed as one-time tasks.
+- At schedule trigger time, runtime dispatches command envelope to `greenhouse_commands`, then disables the schedule.
 - Schedule execution status is dispatch-based:
   - `completed` => command was successfully published to RabbitMQ queue.
-  - `failed` => publish failed and `metadata.lastDispatchError` is populated.
+  - `not_done` => publish failed and `metadata.lastDispatchError` is populated.
+  - `canceled` => schedule was canceled by user before dispatch.
 - Core waiting logic (`timeout`, `retry`, `backoff`) occurs later inside command execution path (`GreenhouseCoreClient.executeCommand`) after queue consumption.
 - Therefore schedule completion is intentionally decoupled from final core response completion.
+
+### User log restore flow
+
+- On login/re-login the desktop asks whether to load previously saved user data.
+- If user confirms, control/server table rows are restored from backend `/user-logs` (database-backed, user-scoped).
+- If user chooses fresh start, old rows are not loaded for the current session view.
 

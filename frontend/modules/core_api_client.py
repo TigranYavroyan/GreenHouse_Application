@@ -248,3 +248,27 @@ class CoreApiClient:
         safe_schedule_id = quote(str(schedule_id or "").strip(), safe="")
         response = self._request(f"/schedules/{safe_schedule_id}", method="DELETE")
         return response if isinstance(response, dict) else {"result": response}
+
+    def list_user_logs(self) -> List[Dict[str, Any]]:
+        payload = self._request("/user-logs")
+        if isinstance(payload, dict):
+            data = payload.get("data", [])
+            return data if isinstance(data, list) else []
+        return []
+
+    def create_user_log(
+        self,
+        *,
+        category: str,
+        title: str,
+        payload: Dict[str, Any],
+        metadata: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        body = {
+            "category": str(category or "control"),
+            "title": str(title or "").strip() or "Event",
+            "payload": payload or {},
+            "metadata": metadata or {},
+        }
+        response = self._request("/user-logs", method="POST", data=body)
+        return response if isinstance(response, dict) else {"result": response}

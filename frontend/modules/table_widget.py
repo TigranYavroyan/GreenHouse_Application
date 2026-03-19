@@ -44,10 +44,19 @@ class SimpleDataTable(QWidget):
     ROW_HEIGHT = 35
     MIN_TABLE_HEIGHT = 0
 
-    def __init__(self, columns=None, parent=None, show_clear_button=False):
+    def __init__(
+        self,
+        columns=None,
+        parent=None,
+        show_clear_button=False,
+        on_clear_requested=None,
+        on_remove_selected_requested=None,
+    ):
         super().__init__(parent)
         self.theme = GreenhouseTheme()
         self.columns = columns or ['Timestamp', 'Data']
+        self.on_clear_requested = on_clear_requested
+        self.on_remove_selected_requested = on_remove_selected_requested
 
         self.setObjectName("simpleDataTable")
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -61,7 +70,17 @@ class SimpleDataTable(QWidget):
         if show_clear_button:
             btn_row = QHBoxLayout()
             btn_row.setContentsMargins(0, 0, 0, 0)
-            self.clear_button = QPushButton("Clear Table")
+            self.remove_row_button = QPushButton("Remove Selected Row")
+            self.remove_row_button.setObjectName("removeTableRowButton")
+            self.remove_row_button.setFixedHeight(32)
+            remove_metrics = QFontMetrics(self.remove_row_button.font())
+            remove_label_width = remove_metrics.horizontalAdvance(self.remove_row_button.text())
+            self.remove_row_button.setMinimumWidth(max(170, remove_label_width + 28))
+            self.remove_row_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            self.remove_row_button.clicked.connect(self.remove_selected_row)
+            btn_row.addWidget(self.remove_row_button, 0, Qt.AlignLeft)
+
+            self.clear_button = QPushButton("Hide All Rows")
             self.clear_button.setObjectName("clearTableButton")
             self.clear_button.setFixedHeight(32)
             # Compute width from rendered text so the label is never clipped.
@@ -69,12 +88,13 @@ class SimpleDataTable(QWidget):
             label_width = metrics.horizontalAdvance(self.clear_button.text())
             self.clear_button.setMinimumWidth(max(120, label_width + 28))
             self.clear_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            self.clear_button.clicked.connect(self.clear_data)
+            self.clear_button.clicked.connect(self._handle_clear_clicked)
             btn_row.addWidget(self.clear_button, 0, Qt.AlignLeft)
             btn_row.addStretch(1)
             layout.addLayout(btn_row)
         else:
             self.clear_button = None
+            self.remove_row_button = None
 
         self.table = QTableWidget()
         self.table.setObjectName("dataTable")
@@ -133,3 +153,18 @@ class SimpleDataTable(QWidget):
 
     def get_row_count(self):
         return self.table.rowCount()
+
+    def _handle_clear_clicked(self):
+        if callable(self.on_clear_requested):
+            self.on_clear_requested()
+            return
+        self.clear_data()
+
+    def remove_selected_row(self):
+        row = self.table.currentRow()
+        if row < 0:
+            return
+        if callable(self.on_remove_selected_requested):
+            self.on_remove_selected_requested(row)
+            return
+        self.table.removeRow(row)

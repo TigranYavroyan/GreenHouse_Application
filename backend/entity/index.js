@@ -6,6 +6,7 @@ import Actuator from './actuator.entity.js';
 import Schedule from './schedule.entity.js';
 import SensorAlertRule from './sensor-alert-rule.entity.js';
 import SensorAlert from './sensor-alert.entity.js';
+import UserLog from './user-log.entity.js';
 
 User.hasMany(Device, {
     foreignKey: {
@@ -17,6 +18,24 @@ User.hasMany(Device, {
     onDelete: 'CASCADE',
 });
 Device.belongsTo(User, {
+    foreignKey: {
+        name: 'userId',
+        allowNull: false,
+        field: 'user_id',
+    },
+    as: 'user',
+});
+
+User.hasMany(UserLog, {
+    foreignKey: {
+        name: 'userId',
+        allowNull: false,
+        field: 'user_id',
+    },
+    as: 'logs',
+    onDelete: 'CASCADE',
+});
+UserLog.belongsTo(User, {
     foreignKey: {
         name: 'userId',
         allowNull: false,
@@ -142,5 +161,6 @@ export {
     Schedule,
     SensorAlertRule,
     SensorAlert,
+    UserLog,
 };
 
