@@ -475,8 +475,8 @@ QScrollBar::handle:horizontal:hover {
          <widget class="QWidget" name="user_output_container">
           <property name="minimumSize">
            <size>
-            <width>400</width>
-            <height>320</height>
+            <width>0</width>
+            <height>0</height>
            </size>
           </property>
           <property name="sizePolicy">
@@ -683,8 +683,8 @@ QScrollBar::handle:horizontal:hover {
          <widget class="QWidget" name="schedule_output_container">
           <property name="minimumSize">
            <size>
-            <width>400</width>
-            <height>320</height>
+            <width>0</width>
+            <height>0</height>
            </size>
           </property>
           <property name="sizePolicy">

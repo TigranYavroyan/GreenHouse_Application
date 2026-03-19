@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFontMetrics
 from modules.styles import GreenhouseTheme
 
 
@@ -41,7 +42,7 @@ class SimpleDataTable(QWidget):
     """
 
     ROW_HEIGHT = 35
-    MIN_TABLE_HEIGHT = 320
+    MIN_TABLE_HEIGHT = 0
 
     def __init__(self, columns=None, parent=None, show_clear_button=False):
         super().__init__(parent)
@@ -50,8 +51,8 @@ class SimpleDataTable(QWidget):
 
         self.setObjectName("simpleDataTable")
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.setMinimumHeight(self.MIN_TABLE_HEIGHT + (44 if show_clear_button else 0))
-        self.setMinimumWidth(400)
+        self.setMinimumHeight(0)
+        self.setMinimumWidth(0)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -60,13 +61,17 @@ class SimpleDataTable(QWidget):
         if show_clear_button:
             btn_row = QHBoxLayout()
             btn_row.setContentsMargins(0, 0, 0, 0)
-            btn_row.addStretch()
-            self.clear_button = QPushButton("🗑️ Clear Table")
+            self.clear_button = QPushButton("Clear Table")
             self.clear_button.setObjectName("clearTableButton")
             self.clear_button.setFixedHeight(32)
-            self.clear_button.setMinimumWidth(100)
+            # Compute width from rendered text so the label is never clipped.
+            metrics = QFontMetrics(self.clear_button.font())
+            label_width = metrics.horizontalAdvance(self.clear_button.text())
+            self.clear_button.setMinimumWidth(max(120, label_width + 28))
+            self.clear_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             self.clear_button.clicked.connect(self.clear_data)
-            btn_row.addWidget(self.clear_button)
+            btn_row.addWidget(self.clear_button, 0, Qt.AlignLeft)
+            btn_row.addStretch(1)
             layout.addLayout(btn_row)
         else:
             self.clear_button = None
@@ -90,9 +95,19 @@ class SimpleDataTable(QWidget):
         self.table.setRowCount(0)
 
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.table.setMinimumHeight(self.MIN_TABLE_HEIGHT)
-        self.table.setMinimumWidth(400)
+        self.table.setMinimumHeight(0)
+        self.table.setMinimumWidth(0)
         layout.addWidget(self.table, 1)
+
+    def resizeEvent(self, event):
+        """
+        Keep table geometry in sync with parent/container resizes.
+        This is especially important when the main window layout changes
+        without explicit table updates (e.g. fullscreen and panel width changes).
+        """
+        super().resizeEvent(event)
+        self.table.updateGeometry()
+        self.table.viewport().update()
 
     def add_row(self, data):
         if len(data) != self.table.columnCount():

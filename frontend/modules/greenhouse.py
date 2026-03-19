@@ -416,34 +416,31 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
     def setup_tables(self):
         """Initialize simple table widgets for displaying RabbitMQ + server data"""
         # Setup control table for command results from RabbitMQ
-        if not hasattr(self, 'user_output_container') or not self.user_output_container:
-            self.logger.error("Cannot setup control table - user_output_container not found")
+        if not hasattr(self, "userTabLayout") or not self.userTabLayout:
+            self.logger.error("Cannot setup control table - userTabLayout not found")
             return
 
-        layout = self.user_output_container.layout()
-        if not layout:
-            layout = QVBoxLayout()
-            layout.setContentsMargins(0, 0, 0, 0)
-            layout.setSpacing(0)
-            self.user_output_container.setLayout(layout)
-
-        self.user_output_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.user_output_container.setMinimumHeight(320)
-        self.user_output_container.setVisible(True)
-
         self.control_table = SimpleDataTable(
-            columns=['Timestamp', 'Command', 'Status', 'Result'],
-            parent=self.user_output_container,
-            show_clear_button=True
+            columns=["Timestamp", "Command", "Status", "Result"],
+            parent=self.userTab,
+            show_clear_button=True,
         )
-        layout.addWidget(self.control_table, 1)  # Stretch factor 1
+        control_insert_index = self.userTabLayout.count()
+        if hasattr(self, "user_output_container") and self.user_output_container:
+            existing_index = self.userTabLayout.indexOf(self.user_output_container)
+            if existing_index >= 0:
+                control_insert_index = existing_index
+                self.userTabLayout.removeWidget(self.user_output_container)
+                self.user_output_container.setVisible(False)
+                self.user_output_container.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.userTabLayout.insertWidget(control_insert_index, self.control_table, 1)
         # Double-click on a control row opens detailed view (mixin)
         self.control_table.table.cellDoubleClicked.connect(self.show_control_details)
 
         # Add a small hint below the control table so users know about double-click
         control_hint = QLabel("Tip: double-click a row in the table to see detailed information.")
         control_hint.setObjectName("controlTableHintLabel")
-        layout.addWidget(control_hint, 0)
+        self.userTabLayout.insertWidget(control_insert_index + 1, control_hint, 0)
 
         # Also set a tooltip on the table itself
         self.control_table.table.setToolTip("Double-click a row to open a detailed view of the result.")
@@ -451,61 +448,58 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self.logger.info(f"Control table created: visible={self.control_table.isVisible()}")
 
         # Setup scheduling table
-        if hasattr(self, 'schedule_output_container') and self.schedule_output_container:
-            schedule_layout = self.schedule_output_container.layout()
-            if not schedule_layout:
-                schedule_layout = QVBoxLayout()
-                schedule_layout.setContentsMargins(0, 0, 0, 0)
-                schedule_layout.setSpacing(0)
-                self.schedule_output_container.setLayout(schedule_layout)
-
-            self.schedule_output_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            self.schedule_output_container.setMinimumHeight(320)
-            self.schedule_output_container.setVisible(True)
-
+        if hasattr(self, "schedulingTabLayout") and self.schedulingTabLayout:
             self.schedule_table = SimpleDataTable(
-                columns=['Schedule ID', 'Target', 'Cron', 'Enabled', 'Last Dispatch', 'Dispatch Status'],
-                parent=self.schedule_output_container,
-                show_clear_button=True
+                columns=["Schedule ID", "Target", "Cron", "Enabled", "Last Dispatch", "Dispatch Status"],
+                parent=self.schedulingTab,
+                show_clear_button=True,
             )
-            schedule_layout.addWidget(self.schedule_table, 1)
+            schedule_insert_index = self.schedulingTabLayout.count()
+            if hasattr(self, "schedule_output_container") and self.schedule_output_container:
+                existing_index = self.schedulingTabLayout.indexOf(self.schedule_output_container)
+                if existing_index >= 0:
+                    schedule_insert_index = existing_index
+                    self.schedulingTabLayout.removeWidget(self.schedule_output_container)
+                    self.schedule_output_container.setVisible(False)
+                    self.schedule_output_container.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+
+            self.schedulingTabLayout.insertWidget(schedule_insert_index, self.schedule_table, 1)
             self.schedule_table.table.setToolTip("Backend-persisted schedules are displayed here with live dispatch status.")
 
             schedule_hint = QLabel("Tip: schedules are persisted in backend and run by cron.")
             schedule_hint.setObjectName("scheduleTableHintLabel")
-            schedule_layout.addWidget(schedule_hint, 0)
+            self.schedulingTabLayout.insertWidget(schedule_insert_index + 1, schedule_hint, 0)
         else:
             self.logger.warning("schedule_output_container not found - scheduling table not created")
 
         # Setup server info table
-        if not hasattr(self, 'server_info_container') or not self.server_info_container:
-            self.logger.error("Cannot setup server table - server_info_container not found")
+        if not hasattr(self, "infoGroupLayout") or not self.infoGroupLayout:
+            self.logger.error("Cannot setup server table - infoGroupLayout not found")
             return
 
-        layout = self.server_info_container.layout()
-        if not layout:
-            layout = QVBoxLayout()
-            layout.setContentsMargins(0, 0, 0, 0)
-            layout.setSpacing(0)
-            self.server_info_container.setLayout(layout)
-
-        self.server_info_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.server_info_container.setMinimumHeight(320)
-        self.server_info_container.setVisible(True)
-
         self.server_table = SimpleDataTable(
-            columns=['Timestamp', 'Type', 'Data'],
-            parent=self.server_info_container,
-            show_clear_button=True
+            columns=["Timestamp", "Type", "Data"],
+            parent=self.infoGroup,
+            show_clear_button=True,
         )
-        layout.addWidget(self.server_table, 1)  # Stretch factor 1
+
+        server_insert_index = self.infoGroupLayout.count()
+        if hasattr(self, "server_info_scroll") and self.server_info_scroll:
+            existing_index = self.infoGroupLayout.indexOf(self.server_info_scroll)
+            if existing_index >= 0:
+                server_insert_index = existing_index
+                self.infoGroupLayout.removeWidget(self.server_info_scroll)
+                self.server_info_scroll.setVisible(False)
+                self.server_info_scroll.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.infoGroupLayout.insertWidget(server_insert_index, self.server_table, 1)
+
         # Double-click on a server row opens detailed view (mixin)
         self.server_table.table.cellDoubleClicked.connect(self.show_server_details)
 
         # Add a small hint below the server table for discoverability
         server_hint = QLabel("Tip: double-click a row in the table to see detailed server or fog data.")
         server_hint.setObjectName("serverTableHintLabel")
-        layout.addWidget(server_hint, 0)
+        self.infoGroupLayout.insertWidget(server_insert_index + 1, server_hint, 0)
 
         # Tooltip on the server table itself
         self.server_table.table.setToolTip("Double-click a row to open a detailed view of the selected entry.")
@@ -520,7 +514,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 widget_name = widget.objectName()
                 if widget_name == 'controlGroup':
                     self.userTabLayout.setStretch(i, 0)  # Buttons take minimal space
-                elif widget_name == 'user_output_container':
+                elif widget_name == 'simpleDataTable':
                     self.userTabLayout.setStretch(i, 1)  # Table takes all remaining space
 
         for i in range(self.serverTabLayout.count()):
@@ -540,7 +534,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                     widget_name = item.widget().objectName()
                     if widget_name == 'scheduleGroup':
                         self.schedulingTabLayout.setStretch(i, 0)
-                    elif widget_name == 'schedule_output_container':
+                    elif widget_name == 'simpleDataTable':
                         self.schedulingTabLayout.setStretch(i, 1)
 
     def setup_scheduler(self):
@@ -905,9 +899,14 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         return action
 
     def resizeEvent(self, event):
-        """Handle window resize - let layout handle sizing naturally"""
+        """Handle window resize and keep table widgets responsive."""
         super().resizeEvent(event)
-        # No need to manually update table sizes - layout handles it
+        for table_widget in (self.control_table, self.schedule_table, self.server_table):
+            if not table_widget:
+                continue
+            table_widget.updateGeometry()
+            table_widget.table.updateGeometry()
+            table_widget.table.viewport().update()
 
     def closeEvent(self, event):
         self.logger.info("Application shutting down")
