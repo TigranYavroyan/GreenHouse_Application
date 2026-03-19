@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont
 import sys
 import logging
@@ -14,6 +14,7 @@ from modules.command_worker import CommandWorker
 from modules.auth_dialog import AuthDialog
 from modules.auth_session import AuthSessionManager
 from modules.core_api_client import CoreApiClient, UnauthorizedError
+from modules.ui_dialogs import StyledMessageDialog
 
 
 def ensure_authenticated(app, backend_url, auth_session):
@@ -38,7 +39,7 @@ def ensure_authenticated(app, backend_url, auth_session):
                 return True
             except Exception as error:
                 auth_session.clear_token()
-                QMessageBox.warning(
+                StyledMessageDialog.show_warning(
                     None,
                     "Authentication Failed",
                     f"Unable to verify authenticated session: {error}",

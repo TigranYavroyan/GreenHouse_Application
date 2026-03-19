@@ -2,12 +2,13 @@ import uuid
 import logging
 
 from PyQt5.QtCore import QDateTime, QTimer
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 from modules.command_worker import CommandWorker
 from modules.table_widget import SimpleDataTable
 from modules.json_prettifier import extract_payload, build_user_friendly_rows
 from modules import table_renderers
+from modules.ui_dialogs import StyledMessageDialog
 
 
 class CommandPanelMixin:
@@ -304,11 +305,7 @@ class CommandPanelMixin:
 
     def show_error(self, title, message):
         self.logger.warning(f"Showing error dialog: {title} - {message}")
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setWindowTitle(title)
-        msg.setText(message)
-        msg.exec_()
+        StyledMessageDialog.show_error(self, str(title), str(message))
 
 
 

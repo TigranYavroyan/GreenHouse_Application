@@ -2,12 +2,13 @@ from typing import Any, Dict, List, Optional
 from copy import deepcopy
 
 from PyQt5.QtCore import QDateTime
-from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 from modules.table_widget import SimpleDataTable
 from modules import table_renderers
 from modules.core_api_client import CoreApiClient, UnauthorizedError
 from modules.core_dtos import ExecutorSnapshotDto, GetterSnapshotDto
+from modules.ui_dialogs import StyledInputDialog, StyledMessageDialog
 
 
 class ServerPanelMixin:
@@ -231,16 +232,18 @@ class ServerPanelMixin:
             candidates.append(executor.name)
 
         if not candidates:
-            QMessageBox.warning(
+            StyledMessageDialog.show_warning(
                 self,
                 "No Executors",
-                "No matching MANUAL executors are available."
-                if manual_only
-                else "No matching executors are available.",
+                (
+                    "No matching MANUAL executors are available."
+                    if manual_only
+                    else "No matching executors are available."
+                ),
             )
             return None
 
-        selected, ok = QInputDialog.getItem(self, title, "Select executor:", candidates, 0, False)
+        selected, ok = StyledInputDialog.get_item(self, title, "Select executor:", candidates, 0, False)
         if not ok or not selected:
             return None
         return str(selected)
@@ -256,7 +259,7 @@ class ServerPanelMixin:
             if str(target.mode).upper() == "MANUAL":
                 return True
 
-            QMessageBox.warning(
+            StyledMessageDialog.show_warning(
                 self,
                 "Executor in AUTO mode",
                 (
@@ -347,7 +350,7 @@ class ServerPanelMixin:
             if not name:
                 return
 
-            selected_mode, ok = QInputDialog.getItem(
+            selected_mode, ok = StyledInputDialog.get_item(
                 self,
                 "Executor Mode",
                 "Mode:",
@@ -415,12 +418,12 @@ class ServerPanelMixin:
             if not self.ensure_executor_manual(name):
                 return
 
-            value, ok = QInputDialog.getText(self, "Set Executor Value", "Value:")
+            value, ok = StyledInputDialog.get_text(self, "Set Executor Value", "Value:")
             if not ok:
                 return
             value = str(value).strip()
             if not value:
-                QMessageBox.warning(self, "Invalid value", "Value is required.")
+                StyledMessageDialog.show_warning(self, "Invalid value", "Value is required.")
                 return
 
             result = self.core_api.executor_set(name, value)

@@ -193,6 +193,22 @@ class CoreApiClient:
             return data if isinstance(data, list) else []
         return []
 
+    def create_device(
+        self,
+        name: str,
+        device_type: str = "controller",
+        status: str = "online",
+        metadata: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        body = {
+            "name": str(name or "").strip() or "Scheduled Device",
+            "type": str(device_type or "controller"),
+            "status": str(status or "online"),
+            "metadata": metadata or {},
+        }
+        response = self._request("/devices", method="POST", data=body)
+        return response if isinstance(response, dict) else {"result": response}
+
     def list_schedules(self) -> List[Dict[str, Any]]:
         payload = self._request("/schedules")
         if isinstance(payload, dict):

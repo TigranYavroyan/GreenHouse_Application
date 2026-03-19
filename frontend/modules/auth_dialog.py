@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QPushButton,
     QTabWidget,
     QVBoxLayout,
@@ -16,6 +15,7 @@ from PyQt5.QtWidgets import (
 
 from modules.core_api_client import ApiRequestError, CoreApiClient, UnauthorizedError
 from modules.styles import GreenhouseTheme, StyleSheetGenerator
+from modules.ui_dialogs import StyledMessageDialog
 
 
 class AuthDialog(QDialog):
@@ -193,14 +193,14 @@ class AuthDialog(QDialog):
 
     def closeEvent(self, event):
         if self.result() != QDialog.Accepted:
-            answer = QMessageBox.question(
+            answer = StyledMessageDialog.ask_yes_no(
                 self,
                 "Exit Application",
                 "Authentication is required. Exit now?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
+                yes_text="Yes",
+                no_text="No",
             )
-            if answer != QMessageBox.Yes:
+            if not answer:
                 event.ignore()
                 return
         event.accept()

@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
     QPushButton,
-    QMessageBox,
     QSizePolicy,
     QLabel,
 )
@@ -26,6 +25,7 @@ from modules.greenhouse_edge_fog import EdgeFogMixin
 from modules.auth_dialog import AuthDialog
 from modules.auth_session import AuthSessionManager
 from modules.core_api_client import CoreApiClient, UnauthorizedError
+from modules.ui_dialogs import StyledMessageDialog
 
 def setup_logging():
     logging.basicConfig(
@@ -242,7 +242,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                     return True
                 except Exception as error:
                     self.auth_session.clear_token()
-                    QMessageBox.warning(
+                    StyledMessageDialog.show_warning(
                         self,
                         "Authentication Error",
                         f"Sign in succeeded but session validation failed: {error}",
@@ -274,6 +274,22 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         if state.get("schedule_clock") and getattr(self, "schedule_clock_timer", None):
             self.schedule_clock_timer.start(5000)
 
+    def _reset_user_scoped_tables(self):
+        """Clear user-scoped table data before switching authentication context."""
+        if self.control_table:
+            self.control_table.clear_data()
+        if self.server_table:
+            self.server_table.clear_data()
+        if self.schedule_table:
+            self.schedule_table.clear_data()
+
+        self.control_history = []
+        self.server_history = []
+        self.schedule_table_rows = []
+        self.schedule_rows = []
+        self.schedule_device_id = None
+        self.schedule_target_keys = []
+
     def handle_unauthorized_error(self, message="Unauthorized"):
         if self._auth_recovery_in_progress:
             return
@@ -281,9 +297,10 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self._auth_recovery_in_progress = True
         timer_state = self._pause_authenticated_timers()
         try:
+            self._reset_user_scoped_tables()
             self.auth_session.clear_token()
             self.update_auth_user_label()
-            QMessageBox.warning(
+            StyledMessageDialog.show_warning(
                 self,
                 "Session Expired",
                 f"{message}\n\nPlease sign in again.",
@@ -299,14 +316,14 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             self._auth_recovery_in_progress = False
 
     def logout_user(self):
-        confirm = QMessageBox.question(
+        confirm = StyledMessageDialog.ask_yes_no(
             self,
             "Logout",
             "Sign out from this desktop session?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+            yes_text="Yes",
+            no_text="No",
         )
-        if confirm != QMessageBox.Yes:
+        if not confirm:
             return
 
         if self._auth_recovery_in_progress:
@@ -315,6 +332,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         self._auth_recovery_in_progress = True
         timer_state = self._pause_authenticated_timers()
         try:
+            self._reset_user_scoped_tables()
             self.auth_session.clear_token()
             self.update_auth_user_label()
             self.status_label.setText("Signed out")
@@ -615,6 +633,20 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             seen.add(key)
             options.append((f"{label_prefix} {name}", (command, parameters), key))
 
+        # Fallback to known default controls so scheduling remains usable even if
+        # executor names don't follow expected fan/heater/actuator naming.
+        if not options:
+            options = [
+                ("Toggle water canal", ("switch_water_canal", {"action": "toggle"}), "switch_water_canal:default"),
+                ("Toggle fan", ("switch_fan", {"fanId": "fan_1", "action": "toggle"}), "switch_fan:fan_1"),
+                ("Toggle heater", ("switch_heater", {"heaterId": "heater_1", "action": "toggle"}), "switch_heater:heater_1"),
+                (
+                    "Toggle actuator",
+                    ("switch_actuator", {"actuatorId": "actuator_1", "action": "toggle"}),
+                    "switch_actuator:actuator_1",
+                ),
+            ]
+
         new_keys = [item[2] for item in options]
         if new_keys == self.schedule_target_keys:
             return
@@ -633,6 +665,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
         if hasattr(self, "scheduleCurrentTimeLabel"):
             self.scheduleCurrentTimeLabel.setText(f"Current Time: {now_text}")
         self.refresh_schedule_table()
+        self._refresh_schedule_targets()
 
     def update_custom_delay_enabled(self):
         """Enable custom delay controls only for custom preset."""
@@ -683,22 +716,49 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             "Unsupported custom interval. Use seconds (1-59), whole minutes (1-59), or whole hours (1-23)."
         )
 
-    def _get_or_resolve_schedule_device_id(self):
-        if self.schedule_device_id:
-            return self.schedule_device_id
+    def _get_or_resolve_schedule_device_id(self, preferred_name="Scheduled Device"):
         if not hasattr(self, "core_api"):
             return None
 
         devices = self.core_api.list_devices()
         if not devices:
+            # Scheduling requires a backend device record; auto-create one if absent.
+            created_device = self.core_api.create_device(
+                name=preferred_name,
+                metadata={"createdFrom": "frontend-scheduling-tab"},
+            )
+            created_id = ""
+            if isinstance(created_device, dict):
+                created_id = str(created_device.get("id", "")).strip()
+                if not created_id:
+                    nested = created_device.get("data")
+                    if isinstance(nested, dict):
+                        created_id = str(nested.get("id", "")).strip()
+            if created_id:
+                self.schedule_device_id = created_id
+                return self.schedule_device_id
+            self.schedule_device_id = None
             return None
 
-        first_device = devices[0] if isinstance(devices[0], dict) else {}
-        device_id = first_device.get("id")
-        if device_id:
-            self.schedule_device_id = str(device_id)
+        device_ids = []
+        for device in devices:
+            if not isinstance(device, dict):
+                continue
+            candidate = device.get("id")
+            if candidate is None:
+                continue
+            device_ids.append(str(candidate))
+
+        if not device_ids:
+            self.schedule_device_id = None
+            return None
+
+        # Keep cached device only while it's still present for this user.
+        if self.schedule_device_id and self.schedule_device_id in device_ids:
             return self.schedule_device_id
-        return None
+
+        self.schedule_device_id = device_ids[0]
+        return self.schedule_device_id
 
     def schedule_selected_task(self):
         """Create recurring backend-persisted schedule for the selected action."""
@@ -708,28 +768,27 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
 
         self._refresh_schedule_targets()
         selected_data = self.scheduleTargetCombo.currentData()
-        if not selected_data or len(selected_data) != 2:
+        if not isinstance(selected_data, (tuple, list)) or len(selected_data) != 2:
             self.show_error("Scheduling Error", "Please choose a valid target action.")
             return
 
+        command, parameters = selected_data
+        target_label = str(self.scheduleTargetCombo.currentText())
         interval_seconds = self.get_selected_interval_seconds()
         if interval_seconds <= 0:
             self.show_error("Invalid Interval", "Recurring interval must be greater than zero.")
             return
 
-        device_id = self._get_or_resolve_schedule_device_id()
-        if not device_id:
-            self.show_error("Scheduling Error", "No device is available. Create a device first.")
-            return
-
-        command, parameters = selected_data
-        target_label = str(self.scheduleTargetCombo.currentText())
-
         try:
+            device_id = self._get_or_resolve_schedule_device_id(preferred_name=target_label)
+            if not device_id:
+                self.show_error("Scheduling Error", "No device is available. Create a device first.")
+                return
+
             cron_expression = self._build_cron_expression(interval_seconds)
             now_text = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            schedule_name = f"{target_label} @ {now_text}"
-            payload = parameters
+            schedule_name = f"{target_label} @ {now_text}"[:120]
+            payload = dict(parameters) if isinstance(parameters, dict) else {}
             metadata = {
                 "sessionId": self.session_id,
                 "createdFrom": "frontend-scheduling-tab",
@@ -744,8 +803,15 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
                 enabled=True,
                 metadata=metadata,
             )
-            schedule_id = str(created.get("id", ""))[:8]
-            self.status_label.setText(f"🗓️ Created backend schedule {schedule_id} for {target_label}")
+            schedule_id = ""
+            if isinstance(created, dict):
+                schedule_id = str(created.get("id", "")).strip()[:8]
+                if not schedule_id:
+                    nested = created.get("data")
+                    if isinstance(nested, dict):
+                        schedule_id = str(nested.get("id", "")).strip()[:8]
+            schedule_label = schedule_id or "created"
+            self.status_label.setText(f"🗓️ Created backend schedule {schedule_label} for {target_label}")
             self.refresh_schedule_table()
         except Exception as error:
             self._handle_api_exception("Scheduling Error", error)
@@ -768,7 +834,7 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
 
         schedule_id = self._get_selected_schedule_id()
         if not schedule_id:
-            QMessageBox.warning(self, "No Selection", "Select a schedule row to delete.")
+            StyledMessageDialog.show_warning(self, "No Selection", "Select a schedule row to delete.")
             return
 
         try:
@@ -784,14 +850,14 @@ class GreenhouseDesktop(QMainWindow, CommandPanelMixin, ServerPanelMixin, EdgeFo
             self.show_error("Scheduling Error", "Core API client is not available.")
             return
 
-        confirmation = QMessageBox.question(
+        confirmation = StyledMessageDialog.ask_yes_no(
             self,
             "Delete All Schedules",
             "Delete all schedules for the current user?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+            yes_text="Yes",
+            no_text="No",
         )
-        if confirmation != QMessageBox.Yes:
+        if not confirmation:
             return
 
         try:
