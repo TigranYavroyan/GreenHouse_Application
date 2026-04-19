@@ -6,7 +6,7 @@ import argparse
 import uuid
 import os
 
-# Load configuration first (.env.development/.env.production based on ENVIRONMENT)
+# Load configuration first (repository root `.env` when present)
 from modules.config import config
 
 from modules.greenhouse import GreenhouseDesktop, setup_logging

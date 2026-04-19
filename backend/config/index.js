@@ -1,4 +1,5 @@
 // config/index.js
+import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -8,17 +9,39 @@ import ConfigPostgres from './configPostgres.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const normalizeNodeEnv = () => (
-  process.env.NODE_ENV === 'production' ? 'production' : 'development'
-);
+/** Repository root `.env` (next to docker-compose.yml), for local monorepo runs. */
+function resolveProjectEnvPath() {
+  const seeds = new Set();
+  const addSeed = (p) => {
+    const resolved = path.resolve(p);
+    if (resolved) seeds.add(resolved);
+  };
+  addSeed(__dirname);
+  addSeed(process.cwd());
+
+  for (const seed of seeds) {
+    let dir = seed;
+    for (let i = 0; i < 12; i += 1) {
+      const envPath = path.join(dir, '.env');
+      const composePath = path.join(dir, 'docker-compose.yml');
+      if (fs.existsSync(composePath) && fs.existsSync(envPath)) {
+        return envPath;
+      }
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  }
+  return null;
+}
 
 const config = {
   ConfigPostgres,
   configEnv: () => {
-    const normalizedEnv = normalizeNodeEnv();
-    dotenv.config({
-      path: `.env.${normalizedEnv}`,
-    });
+    const envPath = resolveProjectEnvPath();
+    if (envPath) {
+      dotenv.config({ path: envPath });
+    }
   },
   logsDir: path.join(__dirname, '..', 'logs'),
   get redis() {

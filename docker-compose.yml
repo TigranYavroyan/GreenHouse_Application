@@ -37,6 +37,8 @@ services:
       context: ./sim
       dockerfile: Dockerfile
     container_name: greenhouse-core-sim
+    env_file:
+      - ./.env
     ports:
       - "3001:3001"
     environment:
@@ -60,8 +62,11 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env.production
+      - ./.env
     environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - POSTGRES_HOST=postgres
       - GREENHOUSE_CORE_URL=http://greenhouse-core-sim:3001
       - GREENHOUSE_CORE_TIMEOUT=10000
       - GREENHOUSE_CORE_RETRIES=2
@@ -95,8 +100,10 @@ services:
       - DISPLAY=${DISPLAY:-:0}
       - QT_X11_NO_MITSHM=1
       - ENVIRONMENT=production
+      - BACKEND_URL=http://backend:3000
+      - RABBITMQ_HOST=rabbitmq
     env_file:
-      - ./frontend/.env.production
+      - ./.env
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./frontend:/app
@@ -112,7 +119,7 @@ services:
     networks:
       - postgres-network 
     env_file:
-      - ./backend/.env.development
+      - ./.env
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -165,7 +172,7 @@ services:
     image: prometheuscommunity/postgres-exporter:latest
     container_name: greenhouse-postgres-exporter
     env_file:
-      - ./backend/.env.development
+      - ./.env
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-user}@postgres:5432/${POSTGRES_DB:-greenhouse}?sslmode=disable
     ports:

@@ -2,6 +2,11 @@
 
 echo "Starting Greenhouse Automation System..."
 
+if [ ! -f .env ]; then
+  echo "No .env found; copying .env.example to .env. Review and edit .env before production use."
+  cp .env.example .env
+fi
+
 # Make sure X11 is running for GUI (Linux)
 if [ "$(uname)" == "Linux" ]; then
     echo "Setting up X11 display..."

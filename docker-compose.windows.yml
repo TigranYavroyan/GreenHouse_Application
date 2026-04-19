@@ -36,8 +36,11 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env.production
+      - ./.env
     environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - POSTGRES_HOST=postgres
       - GREENHOUSE_CORE_URL=http://192.168.27.16:8080
       - GREENHOUSE_CORE_TIMEOUT=10000
       - GREENHOUSE_CORE_RETRIES=2
@@ -71,8 +74,10 @@ services:
       - ENABLE_VNC=true
       - VNC_PORT=5900
       - ENVIRONMENT=production
+      - BACKEND_URL=http://backend:3000
+      - RABBITMQ_HOST=rabbitmq
     env_file:
-      - ./frontend/.env.production
+      - ./.env
     # Windows-safe: remove Linux/X11 mounts that fail with "invalid mount path ':'".
     volumes:
       - ./frontend:/app
@@ -90,7 +95,7 @@ services:
     networks:
       - postgres-network
     env_file:
-      - ./backend/.env.development
+      - ./.env
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -143,7 +148,7 @@ services:
     image: prometheuscommunity/postgres-exporter:latest
     container_name: greenhouse-postgres-exporter
     env_file:
-      - ./backend/.env.development
+      - ./.env
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-user}@postgres:5432/${POSTGRES_DB:-greenhouse}?sslmode=disable
     ports:

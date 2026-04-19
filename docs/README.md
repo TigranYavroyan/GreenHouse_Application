@@ -628,7 +628,7 @@ Extensibility details:
 #### **`modules/config.py`** (`Config`)
 - **Purpose**: Centralized configuration management for frontend
 - **Features**:
-  - Environment-based configuration loading (`.env.development`, `.env.production`)
+  - Loads repository root `.env` when it sits next to `docker-compose.yml` (local runs)
   - Automatic environment detection (`ENVIRONMENT` or `NODE_ENV`)
   - Configuration class with defaults
   - RabbitMQ URL generation helper
@@ -662,11 +662,18 @@ Extensibility details:
    cd GreenHouse_Application
    ```
 
-2. **Start all services**:
+2. **Configure environment** (once per clone):
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` for secrets and URLs. Docker Compose and local apps read this single file at the repository root.
+
+3. **Start all services**:
    ```bash
    ./start.sh
    ```
    The `start.sh` script:
+   - Creates `.env` from `.env.example` if `.env` is missing
    - Sets up X11 display for GUI (Linux)
    - Starts all Docker services
    - Waits for backend to be ready
@@ -678,17 +685,17 @@ Extensibility details:
    docker compose up -d
    ```
 
-3. **Access services**:
+4. **Access services**:
    - Backend API: http://localhost:3000
    - RabbitMQ Management: http://localhost:15672 (guest/guest) - if enabled
    - Frontend: Runs in Docker container with GUI
 
-4. **View logs**:
+5. **View logs**:
    ```bash
    docker compose logs -f
    ```
 
-5. **Stop services**:
+6. **Stop services**:
    ```bash
    docker compose down
    ```
@@ -697,6 +704,8 @@ Extensibility details:
 
 #### Backend Development
 
+From the repository root, ensure `.env` exists (`cp .env.example .env`), then:
+
 ```bash
 cd backend
 npm install
@@ -704,6 +713,8 @@ npm run dev  # Uses nodemon for auto-reload
 ```
 
 #### Frontend Development
+
+From the repository root, ensure `.env` exists (`cp .env.example .env`), then:
 
 ```bash
 cd frontend
@@ -746,19 +757,11 @@ python main.py --debug  # Debug logging
 - `ENABLE_VNC`: When `true`, starts VNC in Xvfb fallback mode for remote interaction (default: `false`)
 - `VNC_PORT`: VNC port used when `ENABLE_VNC=true` (default: `5900`)
 
-### Environment Configuration Files
+### Environment configuration files
 
-The frontend supports the following environment configuration files:
+The project uses a single **`.env`** at the repository root (next to `docker-compose.yml`), with **`.env.example`** as the template. All `docker-compose*.yml` files use `env_file: ./.env` for services that need secrets or tuning.
 
-- **`.env.development`**: Development environment
-- **`.env.production`**: Production environment
-- **`.env.example`**: Template for creating environment files
-
-**Configuration Loading**:
-- `ENVIRONMENT=production` → loads `.env.production`
-- `ENVIRONMENT=development` → loads `.env.development`
-
-See `frontend/README_ENV.md` for detailed configuration guide.
+See `frontend/README_ENV.md` and `backend/README_ENV.md` for pointers; the authoritative variable list is `.env.example` at the repo root.
 
 ---
 
