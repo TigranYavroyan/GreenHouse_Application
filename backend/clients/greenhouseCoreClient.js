@@ -7,6 +7,7 @@ class GreenhouseCoreClient {
     this.baseUrl = config.greenhouseCore.url;
     this.timeout = config.greenhouseCore.timeout;
     this.maxRetries = config.greenhouseCore.retries;
+    this.retryBackoffBaseMs = config.greenhouseCore.retryBackoffBaseMs;
     this.isConnected = false;
   }
 
@@ -82,7 +83,10 @@ class GreenhouseCoreClient {
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         if (attempt > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
+          await new Promise((resolve) => setTimeout(
+            resolve,
+            this.retryBackoffBaseMs * Math.pow(2, attempt)
+          ));
         }
 
         const controller = new AbortController();

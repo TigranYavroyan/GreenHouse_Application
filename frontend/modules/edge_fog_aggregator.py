@@ -11,6 +11,9 @@ import threading
 import time
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 
+from modules.config import config
+
+
 class SensorType(Enum):
     TEMPERATURE = "temperature"
     HUMIDITY = "humidity"
@@ -128,11 +131,11 @@ class EdgeToFogAggregator(QObject):
         """Setup timers for periodic aggregation"""
         self.aggregation_timer = QTimer()
         self.aggregation_timer.timeout.connect(self.run_periodic_aggregation)
-        self.aggregation_timer.start(60000)  # Run every minute
-        
+        self.aggregation_timer.start(config.EDGE_AGGREGATION_INTERVAL_MS)
+
         self.cleanup_timer = QTimer()
         self.cleanup_timer.timeout.connect(self.cleanup_old_data)
-        self.cleanup_timer.start(300000)  # Cleanup every 5 minutes
+        self.cleanup_timer.start(config.EDGE_FOG_CLEANUP_INTERVAL_MS)
     
     def register_edge_device(self, device_id: str, device_type: str, location: str, 
                            capabilities: List[SensorType], ip_address: str = None):

@@ -1,5 +1,6 @@
 // processor/commandProcessor.js
 import SystemLogger from '../logger/systemLogger.js';
+import config from '../config/index.js';
 
 class CommandProcessor {
   constructor({ redisClient, sessionManager, rabbitClient, commandExecutor }) {
@@ -111,7 +112,24 @@ class CommandProcessor {
         session.logger.command(commandId, 'EXECUTING');
         // Store commandId in session temporarily for executor to use
         session.lastCommandId = commandId;
-        const result = await this.executor.runCommand(command, parameters, session);
+        const execTimeoutMs = config.commands.execTimeoutMs;
+        let result;
+        if (execTimeoutMs > 0) {
+          result = await Promise.race([
+            this.executor.runCommand(command, parameters, session),
+            new Promise((resolve) => {
+              setTimeout(() => {
+                resolve({
+                  error: 'Command execution timeout',
+                  command,
+                  executionTime: execTimeoutMs,
+                });
+              }, execTimeoutMs);
+            }),
+          ]);
+        } else {
+          result = await this.executor.runCommand(command, parameters, session);
+        }
 
         // Cache only successful results for commands with positive TTL.
         if (shouldCache && !result.error && this.redis && this.redis.isOpen) {

@@ -31,6 +31,16 @@ if _env_path is not None:
     load_dotenv(_env_path)
 
 
+def _int_env(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if raw is None or raw == '':
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
 # Determine environment (defaults to development)
 ENVIRONMENT = os.getenv('ENVIRONMENT', os.getenv('NODE_ENV', 'development')).lower()
 
@@ -44,14 +54,29 @@ class Config:
 
     # RabbitMQ Configuration
     RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'localhost')
-    RABBITMQ_PORT = int(os.getenv('RABBITMQ_PORT', '5672'))
+    RABBITMQ_PORT = _int_env('RABBITMQ_PORT', 5672)
     RABBITMQ_USER = os.getenv('RABBITMQ_USER', 'guest')
     RABBITMQ_PASS = os.getenv('RABBITMQ_PASS', 'guest')
 
     # Redis Configuration (for edge caching)
     REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-    REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
-    REDIS_DB = int(os.getenv('REDIS_DB', '0'))
+    REDIS_PORT = _int_env('REDIS_PORT', 6379)
+    REDIS_DB = _int_env('REDIS_DB', 0)
+
+    # Command / connection timings (see repository `.env.example`)
+    PENDING_COMMAND_TIMEOUT_MS = _int_env('PENDING_COMMAND_TIMEOUT_MS', 30000)
+    PENDING_COMMAND_POLL_MS = _int_env('PENDING_COMMAND_POLL_MS', 1000)
+    RABBIT_CONNECTION_CHECK_INTERVAL_MS = _int_env('RABBIT_CONNECTION_CHECK_INTERVAL_MS', 10000)
+
+    # Edge–fog demo / sync tuning
+    EDGE_FOG_CLEANUP_INTERVAL_MS = _int_env('EDGE_FOG_CLEANUP_INTERVAL_MS', 300000)
+    EDGE_AGGREGATION_INTERVAL_MS = _int_env('EDGE_AGGREGATION_INTERVAL_MS', 60000)
+    EDGE_FOG_SENSOR_SIM_INTERVAL_MS = _int_env('EDGE_FOG_SENSOR_SIM_INTERVAL_MS', 5000)
+    EDGE_FOG_REDIS_CACHE_TTL_SEC = _int_env('EDGE_FOG_REDIS_CACHE_TTL_SEC', 600)
+    EDGE_FOG_EXAMPLE_DEVICE_IPS = os.getenv(
+        'EDGE_FOG_EXAMPLE_DEVICE_IPS',
+        '192.168.1.101,192.168.1.102,192.168.1.103',
+    )
 
     # Environment
     ENVIRONMENT = ENVIRONMENT

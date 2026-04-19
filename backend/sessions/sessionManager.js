@@ -1,6 +1,7 @@
 // sessions/sessionManager.js
 import createSessionLogger from '../logger/sessionLogger.js';
 import SystemLogger from '../logger/systemLogger.js';
+import config from '../config/index.js';
 
 class SessionManager {
   constructor() {
@@ -60,7 +61,7 @@ class SessionManager {
     }));
   }
 
-  cleanupOldSessions(maxAgeMs = 30 * 60 * 1000) {
+  cleanupOldSessions(maxAgeMs = config.sessions.inactivityTtlMs) {
     const now = Date.now();
     for (const [id, s] of this.sessions.entries()) {
       if (now - new Date(s.lastActivity).getTime() > maxAgeMs) {

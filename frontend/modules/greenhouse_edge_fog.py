@@ -7,6 +7,7 @@ from PyQt5.QtCore import QDateTime, QTimer
 
 from modules.edge_fog_aggregator import EdgeToFogAggregator, SensorReading, SensorType
 from modules.redis_client import RedisEdgeClient
+from modules.config import config
 
 
 class EdgeFogMixin:
@@ -36,12 +37,11 @@ class EdgeFogMixin:
         # Connect to Redis for local caching
         self.redis_edge_client.connect()
 
-        # Setup sensor data consumer (if RabbitMQ is available)
-        # For now, we'll simulate sensor data or receive from RabbitMQ
-        self.setup_sensor_data_consumer()
-
-        # Register some example edge devices (in real scenario, these would come from discovery)
+        # Register example devices before starting the simulator timer
         self.register_example_devices()
+
+        # Setup sensor data consumer (if RabbitMQ is available)
+        self.setup_sensor_data_consumer()
 
         self.logger.info("Edge-to-Fog aggregator setup complete")
 
@@ -51,7 +51,7 @@ class EdgeFogMixin:
         # In production, this would consume from a RabbitMQ queue
         self.sensor_simulator_timer = QTimer()
         self.sensor_simulator_timer.timeout.connect(self.simulate_sensor_reading)
-        self.sensor_simulator_timer.start(5000)  # Every 5 seconds
+        self.sensor_simulator_timer.start(config.EDGE_FOG_SENSOR_SIM_INTERVAL_MS)
 
         self.logger.info("Sensor data consumer started (simulation mode)")
 
@@ -60,12 +60,13 @@ class EdgeFogMixin:
         from datetime import datetime
         import random
 
-        # Simulate readings from different locations
-        locations = ["Zone_A", "Zone_B", "Zone_C"]
-        devices = ["device_001", "device_002", "device_003"]
+        devices = list(self.edge_aggregator.edge_devices.keys())
+        default_triplet = ('device_001', 'device_002', 'device_003')
+        if len(devices) < 3:
+            devices = list(default_triplet)
 
-        for i, (location, device_id) in enumerate(zip(locations, devices)):
-            # Temperature
+        for device_id in devices[:3]:
+            location = self.edge_aggregator.edge_devices.get(device_id, {}).get('location', 'Zone_A')
             temp_reading = SensorReading(
                 device_id=device_id,
                 sensor_type=SensorType.TEMPERATURE,
@@ -93,27 +94,42 @@ class EdgeFogMixin:
 
     def register_example_devices(self):
         """Register example edge devices"""
-        self.edge_aggregator.register_edge_device(
-            device_id="device_001",
-            device_type="sensor_node",
-            location="Zone_A",
-            capabilities=[SensorType.TEMPERATURE, SensorType.HUMIDITY, SensorType.SOIL_MOISTURE],
-            ip_address="192.168.1.101"
+        ips = [x.strip() for x in config.EDGE_FOG_EXAMPLE_DEVICE_IPS.split(',') if x.strip()]
+        fallback = ['192.168.1.101', '192.168.1.102', '192.168.1.103']
+        while len(ips) < 3:
+            ips.append(fallback[len(ips) % 3])
+
+        specs = (
+            (
+                'device_001',
+                'sensor_node',
+                'Zone_A',
+                [SensorType.TEMPERATURE, SensorType.HUMIDITY, SensorType.SOIL_MOISTURE],
+                ips[0],
+            ),
+            (
+                'device_002',
+                'sensor_node',
+                'Zone_B',
+                [SensorType.TEMPERATURE, SensorType.HUMIDITY, SensorType.LIGHT_INTENSITY],
+                ips[1],
+            ),
+            (
+                'device_003',
+                'sensor_node',
+                'Zone_C',
+                [SensorType.TEMPERATURE, SensorType.CO2_LEVEL, SensorType.SOIL_PH],
+                ips[2],
+            ),
         )
-        self.edge_aggregator.register_edge_device(
-            device_id="device_002",
-            device_type="sensor_node",
-            location="Zone_B",
-            capabilities=[SensorType.TEMPERATURE, SensorType.HUMIDITY, SensorType.LIGHT_INTENSITY],
-            ip_address="192.168.1.102"
-        )
-        self.edge_aggregator.register_edge_device(
-            device_id="device_003",
-            device_type="sensor_node",
-            location="Zone_C",
-            capabilities=[SensorType.TEMPERATURE, SensorType.CO2_LEVEL, SensorType.SOIL_PH],
-            ip_address="192.168.1.103"
-        )
+        for device_id, device_type, location, capabilities, ip_address in specs:
+            self.edge_aggregator.register_edge_device(
+                device_id=device_id,
+                device_type=device_type,
+                location=location,
+                capabilities=capabilities,
+                ip_address=ip_address,
+            )
 
     def handle_aggregated_data(self, data: dict):
         """Handle new aggregated data from edge aggregator"""
@@ -121,7 +137,7 @@ class EdgeFogMixin:
 
         # Cache aggregated data locally
         cache_key = f"agg:{data.get('sensor_type')}:{data.get('location')}:{data.get('timeframe')}"
-        self.redis_edge_client.set(cache_key, data, ttl=600)  # 10 minutes
+        self.redis_edge_client.set(cache_key, data, ttl=config.EDGE_FOG_REDIS_CACHE_TTL_SEC)
 
         # Sync to backend (async, don't block UI)
         self.sync_aggregated_data_to_backend(data)

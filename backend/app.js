@@ -245,7 +245,10 @@ class App {
       this.systemLogger.info('RabbitMQ connected and consumer bootstrap complete');
     } catch (err) {
       this.systemLogger.error(`RabbitMQ setup failed: ${err.message}`);
-      setTimeout(() => this.setupRabbitAndConsumer().catch(() => {}), 5000);
+      setTimeout(
+        () => this.setupRabbitAndConsumer().catch(() => {}),
+        this.config.rabbitmq.bootstrapRetryDelayMs
+      );
     }
   }
 
@@ -334,7 +337,7 @@ class App {
       MESSAGE_EXCHANGES.EVENTS_V1,
       MESSAGE_ROUTING_KEYS.NOTIFICATION_EMAIL_VERIFICATION_REQUESTED_V1
     );
-    await this.rabbitClient.prefetch(5);
+    await this.rabbitClient.prefetch(this.config.rabbitmq.consumerPrefetch);
 
     if (this.rabbitConsumerReady) {
       this.rabbitConsumerReady = false;
@@ -418,10 +421,14 @@ class App {
       this.setupRabbitAndConsumer().catch((e) => this.systemLogger.error(`Rabbit setup error: ${e.message}`));
 
       // session cleanup
-      setInterval(() => this.sessionManager.cleanupOldSessions(), 5 * 60 * 1000);
+      setInterval(
+        () => this.sessionManager.cleanupOldSessions(),
+        this.config.sessions.cleanupIntervalMs
+      );
 
-      this.app.listen(port, () => {
-        this.systemLogger.info(`Greenhouse backend running on port ${port}`);
+      const host = this.config.httpListenHost;
+      this.app.listen(port, host, () => {
+        this.systemLogger.info(`Greenhouse backend listening on ${host}:${port}`);
         this.systemLogger.info(`Logs directory: ${this.config.logsDir}`);
         this.systemLogger.info(`API docs available at http://localhost:${port}`);
       });

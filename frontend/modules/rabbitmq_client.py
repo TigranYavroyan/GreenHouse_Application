@@ -14,7 +14,7 @@ class RabbitMQClient(QObject):
         super().__init__()
         
         # Use environment variables with Docker fallbacks
-        self.host = os.getenv('RABBITMQ_HOST', 'rabbitmq')  # Docker service name
+        self.host = os.getenv('RABBITMQ_HOST', 'localhost')
         self.port = int(os.getenv('RABBITMQ_PORT', '5672'))
         self.username = os.getenv('RABBITMQ_USER', 'guest')
         self.password = os.getenv('RABBITMQ_PASS', 'guest')

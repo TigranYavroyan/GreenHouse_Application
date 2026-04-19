@@ -7,16 +7,19 @@ class RedisClientWrapper {
   constructor() {
     this._isOpen = false;
     this._lastRedisErrorLogAt = 0;
-    this._errorLogIntervalMs = 10000;
+    this._errorLogIntervalMs = config.redis.errorLogIntervalMs;
 
+    const { reconnectBackoffBaseMs, reconnectBackoffMaxMs } = config.redis;
     this.client = redis.createClient({
       socket: {
         host: config.redis.host,
         port: config.redis.port,
         reconnectStrategy: (retries) => {
           const cappedRetries = Math.min(retries, 10);
-          const delay = Math.min(500 * (2 ** cappedRetries), 10000);
-          return delay;
+          return Math.min(
+            reconnectBackoffBaseMs * (2 ** cappedRetries),
+            reconnectBackoffMaxMs
+          );
         },
       }
     });

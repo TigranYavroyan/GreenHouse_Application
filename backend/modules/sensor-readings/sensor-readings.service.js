@@ -1,4 +1,5 @@
 import { serviceError } from '../common/service-error.js';
+import config from '../../config/index.js';
 
 class SensorReadingsService {
   constructor({ sensorReadingsRepository, sensorsRepository }) {
@@ -138,7 +139,7 @@ class SensorReadingsService {
       if (!Number.isInteger(parsedLimit) || parsedLimit <= 0) {
         throw serviceError('Invalid "limit" query parameter', 400);
       }
-      normalized.limit = Math.min(parsedLimit, 5000);
+      normalized.limit = Math.min(parsedLimit, config.sensorReadings.maxListLimit);
     }
 
     if (filters.order !== undefined && String(filters.order).trim()) {

@@ -29,7 +29,7 @@ class RabbitMQClient {
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.connect().catch(() => {});
-    }, 5000);
+    }, config.rabbitmq.reconnectDelayMs);
   }
 
   async notifyConnected() {
@@ -64,7 +64,9 @@ class RabbitMQClient {
           SystemLogger.error(`RabbitMQ connection error: ${err.message}`);
         });
         this.connection.on('close', async () => {
-          SystemLogger.warn('RabbitMQ connection closed, attempting reconnect in 5s...');
+          SystemLogger.warn(
+            `RabbitMQ connection closed, reconnecting in ${config.rabbitmq.reconnectDelayMs}ms...`
+          );
           this.channel = null;
           this.connection = null;
           this.scheduleReconnect();

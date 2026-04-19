@@ -373,7 +373,7 @@ Extensibility details:
   - Timeout handling
   - Connection status tracking
   - Configurable via environment variables (URL, timeout, retries)
-- **Default Endpoint**: `http://192.168.27.16:8080` (overridable via `GREENHOUSE_CORE_URL`)
+- **Default endpoint**: `http://127.0.0.1:3001` when `GREENHOUSE_CORE_URL` is unset (override in `.env`)
 
 ### Core Services
 
@@ -386,7 +386,7 @@ Extensibility details:
     - Last activity timestamp
   - Per-session command queue (Promise chain) for sequential execution
   - Session-specific loggers
-  - Automatic cleanup of inactive sessions (30-minute timeout)
+  - Automatic cleanup of inactive sessions (`SESSION_INACTIVITY_TTL_MS`, default 30 minutes)
   - Session listing and retrieval
 
 #### **`processor/commandProcessor.js`** (`CommandProcessor`)
@@ -731,27 +731,14 @@ python main.py --debug  # Debug logging
 ### Environment Variables
 
 #### Backend
-- `NODE_ENV`: Environment (production/development)
-- `PORT`: Server port (default: 3000)
-- `REDIS_HOST`: Redis hostname (default: redis)
-- `REDIS_PORT`: Redis port (default: 6379)
-- `RABBITMQ_HOST`: RabbitMQ hostname (default: rabbitmq)
-- `RABBITMQ_PORT`: RabbitMQ port (default: 5672)
-- `EXEC_TIMEOUT_MS`: Command execution timeout (default: 15000)
-- `GREENHOUSE_CORE_URL`: Greenhouse core API URL (default: http://localhost:3001)
-- `GREENHOUSE_CORE_TIMEOUT`: Request timeout in milliseconds (default: 10000)
-- `GREENHOUSE_CORE_RETRIES`: Number of retry attempts (default: 2)
+- `NODE_ENV`, `PORT`, `HTTP_LISTEN_HOST`: process and HTTP bind address
+- `REDIS_*`, `RABBITMQ_*` (including `RABBITMQ_CONSUMER_PREFETCH`, reconnect delays): clients and consumer
+- `POSTGRES_*`, `JWT_*`, `SMTP_*`, `NOTIFICATION_*`: persistence and mail
+- `EXEC_TIMEOUT_MS`, `SESSION_CLEANUP_INTERVAL_MS`, `SESSION_INACTIVITY_TTL_MS`, `PROM_DEFAULT_METRICS_TIMEOUT_MS`, `SENSOR_READINGS_MAX_LIMIT`, `FOG_*`, `GREENHOUSE_CORE_*`: see `.env.example`
 
 #### Frontend
-- `BACKEND_URL`: Backend API URL (default: http://localhost:3000)
-- `RABBITMQ_HOST`: RabbitMQ hostname (default: rabbitmq)
-- `RABBITMQ_PORT`: RabbitMQ port (default: 5672)
-- `RABBITMQ_USER`: RabbitMQ username (default: guest)
-- `RABBITMQ_PASS`: RabbitMQ password (default: guest)
-- `REDIS_HOST`: Redis hostname for edge caching (default: localhost)
-- `REDIS_PORT`: Redis port for edge caching (default: 6379)
-- `REDIS_DB`: Redis database number (default: 0)
-- `ENVIRONMENT`: Environment mode - `production` or `development` (default: development)
+- `BACKEND_URL`, `RABBITMQ_*`, `REDIS_*`, `PENDING_*`, `RABBIT_CONNECTION_CHECK_INTERVAL_MS`, `EDGE_*`: see `.env.example` (defaults suit local dev; Docker Compose overrides service hostnames where needed)
+- `ENVIRONMENT`: `production` or `development` (default: development)
 - `DISPLAY`: Display endpoint for GUI mode (Linux example: `:0`, Windows X server example: `host.docker.internal:0.0`)
 - `XVFB_SCREEN`: Optional virtual display geometry fallback (default: `1920x1080x24`)
 - `ENABLE_VNC`: When `true`, starts VNC in Xvfb fallback mode for remote interaction (default: `false`)
@@ -865,9 +852,9 @@ The `CommandExecutor` routes all commands to Greenhouse Core via HTTP:
 - **Actuator Control Commands**: `switch_water_canal`, `switch_actuator`, `switch_fan`, `switch_heater` → Greenhouse Core via HTTP
 - **Legacy Command**: `read_sensor` → Automatically routes to appropriate sensor command based on `sensor` parameter
 
-### Current Core Configuration
+### Current core configuration
 
-The backend is configured to use the real core server at `http://192.168.27.16:8080` by default. `GREENHOUSE_CORE_URL` can still be overridden when needed.
+The backend reads **`GREENHOUSE_CORE_URL`** from the repository `.env` (see `.env.example`). If unset, it defaults to **`http://127.0.0.1:3001`** (local simulator). Point it at a physical core or another host when deploying.
 
 The `GreenhouseCoreClient` includes:
 - Automatic retry logic with exponential backoff (configurable retries)

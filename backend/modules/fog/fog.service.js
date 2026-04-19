@@ -1,3 +1,5 @@
+import config from '../../config/index.js';
+
 class FogService {
   constructor(redisClient, systemLogger) {
     this.redis = redisClient;
@@ -66,7 +68,7 @@ class FogService {
     const keys = [];
     for await (const key of this.redis.scanIterator({
       MATCH: pattern,
-      COUNT: 100
+      COUNT: config.fog.redisScanCount
     })) {
       keys.push(key);
     }
@@ -93,7 +95,7 @@ class FogService {
     const keys = [];
     for await (const key of this.redis.scanIterator({
       MATCH: 'fog:device:*',
-      COUNT: 100
+      COUNT: config.fog.redisScanCount
     })) {
       keys.push(key);
     }
@@ -117,10 +119,12 @@ class FogService {
     }
 
     const key = `fog:anomaly:${anomaly.anomaly_id}`;
+    const anomalyTtlSec = config.fog.anomalyTtlSec;
+    const recentMaxIndex = config.fog.anomalyRecentMaxIndex;
 
     await this.redis.setEx(
       key,
-      86400,
+      anomalyTtlSec,
       JSON.stringify({
         ...anomaly,
         receivedAt: new Date().toISOString()
@@ -129,8 +133,8 @@ class FogService {
 
     // Use Redis list instead of storing JSON array
     await this.redis.lPush('fog:anomalies:recent', JSON.stringify(anomaly));
-    await this.redis.lTrim('fog:anomalies:recent', 0, 99);
-    await this.redis.expire('fog:anomalies:recent', 86400);
+    await this.redis.lTrim('fog:anomalies:recent', 0, recentMaxIndex);
+    await this.redis.expire('fog:anomalies:recent', anomalyTtlSec);
 
     this.logger?.warn(`Anomaly received: ${anomaly.message}`);
 

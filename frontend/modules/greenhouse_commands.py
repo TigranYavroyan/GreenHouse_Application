@@ -6,6 +6,7 @@ from PyQt5.QtCore import QDateTime, QTimer
 from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 from modules.command_worker import CommandWorker
+from modules.config import config
 from modules.table_widget import SimpleDataTable
 from modules.json_prettifier import extract_payload, build_user_friendly_rows
 from modules import table_renderers
@@ -44,12 +45,12 @@ class CommandPanelMixin:
         # Setup connection check timer
         self.connection_timer = QTimer()
         self.connection_timer.timeout.connect(self.check_connection)
-        self.connection_timer.start(10000)
+        self.connection_timer.start(config.RABBIT_CONNECTION_CHECK_INTERVAL_MS)
 
-        self.pending_command_timeout_ms = 30000
+        self.pending_command_timeout_ms = config.PENDING_COMMAND_TIMEOUT_MS
         self.pending_command_check_timer = QTimer()
         self.pending_command_check_timer.timeout.connect(self.expire_pending_commands)
-        self.pending_command_check_timer.start(1000)
+        self.pending_command_check_timer.start(config.PENDING_COMMAND_POLL_MS)
 
     # ------------------------------------------------------------------
     # Control table helpers
