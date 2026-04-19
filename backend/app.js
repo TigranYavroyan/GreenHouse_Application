@@ -218,8 +218,8 @@ class App {
     this.app.use('/', createCoreRouter({
       greenhouseCoreClient: this.greenhouseCoreClient
     }));
-    this.app.use('/cache', createCacheRouter(this.redisClient));
-    this.app.use('/fog', createFogRouter(this.redisClient, this.systemLogger));
+    this.app.use('/cache', authMiddleware, createCacheRouter(this.redisClient));
+    this.app.use('/fog', authMiddleware, createFogRouter(this.redisClient, this.systemLogger));
     this.app.use('/sessions', createSessionRouter({ sessionManager: this.sessionManager }));
     this.app.use('/logs', createLogsRouter());
     this.app.use('/metadata', createMetadataRouter({

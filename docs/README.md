@@ -52,8 +52,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 │ Redis  │ │ Greenhouse Core │
 │ Cache  │ │ (Simulator/Real)│
 └────────┘ └──────────────────┘
-         │RabbitMQClient
-         │ HTTP API
+         │ AMQP / HTTP
          ▼
 ┌─────────────────┐
 │ Greenhouse Core │  (FastAPI Simulator or Real Core)
@@ -435,8 +434,8 @@ Extensibility details:
   - `DELETE /sessions/:sessionId`: Terminate a session
   - `GET /logs`: List all log files
   - `GET /logs/system`: Get system log content
-  - `GET /cache/keys`: List all cache keys
-  - `DELETE /cache/clear`: Clear all cached entries
+  - `GET /cache/keys`: List all cache keys (requires `Authorization: Bearer <JWT>`)
+  - `DELETE /cache/clear`: Clear all cached entries (requires JWT)
   - `GET /metadata/stats/`: Get command processing statistics
   - `GET /metadata/queues/`: Get RabbitMQ queue status
   - `GET /status`: Greenhouse core status
@@ -562,15 +561,6 @@ Extensibility details:
     - `error_occurred`: Emitted on errors
   - Thread-safe operations
   - Pending command tracking
-
-#### **`modules/rabbitmq_client.py`** (`RabbitMQClient`)
-- **Purpose**: Alternative RabbitMQ client (thread-safe implementation)
-- **Features**:
-  - QMutex-based thread safety
-  - QTimer-based event processing
-  - Connection status signals
-  - Message sending and receiving
-  - Automatic connection maintenance
 
 ### Styling
 
@@ -807,11 +797,15 @@ See `frontend/README_ENV.md` and `backend/README_ENV.md` for pointers; the autho
 
 ### Cache
 
+All `/cache/*` routes require `Authorization: Bearer <JWT>` (same login token as the rest of the authenticated HTTP API).
+
 - `GET /cache/keys` - List all cache keys (pattern: `cmd:*`)
 - `DELETE /cache/clear` - Clear all cached entries
 - `DELETE /cache/clear-errors` - Clear only error entries from cache (removes corrupted or error cache entries)
 
 ### Edge/Fog Data Aggregation
+
+All `/fog/*` routes require `Authorization: Bearer <JWT>`. The PyQt desktop includes this header when syncing aggregates and anomalies if a session token is available.
 
 - `POST /fog/aggregated` - Store aggregated sensor data from edge nodes
   - Body: `{ sensorType, location, timeframe, data }`

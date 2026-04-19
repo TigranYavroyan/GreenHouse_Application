@@ -426,12 +426,12 @@ The backend is configured to use the real core server at `http://192.168.27.16:8
 - `GET /logs` - List all log files
 - `GET /logs/system` - Get system log content
 
-### Cache
+### Cache (requires JWT: Authorization: Bearer <token>)
 - `GET /cache/keys` - List all cache keys (pattern: `cmd:*`)
 - `DELETE /cache/clear` - Clear all cached entries
 - `DELETE /cache/clear-errors` - Clear only error entries from cache
 
-### Edge/Fog Data Aggregation
+### Edge/Fog Data Aggregation (requires JWT)
 - `POST /fog/aggregated` - Store aggregated sensor data from edge nodes
   - Body: `{ sensorType, location, timeframe, data }`
   - Stores in Redis with namespace: `fog:agg:{sensorType}:{location}:{timeframe}`

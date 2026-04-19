@@ -106,7 +106,7 @@ Added new REST API endpoints for fog data:
 2. Start Redis: `docker compose up redis -d` (or use existing Redis)
 3. Start the frontend: `cd frontend && python main.py`
 4. Check Server tab - you should see aggregated data appearing every minute
-5. Test backend endpoints:
+5. Test backend endpoints (use `Authorization: Bearer <JWT>` from login):
    - `GET http://localhost:3000/fog/aggregated`
    - `GET http://localhost:3000/fog/anomalies`
    - `GET http://localhost:3000/fog/devices`

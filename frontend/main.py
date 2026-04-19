@@ -9,8 +9,8 @@ import os
 # Load configuration first (repository root `.env` when present)
 from modules.config import config
 
-from modules.greenhouse import GreenhouseDesktop, setup_logging
-from modules.command_worker import CommandWorker
+from modules.greenhouse import GreenhouseDesktop
+from modules.logging_setup import setup_logging
 from modules.auth_dialog import AuthDialog
 from modules.auth_session import AuthSessionManager
 from modules.core_api_client import CoreApiClient, UnauthorizedError

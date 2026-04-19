@@ -802,15 +802,22 @@ Currently, edge nodes communicate with the backend only. Direct edge-to-edge com
 
 ### API Testing
 
+Fog routes require a JWT from `POST /auth/login` (same as other authenticated HTTP APIs).
+
 ```bash
+TOKEN="<paste_access_token_here>"
+
 # Get aggregated data
-curl http://localhost:3000/fog/aggregated?sensorType=temperature
+curl -H "Authorization: Bearer ${TOKEN}" \
+  "http://localhost:3000/fog/aggregated?sensorType=temperature"
 
 # Get anomalies
-curl http://localhost:3000/fog/anomalies?limit=10
+curl -H "Authorization: Bearer ${TOKEN}" \
+  "http://localhost:3000/fog/anomalies?limit=10"
 
 # Get devices
-curl http://localhost:3000/fog/devices
+curl -H "Authorization: Bearer ${TOKEN}" \
+  "http://localhost:3000/fog/devices"
 ```
 
 ---

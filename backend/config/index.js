@@ -54,7 +54,13 @@ const config = {
       dotenv.config({ path: projectEnvPath });
     }
   },
-  logsDir: path.join(__dirname, '..', 'logs'),
+  get logsDir() {
+    const fromEnv = process.env.LOGS_DIR && String(process.env.LOGS_DIR).trim();
+    if (fromEnv) {
+      return path.resolve(fromEnv);
+    }
+    return path.join(__dirname, '..', 'logs');
+  },
   get httpListenHost() {
     return process.env.HTTP_LISTEN_HOST || '0.0.0.0';
   },

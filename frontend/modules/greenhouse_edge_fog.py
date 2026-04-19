@@ -1,6 +1,6 @@
 import logging
 import threading
-from typing import Dict
+from typing import Any, Dict, Optional, Tuple
 
 import requests
 from PyQt5.QtCore import QDateTime, QTimer
@@ -8,6 +8,24 @@ from PyQt5.QtCore import QDateTime, QTimer
 from modules.edge_fog_aggregator import EdgeToFogAggregator, SensorReading, SensorType
 from modules.redis_client import RedisEdgeClient
 from modules.config import config
+
+
+def _fog_aggregate_fingerprint(data: Dict[str, Any]) -> Optional[Tuple]:
+    """Stable tuple for comparing consecutive aggregates (skip redundant HTTP sync)."""
+    try:
+        return (
+            str(data.get("sensor_type") or ""),
+            str(data.get("location") or ""),
+            str(data.get("timeframe") or ""),
+            int(data.get("count") or 0),
+            round(float(data.get("average") or 0.0), 4),
+            round(float(data.get("min") or 0.0), 4),
+            round(float(data.get("max") or 0.0), 4),
+            round(float(data.get("std_dev") or 0.0), 4),
+            round(float(data.get("quality_score") or 0.0), 4),
+        )
+    except (TypeError, ValueError):
+        return None
 
 
 class EdgeFogMixin:
@@ -23,7 +41,16 @@ class EdgeFogMixin:
       - self.logger (logging.Logger)
       - self.edge_aggregator (EdgeToFogAggregator)
       - self.redis_edge_client (RedisEdgeClient)
+      - optional: get_auth_token() -> str | None (for authenticated /fog calls)
     """
+
+    def _fog_http_headers(self) -> Dict[str, str]:
+        headers = {"Content-Type": "application/json"}
+        if hasattr(self, "get_auth_token"):
+            token = self.get_auth_token()
+            if token:
+                headers["Authorization"] = f"Bearer {token}"
+        return headers
 
     def setup_edge_aggregator(self):
         """Setup Edge-to-Fog aggregator and connect signals"""
@@ -135,12 +162,22 @@ class EdgeFogMixin:
         """Handle new aggregated data from edge aggregator"""
         self.logger.debug(f"Received aggregated data: {data.get('sensor_type')} at {data.get('location')}")
 
-        # Cache aggregated data locally
+        # Cache aggregated data locally (read-before-write avoids redundant backend sync)
         cache_key = f"agg:{data.get('sensor_type')}:{data.get('location')}:{data.get('timeframe')}"
+        fp_new = _fog_aggregate_fingerprint(data)
+        previous = self.redis_edge_client.get(cache_key) if fp_new else None
+        fp_prev = _fog_aggregate_fingerprint(previous) if isinstance(previous, dict) else None
+        unchanged = fp_new is not None and fp_prev == fp_new
+
         self.redis_edge_client.set(cache_key, data, ttl=config.EDGE_FOG_REDIS_CACHE_TTL_SEC)
 
-        # Sync to backend (async, don't block UI)
-        self.sync_aggregated_data_to_backend(data)
+        if unchanged:
+            self.logger.debug(
+                "Skipping fog aggregated HTTP sync (unchanged vs local Redis): %s",
+                cache_key,
+            )
+        else:
+            self.sync_aggregated_data_to_backend(data)
 
         # Display in appropriate UI component (if available)
         # Log aggregated data (tables will be updated via API calls)
@@ -175,7 +212,8 @@ class EdgeFogMixin:
                     response = requests.post(
                         f"{self.backend_url}/fog/aggregated",
                         json=payload,
-                        timeout=5
+                        headers=self._fog_http_headers(),
+                        timeout=5,
                     )
                     if response.status_code == 200:
                         self.logger.debug(f"Synced aggregated data to backend: {data.get('sensor_type')}")
@@ -212,7 +250,8 @@ class EdgeFogMixin:
                     response = requests.post(
                         f"{self.backend_url}/fog/anomalies",
                         json=anomaly,
-                        timeout=5
+                        headers=self._fog_http_headers(),
+                        timeout=5,
                     )
                     if response.status_code == 200:
                         self.logger.debug(f"Synced anomaly to backend: {anomaly.get('anomaly_id')}")
