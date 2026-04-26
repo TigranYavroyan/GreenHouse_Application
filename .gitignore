@@ -18,3 +18,5 @@ frontend/*.log.*
 examples/
 
 .env
+
+GreenHouse2/
