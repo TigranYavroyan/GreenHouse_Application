@@ -29,6 +29,7 @@ from modules.greenhouse_edge_fog import EdgeFogMixin
 from modules.greenhouse_auth_mixin import GreenhouseAuthMixin
 from modules.greenhouse_statistics_mixin import GreenhouseStatisticsMixin
 from modules.greenhouse_scheduling_mixin import GreenhouseSchedulingMixin
+from modules.greenhouse_logic_mixin import GreenhouseLogicMixin
 from modules.auth_session import AuthSessionManager
 from modules.ui_dialogs import StyledMessageDialog
 
@@ -38,6 +39,7 @@ class GreenhouseDesktop(
     GreenhouseAuthMixin,
     GreenhouseStatisticsMixin,
     GreenhouseSchedulingMixin,
+    GreenhouseLogicMixin,
     CommandPanelMixin,
     ServerPanelMixin,
     EdgeFogMixin,
@@ -96,6 +98,7 @@ class GreenhouseDesktop(
         self.setup_core_panel()
         self.setup_scheduler()
         self.setup_statistics_tab()
+        self.setup_logic_tab()
         self.remove_unused_core_controls()
         self.configure_core_server_buttons()
         

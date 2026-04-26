@@ -62,7 +62,9 @@ QLabel#status_label {
 
 QLabel#controlTableHintLabel,
 QLabel#scheduleTableHintLabel,
-QLabel#serverTableHintLabel {
+QLabel#serverTableHintLabel,
+QLabel#logicToolboxHintLabel,
+QLabel#logicCanvasStatusLabel {
     color: #A3ADC2;
     font-size: 11px;
     margin-top: 4px;
@@ -1265,6 +1267,368 @@ QScrollBar::handle:horizontal:hover {
            <property name="bottomMargin">
             <number>0</number>
            </property>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="logicTab">
+       <attribute name="title">
+        <string>🧠 Logic Builder</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="logicTabLayout">
+        <property name="spacing">
+         <number>8</number>
+        </property>
+        <property name="leftMargin">
+         <number>8</number>
+        </property>
+        <property name="topMargin">
+         <number>8</number>
+        </property>
+        <property name="rightMargin">
+         <number>8</number>
+        </property>
+        <property name="bottomMargin">
+         <number>8</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="logicControlsGroup">
+          <property name="title">
+           <string>Logic Editor Controls</string>
+          </property>
+          <layout class="QGridLayout" name="logicControlsLayout">
+           <property name="leftMargin">
+            <number>12</number>
+           </property>
+           <property name="topMargin">
+            <number>20</number>
+           </property>
+           <property name="rightMargin">
+            <number>12</number>
+           </property>
+           <property name="bottomMargin">
+            <number>12</number>
+           </property>
+           <property name="horizontalSpacing">
+            <number>8</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>8</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="logicAddRootButton">
+             <property name="text">
+              <string>Add Root</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="logicAddConditionButton">
+             <property name="text">
+              <string>Add Condition Node</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="logicAddActionButton">
+             <property name="text">
+              <string>Add Action Node</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QPushButton" name="logicDeleteSelectedButton">
+             <property name="text">
+              <string>Delete Selected</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QPushButton" name="logicConnectSelectedButton">
+             <property name="text">
+              <string>Connect Selected</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="logicLoadButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Load (next step)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="logicValidateButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Validate (next step)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="logicUploadButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Upload (next step)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QPushButton" name="logicReloadButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Reload (next step)</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="logicMainLayout">
+          <property name="spacing">
+           <number>8</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="logicToolboxGroup">
+            <property name="minimumSize">
+             <size>
+              <width>210</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>280</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Node Toolbox</string>
+            </property>
+            <layout class="QVBoxLayout" name="logicToolboxLayout">
+             <property name="leftMargin">
+              <number>12</number>
+             </property>
+             <property name="topMargin">
+              <number>20</number>
+             </property>
+             <property name="rightMargin">
+              <number>12</number>
+             </property>
+             <property name="bottomMargin">
+              <number>12</number>
+             </property>
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="logicToolboxHintLabel">
+               <property name="text">
+                <string>Drag block types into canvas or use Add buttons.</string>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QListWidget" name="logicNodePaletteList"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="logicCanvasGroup">
+            <property name="title">
+             <string>Block-Scheme Canvas</string>
+            </property>
+            <layout class="QVBoxLayout" name="logicCanvasLayout">
+             <property name="leftMargin">
+              <number>8</number>
+             </property>
+             <property name="topMargin">
+              <number>16</number>
+             </property>
+             <property name="rightMargin">
+              <number>8</number>
+             </property>
+             <property name="bottomMargin">
+              <number>8</number>
+             </property>
+             <property name="spacing">
+              <number>6</number>
+             </property>
+             <item>
+              <widget class="QWidget" name="logicCanvasContainer">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>1</horstretch>
+                 <verstretch>1</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>320</height>
+                </size>
+               </property>
+               <layout class="QVBoxLayout" name="logicCanvasContainerLayout">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="logicCanvasStatusLabel">
+               <property name="text">
+                <string>Canvas ready. API calls are disabled in this step.</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="logicPropertiesGroup">
+            <property name="minimumSize">
+             <size>
+              <width>260</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>380</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Selected Node Properties</string>
+            </property>
+            <layout class="QVBoxLayout" name="logicPropertiesLayout">
+             <property name="leftMargin">
+              <number>12</number>
+             </property>
+             <property name="topMargin">
+              <number>20</number>
+             </property>
+             <property name="rightMargin">
+              <number>12</number>
+             </property>
+             <property name="bottomMargin">
+              <number>12</number>
+             </property>
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="logicPropertyNodeTypeLabel">
+               <property name="text">
+                <string>Type: none</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="logicPropertyTitleEdit">
+               <property name="placeholderText">
+                <string>Node title</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="logicPropertyConditionCombo"/>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="logicPropertyArgsEdit">
+               <property name="placeholderText">
+                <string>Args (comma-separated)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="logicPropertyTargetCombo"/>
+             </item>
+             <item>
+              <widget class="QComboBox" name="logicPropertyValueTypeCombo"/>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="logicPropertyValueEdit">
+               <property name="placeholderText">
+                <string>Action value</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="logicPropertyTriggerCombo"/>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="logicPropertyEnabledCheck">
+               <property name="text">
+                <string>Action enabled</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="logicApplyPropertyButton">
+               <property name="text">
+                <string>Apply to selected node</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="logicValidationGroup">
+          <property name="title">
+           <string>Validation</string>
+          </property>
+          <layout class="QVBoxLayout" name="logicValidationLayout">
+           <property name="leftMargin">
+            <number>12</number>
+           </property>
+           <property name="topMargin">
+            <number>20</number>
+           </property>
+           <property name="rightMargin">
+            <number>12</number>
+           </property>
+           <property name="bottomMargin">
+            <number>12</number>
+           </property>
+           <item>
+            <widget class="QListWidget" name="logicValidationList">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>110</height>
+              </size>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>

@@ -1,0 +1,87 @@
+{
+  "root": {
+    "actions": [],
+    "args": [],
+    "children": [
+      {
+        "actions": [
+          {
+            "enabled": true,
+            "target": "LOW_DCM_D_0",
+            "trigger": "while_true",
+            "value": "true",
+            "valueType": "bool"
+          }
+        ],
+        "args": [
+          "time",
+          "50000",
+          "2",
+          "0"
+        ],
+        "children": [],
+        "condition": "mod_part",
+        "runtime": {
+          "effectiveResult": false,
+          "lastError": "",
+          "lastEvalMs": 5061062,
+          "lastFireMs": 5056755,
+          "localResult": false,
+          "prevEffectiveResult": false,
+          "resolvedArgs": [
+            "1773706569307",
+            "50000",
+            "2",
+            "0"
+          ]
+        },
+        "title": "blink_on"
+      },
+      {
+        "actions": [
+          {
+            "enabled": true,
+            "target": "LOW_DCM_D_0",
+            "trigger": "while_true",
+            "value": "false",
+            "valueType": "bool"
+          }
+        ],
+        "args": [
+          "time",
+          "50000",
+          "2",
+          "1"
+        ],
+        "children": [],
+        "condition": "mod_part",
+        "runtime": {
+          "effectiveResult": true,
+          "lastError": "",
+          "lastEvalMs": 5061062,
+          "lastFireMs": 5061063,
+          "localResult": true,
+          "prevEffectiveResult": true,
+          "resolvedArgs": [
+            "1773706569307",
+            "50000",
+            "2",
+            "1"
+          ]
+        },
+        "title": "blink_off"
+      }
+    ],
+    "condition": "always",
+    "runtime": {
+      "effectiveResult": true,
+      "lastError": "",
+      "lastEvalMs": 5061062,
+      "lastFireMs": 0,
+      "localResult": true,
+      "prevEffectiveResult": true,
+      "resolvedArgs": []
+    },
+    "title": "blink"
+  }
+}
