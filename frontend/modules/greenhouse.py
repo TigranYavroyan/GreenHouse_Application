@@ -328,7 +328,7 @@ class GreenhouseDesktop(
             return
 
         self.control_table = SimpleDataTable(
-            columns=["Timestamp", "Command", "Status", "Result"],
+            columns=["Timestamp", "Command", "Status"],
             parent=self.userTab,
             show_clear_button=True,
             on_clear_requested=self.clear_control_table,

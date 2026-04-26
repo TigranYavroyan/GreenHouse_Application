@@ -923,7 +923,6 @@ class GreenhouseStatisticsMixin:
 
             command = str(payload.get("command", title or "command"))
             status = str(payload.get("status", "OK"))
-            result = str(payload.get("result", ""))
             response = payload.get("response", {})
             cached = bool(payload.get("cached", False))
             self.control_history.append(
@@ -935,5 +934,6 @@ class GreenhouseStatisticsMixin:
                     "error": payload.get("error"),
                 }
             )
-            self.control_table.add_row([display_time, command, status, result])
+            # Keep control table non-technical: details are available on double-click.
+            self.control_table.add_row([display_time, command, status])
 

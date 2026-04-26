@@ -265,35 +265,39 @@ def render_command_result_data(data: Dict, command: str = '', timestamp: str = '
     # Extract result
     result = data.get('result', data.get('data', {}))
     
-    # Format result based on type
+    # Format result based on type - keep it user-friendly and non-technical.
     if isinstance(result, dict):
-        # If result has 'output', use it
-        if 'output' in result:
-            result_str = str(result['output'])
-        # If result has 'data', format it nicely
-        elif 'data' in result:
-            result_data = result['data']
-            if isinstance(result_data, dict):
-                # For sensor data, show key values
-                if 'value' in result_data:
-                    result_str = f"Value: {result_data.get('value')}"
-                elif 'temperature' in result_data:
-                    result_str = f"Temperature: {result_data.get('temperature')}"
-                else:
-                    result_str = json.dumps(result_data, indent=2)[:200]  # Limit length
-            else:
-                result_str = str(result_data)
+        summary_pairs = []
+
+        # Prefer common payload keys, otherwise use the dict itself.
+        candidate_payload = result.get('data', result.get('output', result))
+        if isinstance(candidate_payload, dict):
+            for key, value in candidate_payload.items():
+                summary_pairs.append(f"{key}: {value}")
+                if len(summary_pairs) >= 3:
+                    break
         else:
-            # Flatten dict for display
-            flat_result = flatten_dict(result)
-            if len(flat_result) <= 3:
-                result_str = ', '.join([f"{k}: {v}" for k, v in flat_result.items()])
-            else:
-                result_str = json.dumps(result, indent=2)[:200]  # Limit length
+            summary_pairs.append(str(candidate_payload))
+
+        if summary_pairs:
+            result_str = "; ".join(summary_pairs)
+            total_fields = len(candidate_payload) if isinstance(candidate_payload, dict) else 1
+            if total_fields > len(summary_pairs):
+                result_str = f"{result_str}; ... (click for details)"
+        else:
+            result_str = "Completed (click for details)"
+    elif isinstance(result, list):
+        if not result:
+            result_str = "No items returned"
+        else:
+            preview_items = [str(item) for item in result[:3]]
+            result_str = "; ".join(preview_items)
+            if len(result) > 3:
+                result_str = f"{result_str}; ... (click for details)"
     elif isinstance(result, str):
-        result_str = result[:200]  # Limit length
+        result_str = result[:200]
     else:
-        result_str = str(result)[:200]  # Limit length
+        result_str = str(result)[:200]
     
     # Handle errors
     if error:

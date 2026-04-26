@@ -87,8 +87,23 @@ def build_user_friendly_rows(
         EXPAND_KEYS = {"data", "output", "payload", "result"}
         expanded_signatures = set()
 
+        def _looks_like_raw_blob(raw_value: Any) -> bool:
+            """Detect values that represent full nested payload dumps."""
+            if isinstance(raw_value, (dict, list)):
+                return True
+            if isinstance(raw_value, str):
+                text = raw_value.strip()
+                return (text.startswith("{") and text.endswith("}")) or (
+                    text.startswith("[") and text.endswith("]")
+                )
+            return False
+
         for raw_key, value in payload.items():
             key_lower = str(raw_key).lower()
+
+            # Hide redundant technical dump rows in details view.
+            if key_lower == "output" and _looks_like_raw_blob(value):
+                continue
 
             if isinstance(value, dict) and key_lower in EXPAND_KEYS:
                 # Try to avoid duplicating identical dicts under different keys

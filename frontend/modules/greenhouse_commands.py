@@ -107,7 +107,7 @@ class CommandPanelMixin:
     def update_connection_status(self, connected):
         self.rabbitmq_connected = connected
         if connected:
-            self.connection_status.setText("✅ Connected to RabbitMQ")
+            self.connection_status.setText("✅ Connected")
             self.connection_status.setStyleSheet(f"""
                 color: {self.theme.colors.success}; 
                 font-weight: {self.theme.typography.medium};
@@ -118,7 +118,7 @@ class CommandPanelMixin:
                 border-left: 2px solid {self.theme.colors.success};
             """)
         else:
-            self.connection_status.setText("❌ Disconnected from RabbitMQ")
+            self.connection_status.setText("❌ No Connection")
             self.connection_status.setStyleSheet(f"""
                 color: {self.theme.colors.error}; 
                 font-weight: {self.theme.typography.medium};
@@ -255,7 +255,7 @@ class CommandPanelMixin:
                     }
                 )
 
-                # Use table renderer to format a compact, user-friendly summary
+                # Use table renderer to keep status/result formatting consistent
                 columns, rows = table_renderers.render_command_result_data(
                     response,
                     command=command_name,
@@ -263,8 +263,8 @@ class CommandPanelMixin:
                     cached=cached,
                 )
 
-                # Our control_table is initialized with 4 columns, so we combine
-                # the renderer's Result + Cached columns into a single Result cell.
+                # Our control table intentionally hides raw result payloads.
+                # Users can always open full data by double-clicking the row.
                 if rows:
                     rendered_row = rows[0]
                     # Expected from renderer: [timestamp, command, status, result_str, cached_str]
@@ -276,7 +276,7 @@ class CommandPanelMixin:
                         status = rendered_row[2] if len(rendered_row) > 2 else ""
                         display_result = rendered_row[3] if len(rendered_row) > 3 else ""
 
-                    self.control_table.add_row([timestamp, command_name, status, display_result])
+                    self.control_table.add_row([timestamp, command_name, status])
                     self.logger.info(f"Added row to control table: {command_name} - {status}")
                     if hasattr(self, "persist_user_log"):
                         self.persist_user_log(
