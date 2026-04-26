@@ -95,6 +95,9 @@ class App {
     this.rabbitConsumerReady = false;
     this.rabbitReconnectHandlerAttached = false;
     this.notificationConsumerReady = false;
+    this.serverInstance = null;
+    this.sessionCleanupTimer = null;
+    this.isShuttingDown = false;
 
     // services
     this.usersService = new UsersService(this.usersRepository);
@@ -306,15 +309,18 @@ class App {
     }
   }
 
-  publishCommandResponse(payload) {
+  async publishCommandResponse(payload, targetQueue = MESSAGE_QUEUES.COMMAND_RESPONSES) {
     const published = this.rabbitClient.sendToQueue(
-      MESSAGE_QUEUES.COMMAND_RESPONSES,
+      targetQueue,
       Buffer.from(JSON.stringify(payload)),
       { persistent: true }
     );
 
     if (!published) {
-      throw new Error(`Failed to publish response to ${MESSAGE_QUEUES.COMMAND_RESPONSES}`);
+      this.systemLogger.warn(
+        `RabbitMQ backpressure while publishing to ${targetQueue}, waiting for drain`
+      );
+      await this.rabbitClient.waitForDrain();
     }
   }
 
@@ -350,13 +356,14 @@ class App {
       if (!msg) return;
 
       let commandData = null;
+      const responseQueue = msg?.properties?.replyTo || MESSAGE_QUEUES.COMMAND_RESPONSES;
 
       try {
         commandData = JSON.parse(msg.content.toString());
       } catch (parseError) {
         const errorResponse = this.buildErrorResponse(commandData, new Error('Invalid JSON command payload'));
         try {
-          this.publishCommandResponse(errorResponse);
+          await this.publishCommandResponse(errorResponse, responseQueue);
           this.rabbitClient.ack(msg);
         } catch (publishError) {
           this.systemLogger.error(`Failed to publish parse error response: ${publishError.message}`);
@@ -369,14 +376,14 @@ class App {
         this.validateCommandMessage(commandData);
         this.systemLogger.debug(`Processing command: ${commandData.commandId}`);
         const result = await this.commandProcessor.processCommand(commandData);
-        this.publishCommandResponse(result);
+        await this.publishCommandResponse(result, responseQueue);
         this.rabbitClient.ack(msg);
       } catch (err) {
         this.commandProcessor.commandStats.errors++;
         this.systemLogger.error(`Command processing failed: ${err && err.message ? err.message : JSON.stringify(err)}`);
         const errorResponse = this.buildErrorResponse(commandData, err);
         try {
-          this.publishCommandResponse(errorResponse);
+          await this.publishCommandResponse(errorResponse, responseQueue);
           this.rabbitClient.ack(msg);
         } catch (publishError) {
           this.systemLogger.error(`Failed to publish error response: ${publishError.message}`);
@@ -421,32 +428,82 @@ class App {
       this.setupRabbitAndConsumer().catch((e) => this.systemLogger.error(`Rabbit setup error: ${e.message}`));
 
       // session cleanup
-      setInterval(
+      this.sessionCleanupTimer = setInterval(
         () => this.sessionManager.cleanupOldSessions(),
         this.config.sessions.cleanupIntervalMs
       );
 
       const host = this.config.httpListenHost;
-      this.app.listen(port, host, () => {
+      this.serverInstance = this.app.listen(port, host, () => {
         this.systemLogger.info(`Greenhouse backend listening on ${host}:${port}`);
         this.systemLogger.info(`Logs directory: ${this.config.logsDir}`);
         this.systemLogger.info(`API docs available at http://localhost:${port}`);
       });
 
-      const stopRuntime = () => {
-        try {
-          this.schedulesRuntime.stop();
-        } catch (error) {
-          this.systemLogger.warn(`Failed to stop schedules runtime: ${error.message}`);
-        }
-      };
-      process.on('SIGINT', stopRuntime);
-      process.on('SIGTERM', stopRuntime);
+      process.on('SIGINT', () => {
+        this.shutdown('SIGINT').catch((error) => {
+          this.systemLogger.error(`Graceful shutdown failed: ${error.message}`);
+          process.exit(1);
+        });
+      });
+      process.on('SIGTERM', () => {
+        this.shutdown('SIGTERM').catch((error) => {
+          this.systemLogger.error(`Graceful shutdown failed: ${error.message}`);
+          process.exit(1);
+        });
+      });
 
     } catch (err) {
       this.systemLogger.error(`Failed to start server: ${err.message}`);
       process.exit(1);
     }
+  }
+
+  async shutdown(signal = 'unknown') {
+    if (this.isShuttingDown) return;
+    this.isShuttingDown = true;
+    this.systemLogger.info(`Received ${signal}, shutting down gracefully...`);
+
+    if (this.sessionCleanupTimer) {
+      clearInterval(this.sessionCleanupTimer);
+      this.sessionCleanupTimer = null;
+    }
+
+    try {
+      this.schedulesRuntime.stop();
+    } catch (error) {
+      this.systemLogger.warn(`Failed to stop schedules runtime: ${error.message}`);
+    }
+
+    if (this.serverInstance) {
+      await new Promise((resolve) => {
+        this.serverInstance.close(() => resolve());
+      });
+      this.serverInstance = null;
+    }
+
+    try {
+      await this.rabbitClient.close();
+    } catch (error) {
+      this.systemLogger.warn(`Failed to close RabbitMQ client: ${error.message}`);
+    }
+
+    if (this.redisClient?.isOpen) {
+      try {
+        await this.redisClient.client.quit();
+      } catch (error) {
+        this.systemLogger.warn(`Failed to close Redis client: ${error.message}`);
+      }
+    }
+
+    try {
+      const sequelize = await this.config.ConfigPostgres.getInstance();
+      await sequelize.close();
+    } catch (error) {
+      this.systemLogger.warn(`Failed to close Postgres connection: ${error.message}`);
+    }
+
+    process.exit(0);
   }
 }
 

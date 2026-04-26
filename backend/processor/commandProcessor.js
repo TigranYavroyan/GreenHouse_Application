@@ -35,7 +35,15 @@ class CommandProcessor {
     session.lastActivity = new Date().toISOString();
     session.logger.command(commandId, 'RECEIVED', `command: ${command}`);
 
-    session.commandQueue = session.commandQueue.then(async () => {
+    session.commandQueue = session.commandQueue
+      .catch((queueError) => {
+        session.logger.error(
+          `Previous command in queue failed, continuing with next command: ${
+            queueError && queueError.message ? queueError.message : String(queueError)
+          }`,
+        );
+      })
+      .then(async () => {
       try {
         const { ttl, shouldCache } = resolveCachePlan(command, parameters);
         const redis = this.redis && this.redis.isOpen ? this.redis : null;
@@ -128,7 +136,7 @@ class CommandProcessor {
         );
         throw err;
       }
-    });
+      });
 
     return session.commandQueue;
   }

@@ -113,7 +113,7 @@ class SchedulesRuntime {
         { persistent: true }
       );
       if (!queued) {
-        throw new Error('Queue publish was buffered by RabbitMQ channel');
+        await this.rabbitClient.waitForDrain();
       }
 
       await this._markDispatchSuccess(schedule.id, commandId, scheduleMode);

@@ -184,7 +184,9 @@ The Greenhouse Automation Application follows a **microservices architecture** w
 - Only successful results are cached (errors are not cached)
 
 #### 8. **Response Delivery**
-- Processed command result is sent to RabbitMQ queue: `command_responses`
+- Processed command result is sent to a reply queue:
+  - preferred target is message `replyTo` queue set by frontend publisher
+  - fallback target is shared queue `command_responses` when `replyTo` is absent
 - Response includes:
   - `commandId` (matches request)
   - `result` (execution output or error)
@@ -193,7 +195,7 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - `timestamp`
 
 #### 9. **Frontend Response Handling**
-- `CommandWorker` polls `command_responses` queue (non-blocking)
+- `CommandWorker` consumes a dedicated per-session reply queue (`command_responses.<sessionId>`) on a background thread
 - When response arrives:
   - Emits `response_received` signal
   - `GreenhouseDesktop` handles the signal
@@ -228,7 +230,8 @@ The Greenhouse Automation Application follows a **microservices architecture** w
   - 15672 (Management UI, commented out)
 - **Queues**:
   - `greenhouse_commands`: Commands from frontend to backend
-  - `command_responses`: Responses from backend to frontend
+  - `command_responses`: Legacy/fallback shared response queue
+  - `command_responses.<sessionId>`: Dedicated frontend reply queues (preferred via AMQP `replyTo`)
   - `notification.email.verification.v1`: Verification email requests
   - `notification.email.verification.retry.v1`: Delayed retries for transient SMTP failures
   - `notification.email.verification.dlq.v1`: Dead-letter queue for permanent failures
@@ -552,8 +555,9 @@ Extensibility details:
 - **Key Features**:
   - Connects to RabbitMQ broker
   - Sends commands to `greenhouse_commands` queue
-  - Receives responses from `command_responses` queue
-  - Non-blocking message polling using QTimer (every 100ms)
+  - Sets `replyTo=command_responses.<sessionId>` on each command publish
+  - Receives responses from dedicated reply queue
+  - Runs RabbitMQ I/O on a background thread (UI thread stays responsive)
   - Automatic reconnection on connection loss
   - PyQt5 signals for:
     - `response_received`: Emitted when command response arrives

@@ -92,7 +92,7 @@ class NotificationConsumer {
         );
 
         if (!published) {
-          throw new Error('Failed to publish verification event to retry queue');
+          await this.rabbitClient.waitForDrain();
         }
 
         this.logger.warn(
@@ -133,7 +133,7 @@ class NotificationConsumer {
     );
 
     if (!published) {
-      throw new Error('Failed to publish message to notification DLQ');
+      await this.rabbitClient.waitForDrain();
     }
 
     this.logger.error(`Verification email moved to DLQ: ${reason}`);

@@ -689,6 +689,14 @@ Command payload sent to `greenhouse_commands`:
 }
 ```
 
+AMQP publish properties used by frontend:
+- `replyTo`: `command_responses.<sessionId>` (dedicated response queue per desktop session)
+- `correlationId`: `commandId`
+
+Backend response routing:
+- If incoming command message has `replyTo`, backend publishes response there.
+- Otherwise backend falls back to shared `command_responses`.
+
 Success response payload from `command_responses`:
 
 ```json

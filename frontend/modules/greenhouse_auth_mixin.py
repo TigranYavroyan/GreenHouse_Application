@@ -1,4 +1,6 @@
 """Authentication UI and session recovery for the desktop shell."""
+from datetime import datetime, timezone
+
 from PyQt5.QtWidgets import QLabel, QPushButton
 
 from modules.auth_dialog import AuthDialog

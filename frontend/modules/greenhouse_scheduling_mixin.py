@@ -1,5 +1,5 @@
 """Scheduling tab: targets, one-off schedules, and table rendering."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from PyQt5.QtCore import QTimer
 

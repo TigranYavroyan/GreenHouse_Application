@@ -35,6 +35,7 @@ class CommandPanelMixin:
     def setup_command_worker(self):
         self.logger.info("Setting up command worker")
         self.command_worker = CommandWorker()
+        self.command_worker.set_session_id(self.session_id)
         self.command_worker.response_received.connect(self.handle_response)
         self.command_worker.connection_status.connect(self.update_connection_status)
         self.command_worker.error_occurred.connect(self.handle_error)
@@ -217,19 +218,28 @@ class CommandPanelMixin:
         session_id = response.get('sessionId')
         current_path = response.get('currentPath')
 
+        if session_id and str(session_id) != str(self.session_id):
+            self.logger.warning(
+                f"Ignoring response for foreign session {session_id}; current session is {self.session_id}"
+            )
+            return
+
         self.logger.info(f"Received response for command {command_id}, cached: {cached}, error: {bool(error)}")
 
         timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
 
         # Get command name from pending commands or response
         command_name = "unknown"
+        command_info = {}
         if command_id in self.pending_commands:
             command_info = self.pending_commands[command_id]
             command_name = command_info.get('command', 'unknown')
             del self.pending_commands[command_id]
         else:
-            command_name = response.get('command', 'unknown')
-            self.logger.warning(f"Command ID {command_id} not found in pending_commands!")
+            self.logger.warning(
+                f"Command ID {command_id} not found in pending_commands; skipping as late/duplicate response"
+            )
+            return
 
         # Add row to table with data from RabbitMQ
         if self.control_table:

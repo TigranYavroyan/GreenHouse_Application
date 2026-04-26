@@ -110,6 +110,19 @@ class RabbitMQClient {
     return this.channel.sendToQueue(queue, buffer, opts);
   }
 
+  async waitForDrain(timeoutMs = 5000) {
+    if (!this.channel) throw new Error('RabbitMQ channel not available');
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`RabbitMQ channel drain timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+      this.channel.once('drain', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+  }
+
   publish(exchange, routingKey, buffer, opts) {
     if (!this.channel) throw new Error('RabbitMQ channel not available');
     return this.channel.publish(exchange, routingKey, buffer, opts);
@@ -131,6 +144,33 @@ class RabbitMQClient {
 
   nack(msg, requeue = true) {
     if (this.channel && msg) this.channel.nack(msg, false, requeue);
+  }
+
+  async close() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
+    const channel = this.channel;
+    const connection = this.connection;
+    this.channel = null;
+    this.connection = null;
+
+    if (channel) {
+      try {
+        await channel.close();
+      } catch (error) {
+        SystemLogger.warn(`Failed to close RabbitMQ channel: ${error.message}`);
+      }
+    }
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (error) {
+        SystemLogger.warn(`Failed to close RabbitMQ connection: ${error.message}`);
+      }
+    }
   }
 }
 
