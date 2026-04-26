@@ -902,6 +902,7 @@ class GreenhouseStatisticsMixin:
 
         self.control_table.clear_data()
         self.control_history = []
+        restored_count = 0
 
         for entry in reversed(entries):
             if not isinstance(entry, dict):
@@ -922,18 +923,34 @@ class GreenhouseStatisticsMixin:
             display_time = ts_dt.astimezone().strftime("%H:%M:%S") if ts_dt else "-"
 
             command = str(payload.get("command", title or "command"))
-            status = str(payload.get("status", "OK"))
+            command_display = (
+                self._command_display_name(command, payload.get("parameters", {}))
+                if hasattr(self, "_command_display_name")
+                else command.replace("_", " ").title()
+            )
+            raw_status = str(payload.get("status", "OK"))
+            status = (
+                self._normalize_control_status(raw_status)
+                if hasattr(self, "_normalize_control_status")
+                else raw_status
+            )
             response = payload.get("response", {})
             cached = bool(payload.get("cached", False))
             self.control_history.append(
                 {
                     "timestamp": display_time,
                     "command": command,
-                    "response": response if isinstance(response, dict) else {"result": result},
+                    "command_display": command_display,
+                    "response": response if isinstance(response, dict) else {"result": payload.get("result", "")},
                     "cached": cached,
                     "error": payload.get("error"),
                 }
             )
             # Keep control table non-technical: details are available on double-click.
-            self.control_table.add_row([display_time, command, status])
+            self.control_table.add_row([display_time, command_display, status])
+            restored_count += 1
+        if hasattr(self, "_on_control_table_selection_changed"):
+            self._on_control_table_selection_changed()
+        if restored_count > 0:
+            self.status_label.setText(f"Restored {restored_count} previous action(s)")
 

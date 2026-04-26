@@ -51,6 +51,18 @@ def format_timestamp(timestamp: Any) -> str:
     return str(timestamp)
 
 
+def format_stamp_ms(stamp_ms: Any) -> str:
+    """Format stamp milliseconds to local readable datetime."""
+    try:
+        stamp_value = int(float(stamp_ms))
+    except (TypeError, ValueError):
+        return str(stamp_ms)
+
+    if stamp_value <= 0:
+        return str(stamp_ms)
+    return format_timestamp(stamp_value)
+
+
 def format_size(size_bytes: int) -> str:
     """Format file size to human-readable format"""
     for unit in ['B', 'KB', 'MB', 'GB']:
@@ -260,7 +272,7 @@ def render_command_result_data(data: Dict, command: str = '', timestamp: str = '
     # Determine status
     error = data.get('error')
     success = data.get('success', error is None)
-    status = '✅ Success' if success else '❌ Error'
+    status = 'Success' if success else 'Failed'
     
     # Extract result
     result = data.get('result', data.get('data', {}))
@@ -304,6 +316,8 @@ def render_command_result_data(data: Dict, command: str = '', timestamp: str = '
         result_str = f"Error: {error}"
     
     cached_str = 'Yes' if cached else 'No'
+    if success and cached:
+        status = "Success (Cached)"
     
     rows.append([timestamp, command, status, result_str, cached_str])
     
@@ -475,14 +489,14 @@ def render_executor_schema_data(data: Dict) -> Tuple[List[str], List[List[str]]]
 
 
 def render_getters_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Key', 'Valid', 'StampMs', 'Type', 'Value']
+    columns = ['Key', 'Valid', 'Timestamp', 'Type', 'Value']
     rows = []
 
     if isinstance(data, list):
         for item in data:
             key = str(getattr(item, 'key', ''))
             valid = str(getattr(item, 'valid', False))
-            stamp_ms = str(getattr(item, 'stamp_ms', 0))
+            stamp_ms = format_stamp_ms(getattr(item, 'stamp_ms', 0))
             typed_data = getattr(item, 'data', None)
             value_type = str(getattr(typed_data, 'value_type', 'unknown'))
             value = getattr(typed_data, 'value', None)
@@ -493,7 +507,7 @@ def render_getters_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]
                 rows.append([str(key), 'False', '0', 'unknown', str(item)])
                 continue
             valid = str(item.get('valid', False))
-            stamp_ms = str(item.get('stampMs', 0))
+            stamp_ms = format_stamp_ms(item.get('stampMs', 0))
             data_obj = item.get('data', {})
             value_type = str(data_obj.get('type', 'unknown')) if isinstance(data_obj, dict) else 'unknown'
             value = data_obj.get('value') if isinstance(data_obj, dict) else data_obj
@@ -503,7 +517,7 @@ def render_getters_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]
 
 
 def render_executors_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Id', 'Name', 'Valid', 'StampMs', 'Mode', 'Type', 'Value']
+    columns = ['Id', 'Name', 'Valid', 'Timestamp', 'Mode', 'Type', 'Value']
     rows = []
 
     if isinstance(data, list):
@@ -512,7 +526,7 @@ def render_executors_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]
                 executor_id = str(item.get('id', ''))
                 name = str(item.get('name', ''))
                 valid = str(item.get('valid', False))
-                stamp_ms = str(item.get('stampMs', 0))
+                stamp_ms = format_stamp_ms(item.get('stampMs', 0))
                 mode = str(item.get('mode', 'UNKNOWN'))
                 data_obj = item.get('data', {})
                 value_type = str(data_obj.get('type', 'unknown')) if isinstance(data_obj, dict) else 'unknown'
@@ -521,7 +535,7 @@ def render_executors_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]
                 executor_id = str(getattr(item, 'executor_id', ''))
                 name = str(getattr(item, 'name', ''))
                 valid = str(getattr(item, 'valid', False))
-                stamp_ms = str(getattr(item, 'stamp_ms', 0))
+                stamp_ms = format_stamp_ms(getattr(item, 'stamp_ms', 0))
                 mode = str(getattr(item, 'mode', 'UNKNOWN'))
                 typed_data = getattr(item, 'data', None)
                 value_type = str(getattr(typed_data, 'value_type', 'unknown'))

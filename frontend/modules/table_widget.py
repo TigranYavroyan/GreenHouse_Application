@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFontMetrics
+from PyQt5.QtGui import QFontMetrics, QColor
 from modules.styles import GreenhouseTheme
 
 
@@ -145,8 +145,34 @@ class SimpleDataTable(QWidget):
         for col, value in enumerate(data):
             item = QTableWidgetItem(str(value) if value is not None else "")
             item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self._apply_semantic_cell_style(col, item)
             self.table.setItem(row, col, item)
         self.table.scrollToBottom()
+
+    def _apply_semantic_cell_style(self, column_index, item):
+        """Apply lightweight semantic colors for recognizable status values."""
+        if not item:
+            return
+        if not isinstance(column_index, int) or column_index < 0:
+            return
+        if column_index >= len(self.columns):
+            return
+
+        header = str(self.columns[column_index]).strip().lower()
+        if header != "status":
+            return
+
+        text = str(item.text() or "").strip().lower()
+        if "success" in text or text == "ok":
+            item.setForeground(QColor(self.theme.colors.success))
+            return
+        if "fail" in text or "error" in text or "timeout" in text:
+            item.setForeground(QColor(self.theme.colors.error))
+            return
+        if "progress" in text or "running" in text or "pending" in text:
+            item.setForeground(QColor(self.theme.colors.warning))
+            return
+        item.setForeground(QColor(self.theme.colors.text_secondary))
 
     def clear_data(self):
         self.table.setRowCount(0)

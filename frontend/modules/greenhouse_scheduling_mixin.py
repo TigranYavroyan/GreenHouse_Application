@@ -163,6 +163,7 @@ class GreenhouseSchedulingMixin:
         if self.schedule_table:
             self.schedule_table.clear_data()
         self.schedule_table_rows = []
+        self._update_schedule_empty_state()
 
     def remove_selected_schedule_row_from_view(self, row=None):
         """Hide selected row from schedule table view."""
@@ -186,6 +187,8 @@ class GreenhouseSchedulingMixin:
         self.control_table.table.removeRow(row)
         if 0 <= row < len(self.control_history):
             self.control_history.pop(row)
+        if hasattr(self, "_on_control_table_selection_changed"):
+            self._on_control_table_selection_changed()
 
     def _remove_selected_server_row(self, row):
         """Remove selected server-table row and keep history mapping aligned."""
@@ -196,6 +199,8 @@ class GreenhouseSchedulingMixin:
         self.server_table.table.removeRow(row)
         if 0 <= row < len(self.server_history):
             self.server_history.pop(row)
+        if hasattr(self, "_update_server_empty_state"):
+            self._update_server_empty_state()
 
     def update_custom_delay_enabled(self):
         """Enable custom delay controls only for custom preset."""
@@ -333,7 +338,7 @@ class GreenhouseSchedulingMixin:
                     if isinstance(nested, dict):
                         schedule_id = str(nested.get("id", "")).strip()[:8]
             schedule_label = schedule_id or "created"
-            self.status_label.setText(f"🗓️ One-time task {schedule_label} scheduled for {target_label}")
+            self.status_label.setText(f"One-time task {schedule_label} scheduled for {target_label}")
             self.refresh_schedule_table()
         except Exception as error:
             self._handle_api_exception("Scheduling Error", error)
@@ -378,7 +383,7 @@ class GreenhouseSchedulingMixin:
                 },
             )
             self.refresh_schedule_table()
-            self.status_label.setText(f"🚫 Canceled task {str(schedule_id)[:8]}")
+            self.status_label.setText(f"Canceled task {str(schedule_id)[:8]}")
         except Exception as error:
             self._handle_api_exception("Scheduling Error", error)
 
@@ -416,7 +421,7 @@ class GreenhouseSchedulingMixin:
                     schedule_map[sid] = schedule
 
             if not schedule_ids:
-                self.status_label.setText("ℹ️ No pending schedules to cancel")
+                self.status_label.setText("No pending schedules to cancel")
                 return
 
             canceled = 0
@@ -446,7 +451,7 @@ class GreenhouseSchedulingMixin:
                     f"Canceled {canceled} schedule(s), but some failed:\n{summary}",
                 )
             else:
-                self.status_label.setText(f"🧹 Canceled {canceled} pending schedule(s)")
+                self.status_label.setText(f"Canceled {canceled} pending schedule(s)")
         except Exception as error:
             self._handle_api_exception("Scheduling Error", error)
 
@@ -520,6 +525,13 @@ class GreenhouseSchedulingMixin:
                 self.schedule_table.table.selectRow(selected_index)
             except ValueError:
                 pass
+        self._update_schedule_empty_state()
+
+    def _update_schedule_empty_state(self):
+        if not hasattr(self, "schedule_empty_state_label") or not self.schedule_empty_state_label:
+            return
+        has_rows = bool(self.schedule_table and self.schedule_table.table.rowCount() > 0)
+        self.schedule_empty_state_label.setVisible(not has_rows)
 
     def _parse_datetime(self, value):
         text = str(value or "").strip()

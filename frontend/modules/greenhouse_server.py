@@ -66,12 +66,13 @@ class ServerPanelMixin:
 
             # Compute a short status summary for the main server table
             timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
-            status = "✅ OK"
+            status = "Success"
             if isinstance(data, dict) and data.get("error"):
-                status = f"❌ Error: {data.get('error')}"
+                status = "Failed"
 
             # Append a compact summary row; detailed view is available on double-click
             self.server_table.add_row([timestamp, title, status])
+            self._update_server_empty_state()
             self.logger.info(f"Added server summary row for '{title}' ({data_type})")
 
         except Exception as e:
@@ -82,6 +83,13 @@ class ServerPanelMixin:
         if self.server_table:
             self.server_table.clear_data()
         self.server_history = []
+        self._update_server_empty_state()
+
+    def _update_server_empty_state(self):
+        if not hasattr(self, "server_empty_state_label") or not self.server_empty_state_label:
+            return
+        has_rows = bool(self.server_table and self.server_table.table.rowCount() > 0)
+        self.server_empty_state_label.setVisible(not has_rows)
 
     def show_server_details(self, row, column):
         """Open a detailed table view for a selected server-table row."""
@@ -304,7 +312,7 @@ class ServerPanelMixin:
             self._refresh_executors()
             self.display_data_table("Executors", self.core_executors, "executors")
 
-            self.status_label.setText("✅ Greenhouse state refreshed")
+            self.status_label.setText("Greenhouse state refreshed")
         except Exception as error:
             self._show_core_error("Refresh greenhouse snapshot", error)
 

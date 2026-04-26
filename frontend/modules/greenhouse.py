@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from PyQt5.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
+    QHBoxLayout,
     QPushButton,
     QSizePolicy,
     QLabel,
@@ -157,18 +158,58 @@ class GreenhouseDesktop(
     def add_functions(self):
         """Setup signal connections and functionality"""
         # User Tab - Sensor reading buttons
-        self.tempButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "temperature"}))
-        self.humidityButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "humidity"}))
-        self.lightButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "light"}))
-        self.co2Button.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "co2"}))
-        self.soilMoistureButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "soil_moisture"}))
-        self.soilPHButton.clicked.connect(lambda: self.send_user_command("read_sensor", {"sensor": "soil_ph"}))
+        self.tempButton.clicked.connect(
+            lambda: self.send_user_command("read_sensor", {"sensor": "temperature"}, source_button=self.tempButton)
+        )
+        self.humidityButton.clicked.connect(
+            lambda: self.send_user_command("read_sensor", {"sensor": "humidity"}, source_button=self.humidityButton)
+        )
+        self.lightButton.clicked.connect(
+            lambda: self.send_user_command("read_sensor", {"sensor": "light"}, source_button=self.lightButton)
+        )
+        self.co2Button.clicked.connect(
+            lambda: self.send_user_command("read_sensor", {"sensor": "co2"}, source_button=self.co2Button)
+        )
+        self.soilMoistureButton.clicked.connect(
+            lambda: self.send_user_command(
+                "read_sensor",
+                {"sensor": "soil_moisture"},
+                source_button=self.soilMoistureButton,
+            )
+        )
+        self.soilPHButton.clicked.connect(
+            lambda: self.send_user_command("read_sensor", {"sensor": "soil_ph"}, source_button=self.soilPHButton)
+        )
 
         # User Tab - Device control buttons
-        self.waterCanalButton.clicked.connect(lambda: self.send_user_command("switch_water_canal", {"action": "toggle"}))
-        self.fanButton.clicked.connect(lambda: self.send_user_command("switch_fan", {"fanId": "fan_1", "action": "toggle"}))
-        self.heaterButton.clicked.connect(lambda: self.send_user_command("switch_heater", {"heaterId": "heater_1", "action": "toggle"}))
-        self.actuatorButton.clicked.connect(lambda: self.send_user_command("switch_actuator", {"actuatorId": "actuator_1", "action": "toggle"}))
+        self.waterCanalButton.clicked.connect(
+            lambda: self.send_user_command(
+                "switch_water_canal",
+                {"action": "toggle"},
+                source_button=self.waterCanalButton,
+            )
+        )
+        self.fanButton.clicked.connect(
+            lambda: self.send_user_command(
+                "switch_fan",
+                {"fanId": "fan_1", "action": "toggle"},
+                source_button=self.fanButton,
+            )
+        )
+        self.heaterButton.clicked.connect(
+            lambda: self.send_user_command(
+                "switch_heater",
+                {"heaterId": "heater_1", "action": "toggle"},
+                source_button=self.heaterButton,
+            )
+        )
+        self.actuatorButton.clicked.connect(
+            lambda: self.send_user_command(
+                "switch_actuator",
+                {"actuatorId": "actuator_1", "action": "toggle"},
+                source_button=self.actuatorButton,
+            )
+        )
 
         # Server Tab - Server management buttons
         self.healthButton.clicked.connect(self.view_core_status)
@@ -345,14 +386,49 @@ class GreenhouseDesktop(
         self.userTabLayout.insertWidget(control_insert_index, self.control_table, 1)
         # Double-click on a control row opens detailed view (mixin)
         self.control_table.table.cellDoubleClicked.connect(self.show_control_details)
+        self.control_table.table.itemSelectionChanged.connect(self._on_control_table_selection_changed)
 
-        # Add a small hint below the control table so users know about double-click
-        control_hint = QLabel("Tip: double-click a row in the table to see detailed information.")
+        # Connection banner in user tab for clear reconnect guidance.
+        control_connection_row = QHBoxLayout()
+        control_connection_row.setContentsMargins(0, 0, 0, 0)
+        self.control_connection_banner = QLabel("No connection. Reconnecting automatically...")
+        self.control_connection_banner.setObjectName("controlConnectionBanner")
+        self.retry_connection_button = QPushButton("Retry now")
+        self.retry_connection_button.setObjectName("retryConnectionButton")
+        self.retry_connection_button.clicked.connect(self.retry_connection_now)
+        control_connection_row.addWidget(self.control_connection_banner, 0, Qt.AlignLeft)
+        control_connection_row.addWidget(self.retry_connection_button, 0, Qt.AlignLeft)
+        control_connection_row.addStretch(1)
+        self.userTabLayout.insertLayout(control_insert_index + 1, control_connection_row)
+
+        # Explicit action for details improves discoverability versus double-click only.
+        control_actions = QHBoxLayout()
+        control_actions.setContentsMargins(0, 0, 0, 0)
+        self.view_control_details_button = QPushButton("View Selected Details")
+        self.view_control_details_button.setObjectName("viewControlDetailsButton")
+        self.view_control_details_button.setEnabled(False)
+        self.view_control_details_button.clicked.connect(self.view_selected_control_details)
+        control_actions.addWidget(self.view_control_details_button, 0, Qt.AlignLeft)
+        control_actions.addStretch(1)
+        self.userTabLayout.insertLayout(control_insert_index + 2, control_actions)
+
+        # Add a small hint below the control table so users know how to open details.
+        control_hint = QLabel("Tip: select a row and click 'View Selected Details' (or double-click a row).")
         control_hint.setObjectName("controlTableHintLabel")
-        self.userTabLayout.insertWidget(control_insert_index + 1, control_hint, 0)
+        self.userTabLayout.insertWidget(control_insert_index + 3, control_hint, 0)
+
+        self.control_empty_state_label = QLabel(
+            "No actions yet. Use any control above to run your first command."
+        )
+        self.control_empty_state_label.setObjectName("controlEmptyStateLabel")
+        self.userTabLayout.insertWidget(control_insert_index + 4, self.control_empty_state_label, 0)
 
         # Also set a tooltip on the table itself
-        self.control_table.table.setToolTip("Double-click a row to open a detailed view of the result.")
+        self.control_table.table.setToolTip(
+            "Select a row and click 'View Selected Details', or double-click a row."
+        )
+        self._on_control_table_selection_changed()
+        self._update_connection_banner()
 
         self.logger.info(f"Control table created: visible={self.control_table.isVisible()}")
 
@@ -380,6 +456,12 @@ class GreenhouseDesktop(
             schedule_hint = QLabel("Tip: one-time tasks update countdown every second. Hide rows if needed.")
             schedule_hint.setObjectName("scheduleTableHintLabel")
             self.schedulingTabLayout.insertWidget(schedule_insert_index + 1, schedule_hint, 0)
+
+            self.schedule_empty_state_label = QLabel(
+                "No schedules yet. Create a one-time task from the controls above."
+            )
+            self.schedule_empty_state_label.setObjectName("scheduleEmptyStateLabel")
+            self.schedulingTabLayout.insertWidget(schedule_insert_index + 2, self.schedule_empty_state_label, 0)
         else:
             self.logger.warning("schedule_output_container not found - scheduling table not created")
 
@@ -414,8 +496,18 @@ class GreenhouseDesktop(
         server_hint.setObjectName("serverTableHintLabel")
         self.infoGroupLayout.insertWidget(server_insert_index + 1, server_hint, 0)
 
+        self.server_empty_state_label = QLabel(
+            "No server checks yet. Click any server action above to load data."
+        )
+        self.server_empty_state_label.setObjectName("serverEmptyStateLabel")
+        self.infoGroupLayout.insertWidget(server_insert_index + 2, self.server_empty_state_label, 0)
+
         # Tooltip on the server table itself
         self.server_table.table.setToolTip("Double-click a row to open a detailed view of the selected entry.")
+        if hasattr(self, "_update_schedule_empty_state"):
+            self._update_schedule_empty_state()
+        if hasattr(self, "_update_server_empty_state"):
+            self._update_server_empty_state()
 
         self.logger.info(f"Server table created: visible={self.server_table.isVisible()}")
 

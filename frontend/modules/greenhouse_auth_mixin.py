@@ -127,7 +127,7 @@ class GreenhouseAuthMixin:
 
             if self._reauthenticate_or_exit():
                 self._resume_authenticated_timers(timer_state)
-                self.status_label.setText("✅ Re-authenticated successfully")
+                self.status_label.setText("Re-authenticated successfully")
                 return
 
             self.close()
@@ -157,7 +157,7 @@ class GreenhouseAuthMixin:
             self.status_label.setText("Signed out")
             if self._reauthenticate_or_exit():
                 self._resume_authenticated_timers(timer_state)
-                self.status_label.setText("✅ Signed in again")
+                self.status_label.setText("Signed in again")
                 return
             self.close()
         finally:
