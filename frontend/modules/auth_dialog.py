@@ -135,6 +135,33 @@ class AuthDialog(QDialog):
         self.signup_button.setEnabled(not busy)
         self.cancel_button.setEnabled(not busy)
 
+    @staticmethod
+    def _friendly_error_message(error: Exception) -> str:
+        """
+        Map technical backend/network exceptions to simple user-facing text.
+        """
+        if isinstance(error, UnauthorizedError):
+            return str(error)
+
+        if isinstance(error, ApiRequestError):
+            if int(getattr(error, "status_code", 0)) >= 500:
+                return "Server is not available."
+            return str(error) or "Request failed."
+
+        raw_message = str(error or "").strip().lower()
+        network_signatures = (
+            "connection refused",
+            "failed to establish a new connection",
+            "max retries exceeded",
+            "name or service not known",
+            "timed out",
+            "connection aborted",
+            "connection reset",
+        )
+        if any(signature in raw_message for signature in network_signatures):
+            return "Server is not available."
+        return str(error) or "Server is not available."
+
     def _submit_sign_in(self) -> None:
         username = self.signin_username.text().strip()
         password = self.signin_password.text()
@@ -153,9 +180,9 @@ class AuthDialog(QDialog):
         except UnauthorizedError as error:
             self._set_feedback(str(error), "error")
         except ApiRequestError as error:
-            self._set_feedback(str(error), "error")
+            self._set_feedback(self._friendly_error_message(error), "error")
         except Exception as error:
-            self._set_feedback(str(error), "error")
+            self._set_feedback(self._friendly_error_message(error), "error")
         finally:
             self._set_busy(False)
 
@@ -185,9 +212,9 @@ class AuthDialog(QDialog):
         except UnauthorizedError as error:
             self._set_feedback(str(error), "error")
         except ApiRequestError as error:
-            self._set_feedback(str(error), "error")
+            self._set_feedback(self._friendly_error_message(error), "error")
         except Exception as error:
-            self._set_feedback(str(error), "error")
+            self._set_feedback(self._friendly_error_message(error), "error")
         finally:
             self._set_busy(False)
 

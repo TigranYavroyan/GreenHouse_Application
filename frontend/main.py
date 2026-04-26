@@ -13,7 +13,7 @@ from modules.greenhouse import GreenhouseDesktop
 from modules.logging_setup import setup_logging
 from modules.auth_dialog import AuthDialog
 from modules.auth_session import AuthSessionManager
-from modules.core_api_client import CoreApiClient, UnauthorizedError
+from modules.core_api_client import CoreApiClient, UnauthorizedError, ApiRequestError
 from modules.ui_dialogs import StyledMessageDialog
 
 
@@ -39,10 +39,13 @@ def ensure_authenticated(app, backend_url, auth_session):
                 return True
             except Exception as error:
                 auth_session.clear_token()
+                message = "Server is not available."
+                if isinstance(error, ApiRequestError) and int(getattr(error, "status_code", 0)) < 500:
+                    message = f"Unable to verify authenticated session: {error}"
                 StyledMessageDialog.show_warning(
                     None,
                     "Authentication Failed",
-                    f"Unable to verify authenticated session: {error}",
+                    message,
                 )
                 continue
         return False
