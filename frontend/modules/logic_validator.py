@@ -1,7 +1,7 @@
 """Validation for logic canvas structural integrity."""
 
-from dataclasses import dataclass
-from typing import Dict, List, Set
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Set
 
 from modules.logic_constants import (
     CONDITION_SPECS,
@@ -13,14 +13,28 @@ from modules.logic_constants import (
     TRIGGER_MODES,
     VALUE_TYPES,
 )
+from modules.localization import tr_key
+from modules.localization.localization_keys import LogicValidation
 from modules.logic_models import LogicDocument
 
 
 @dataclass(frozen=True)
 class LogicValidationIssue:
-    severity: str  # "error" | "warning"
-    message: str
+    """Validation issue described by a translation key + format params.
+
+    `message` is rendered eagerly for any consumer that wants the text in the
+    active language, while `message_key` and `params` allow downstream code to
+    re-render the message after a language switch.
+    """
+
+    severity: str
+    message_key: str
+    params: Dict[str, Any] = field(default_factory=dict)
     node_id: str = ""
+
+    @property
+    def message(self) -> str:
+        return tr_key(self.message_key, **self.params)
 
 
 def _is_int_token(value: str) -> bool:
@@ -62,7 +76,8 @@ def _validate_arg_kinds(
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message=f"Node '{node_title}': '{arg_spec.label}' is required.",
+                    message_key=LogicValidation.ARG_REQUIRED,
+                    params={"title": node_title, "label": arg_spec.label},
                     node_id=node_id,
                 )
             )
@@ -77,7 +92,8 @@ def _validate_arg_kinds(
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message=f"Node '{node_title}': '{arg_spec.label}' must be an integer.",
+                    message_key=LogicValidation.ARG_MUST_BE_INT,
+                    params={"title": node_title, "label": arg_spec.label},
                     node_id=node_id,
                 )
             )
@@ -85,7 +101,8 @@ def _validate_arg_kinds(
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message=f"Node '{node_title}': '{arg_spec.label}' must be numeric.",
+                    message_key=LogicValidation.ARG_MUST_BE_NUMERIC,
+                    params={"title": node_title, "label": arg_spec.label},
                     node_id=node_id,
                 )
             )
@@ -95,10 +112,8 @@ def _validate_arg_kinds(
                 issues.append(
                     LogicValidationIssue(
                         severity="warning",
-                        message=(
-                            f"Node '{node_title}': '{arg_spec.label}' should be bool literal "
-                            "or a getter token (example: SENSOR.FLAG)."
-                        ),
+                        message_key=LogicValidation.ARG_BOOL_WARNING,
+                        params={"title": node_title, "label": arg_spec.label},
                         node_id=node_id,
                     )
                 )
@@ -110,7 +125,8 @@ def _validate_action_value(node_title: str, node_id: str, value_type: str, value
         return [
             LogicValidationIssue(
                 severity="error",
-                message=f"Action '{node_title}': bool value must be true/false or 1/0.",
+                message_key=LogicValidation.ACTION_BOOL_VALUE,
+                params={"title": node_title},
                 node_id=node_id,
             )
         ]
@@ -118,7 +134,8 @@ def _validate_action_value(node_title: str, node_id: str, value_type: str, value
         return [
             LogicValidationIssue(
                 severity="error",
-                message=f"Action '{node_title}': int value must be a valid integer literal.",
+                message_key=LogicValidation.ACTION_INT_LITERAL,
+                params={"title": node_title},
                 node_id=node_id,
             )
         ]
@@ -126,7 +143,8 @@ def _validate_action_value(node_title: str, node_id: str, value_type: str, value
         return [
             LogicValidationIssue(
                 severity="error",
-                message=f"Action '{node_title}': double value must be a valid number literal.",
+                message_key=LogicValidation.ACTION_DOUBLE_LITERAL,
+                params={"title": node_title},
                 node_id=node_id,
             )
         ]
@@ -148,7 +166,8 @@ def _validate_condition_constraints(
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=f"Node '{node_title}': minimum must be <= maximum.",
+                        message_key=LogicValidation.MIN_MAX_ORDER,
+                        params={"title": node_title},
                         node_id=node_id,
                     )
                 )
@@ -159,7 +178,8 @@ def _validate_condition_constraints(
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=f"Node '{node_title}': modulo base must be > 0.",
+                        message_key=LogicValidation.MODULO_POSITIVE,
+                        params={"title": node_title},
                         node_id=node_id,
                     )
                 )
@@ -172,7 +192,8 @@ def _validate_condition_constraints(
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=f"Node '{node_title}': modulo base must be > 0.",
+                        message_key=LogicValidation.MODULO_POSITIVE,
+                        params={"title": node_title},
                         node_id=node_id,
                     )
                 )
@@ -180,7 +201,8 @@ def _validate_condition_constraints(
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=f"Node '{node_title}': modulo min must be <= modulo max.",
+                        message_key=LogicValidation.MODULO_MIN_MAX_ORDER,
+                        params={"title": node_title},
                         node_id=node_id,
                     )
                 )
@@ -193,7 +215,8 @@ def _validate_condition_constraints(
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=f"Node '{node_title}': part size must be > 0.",
+                        message_key=LogicValidation.PART_SIZE_POSITIVE,
+                        params={"title": node_title},
                         node_id=node_id,
                     )
                 )
@@ -201,7 +224,8 @@ def _validate_condition_constraints(
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=f"Node '{node_title}': part count must be > 0.",
+                        message_key=LogicValidation.PART_COUNT_POSITIVE,
+                        params={"title": node_title},
                         node_id=node_id,
                     )
                 )
@@ -209,14 +233,12 @@ def _validate_condition_constraints(
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=(
-                            f"Node '{node_title}': part index must be within [0, {part_count - 1}]."
-                        ),
+                        message_key=LogicValidation.PART_INDEX_BOUNDS,
+                        params={"title": node_title, "upper": part_count - 1},
                         node_id=node_id,
                     )
                 )
     except ValueError:
-        # Type errors are already reported by _validate_arg_kinds.
         pass
     return issues
 
@@ -260,7 +282,8 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
         issues.append(
             LogicValidationIssue(
                 severity="error",
-                message=f"Exactly one root node is required (found {len(roots)}).",
+                message_key=LogicValidation.ROOT_COUNT,
+                params={"count": len(roots)},
             )
         )
 
@@ -269,11 +292,10 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
         issues.append(
             LogicValidationIssue(
                 severity="error",
-                message="Rule flow contains a cycle; graph must be acyclic.",
+                message_key=LogicValidation.CYCLE,
             )
         )
 
-    # Action nodes must belong to exactly one rule.
     action_assignments: Dict[str, int] = {}
     for action_id, owners in doc.action_edges.items():
         action_assignments[action_id] = len(set(owners))
@@ -285,7 +307,8 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message=f"Action '{node.title}' must be connected to exactly one rule.",
+                    message_key=LogicValidation.ACTION_ONE_RULE,
+                    params={"title": node.title},
                     node_id=node.node_id,
                 )
             )
@@ -294,7 +317,8 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message=f"Action '{node.title}' must have a target executor.",
+                    message_key=LogicValidation.ACTION_TARGET_REQUIRED,
+                    params={"title": node.title},
                     node_id=node.node_id,
                 )
             )
@@ -302,7 +326,8 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message=f"Action '{node.title}' uses unknown value type '{action.value_type}'.",
+                    message_key=LogicValidation.ACTION_UNKNOWN_VALUE_TYPE,
+                    params={"title": node.title, "value_type": action.value_type},
                     node_id=node.node_id,
                 )
             )
@@ -310,7 +335,8 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message=f"Action '{node.title}' uses unknown trigger '{action.trigger}'.",
+                    message_key=LogicValidation.ACTION_UNKNOWN_TRIGGER,
+                    params={"title": node.title, "trigger": action.trigger},
                     node_id=node.node_id,
                 )
             )
@@ -331,7 +357,8 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
             issues.append(
                 LogicValidationIssue(
                     severity="warning",
-                    message=f"Node '{node.title}' uses unknown condition '{node.condition}'.",
+                    message_key=LogicValidation.UNKNOWN_CONDITION,
+                    params={"title": node.title, "condition": node.condition},
                     node_id=node.node_id,
                 )
             )
@@ -345,10 +372,13 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
                 issues.append(
                     LogicValidationIssue(
                         severity="error",
-                        message=(
-                            f"Node '{node.title}' expects {expected_count} args for '{node.condition}' "
-                            f"but got {actual_count}."
-                        ),
+                        message_key=LogicValidation.ARG_COUNT_MISMATCH,
+                        params={
+                            "title": node.title,
+                            "expected": expected_count,
+                            "condition": node.condition,
+                            "actual": actual_count,
+                        },
                         node_id=node.node_id,
                     )
                 )
@@ -370,7 +400,6 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
                 )
             )
 
-    # Root must have no incoming flow edges.
     incoming_counts: Dict[str, int] = {}
     for node in doc.nodes.values():
         if node.kind not in RULE_NODE_KINDS:
@@ -382,11 +411,11 @@ def validate_logic_document(doc: LogicDocument) -> List[LogicValidationIssue]:
             issues.append(
                 LogicValidationIssue(
                     severity="error",
-                    message="Root node cannot have incoming flow edges.",
+                    message_key=LogicValidation.ROOT_NO_INCOMING,
                     node_id=root.node_id,
                 )
             )
 
     if not issues:
-        issues.append(LogicValidationIssue(severity="info", message="No validation issues found."))
+        issues.append(LogicValidationIssue(severity="info", message_key=LogicValidation.CLEAN))
     return issues

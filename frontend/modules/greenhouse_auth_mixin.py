@@ -6,6 +6,12 @@ from PyQt5.QtWidgets import QLabel, QPushButton
 from modules.auth_dialog import AuthDialog
 from modules.core_api_client import CoreApiClient, UnauthorizedError
 from modules.ui_dialogs import StyledMessageDialog
+from modules.localization import tr_key
+from modules.localization.localization_keys import (
+    Auth,
+    Common,
+    Dialogs,
+)
 
 
 class GreenhouseAuthMixin:
@@ -15,7 +21,7 @@ class GreenhouseAuthMixin:
 
         self.auth_user_label = QLabel("")
         self.auth_user_label.setObjectName("authUserLabel")
-        self.logoutButton = QPushButton("Logout")
+        self.logoutButton = QPushButton(tr_key(Common.LOGOUT))
         self.logoutButton.setObjectName("logoutButton")
         self.logoutButton.setMinimumHeight(24)
 
@@ -29,11 +35,11 @@ class GreenhouseAuthMixin:
         claims = self.auth_session.decode_claims()
         username = str(claims.get("username", "")).strip()
         if username:
-            self.auth_user_label.setText(f"User: {username}")
-            self.auth_user_label.setToolTip("Authenticated user")
+            self.auth_user_label.setText(tr_key(Auth.USER_LABEL, username=username))
+            self.auth_user_label.setToolTip(tr_key(Auth.USER_TOOLTIP))
         else:
-            self.auth_user_label.setText("User: -")
-            self.auth_user_label.setToolTip("No authenticated user")
+            self.auth_user_label.setText(tr_key(Auth.USER_LABEL_EMPTY))
+            self.auth_user_label.setToolTip(tr_key(Auth.NO_USER_TOOLTIP))
 
     def get_auth_token(self):
         return self.auth_session.get_token()
@@ -55,8 +61,8 @@ class GreenhouseAuthMixin:
                     self.auth_session.clear_token()
                     StyledMessageDialog.show_warning(
                         self,
-                        "Authentication Error",
-                        f"Sign in succeeded but session validation failed: {error}",
+                        tr_key(Dialogs.AUTH_ERROR_TITLE),
+                        tr_key(Dialogs.AUTH_VALIDATION_FAILED, error=str(error)),
                     )
                     continue
             return False
@@ -121,26 +127,32 @@ class GreenhouseAuthMixin:
             self.update_auth_user_label()
             StyledMessageDialog.show_warning(
                 self,
-                "Session Expired",
-                f"{message}\n\nPlease sign in again.",
+                tr_key(Dialogs.SESSION_EXPIRED_TITLE),
+                tr_key(Dialogs.SESSION_EXPIRED_BODY, message=message),
             )
 
             if self._reauthenticate_or_exit():
                 self._resume_authenticated_timers(timer_state)
-                self.status_label.setText("Re-authenticated successfully")
+                self._set_auth_status(Auth.REAUTHENTICATED)
                 return
 
             self.close()
         finally:
             self._auth_recovery_in_progress = False
 
+    def _set_auth_status(self, key, **params):
+        if hasattr(self, "set_status_state") and callable(self.set_status_state):
+            self.set_status_state(key, **params)
+        elif hasattr(self, "status_label"):
+            self.status_label.setText(tr_key(key, **params))
+
     def logout_user(self):
         confirm = StyledMessageDialog.ask_yes_no(
             self,
-            "Logout",
-            "Sign out from this desktop session?",
-            yes_text="Yes",
-            no_text="No",
+            tr_key(Dialogs.LOGOUT_TITLE),
+            tr_key(Dialogs.LOGOUT_BODY),
+            yes_text=tr_key(Common.YES),
+            no_text=tr_key(Common.NO),
         )
         if not confirm:
             return
@@ -154,10 +166,10 @@ class GreenhouseAuthMixin:
             self._reset_user_scoped_tables()
             self.auth_session.clear_token()
             self.update_auth_user_label()
-            self.status_label.setText("Signed out")
+            self._set_auth_status(Auth.SIGNED_OUT)
             if self._reauthenticate_or_exit():
                 self._resume_authenticated_timers(timer_state)
-                self.status_label.setText("Signed in again")
+                self._set_auth_status(Auth.SIGNED_IN_AGAIN)
                 return
             self.close()
         finally:
@@ -174,10 +186,10 @@ class GreenhouseAuthMixin:
         """
         load_previous = StyledMessageDialog.ask_yes_no(
             self,
-            "Load Previous Data",
-            "Load your previously saved logs and schedules from database?",
-            yes_text="Load",
-            no_text="Start Fresh",
+            tr_key(Dialogs.RESTORE_DATA_TITLE),
+            tr_key(Dialogs.RESTORE_DATA_BODY),
+            yes_text=tr_key(Common.LOAD),
+            no_text=tr_key(Common.START_FRESH),
         )
         self.include_historical_user_data = bool(load_previous)
         self.hidden_schedule_ids = set()

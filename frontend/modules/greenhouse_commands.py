@@ -11,6 +11,16 @@ from modules.table_widget import SimpleDataTable
 from modules.json_prettifier import extract_payload, build_user_friendly_rows
 from modules import table_renderers
 from modules.ui_dialogs import StyledMessageDialog
+from modules.localization import tr_key
+from modules.localization.localization_keys import (
+    CommandDisplay,
+    CommandStatus,
+    Connection,
+    Dialogs,
+    Sensors,
+    Status,
+    Tables,
+)
 
 
 class CommandPanelMixin:
@@ -65,35 +75,48 @@ class CommandPanelMixin:
         self.control_history = []
         self._on_control_table_selection_changed()
 
+    _SENSOR_KEY_MAP = {
+        "temperature": Sensors.TEMPERATURE,
+        "humidity": Sensors.HUMIDITY,
+        "light": Sensors.LIGHT,
+        "co2": Sensors.CO2,
+        "soil_moisture": Sensors.SOIL_MOISTURE,
+        "soil_ph": Sensors.SOIL_PH,
+    }
+
     def _command_display_name(self, command: str, parameters=None) -> str:
         """Map technical command ids to user-friendly action labels."""
         params = parameters or {}
         normalized = str(command or "").strip()
         if command == "read_sensor":
-            sensor = str(params.get("sensor", "sensor")).replace("_", " ")
-            return f"Read {sensor.title()}"
+            sensor = str(params.get("sensor", "")).strip().lower()
+            sensor_key = self._SENSOR_KEY_MAP.get(sensor, Sensors.GENERIC)
+            sensor_label = tr_key(sensor_key)
+            return tr_key(CommandDisplay.READ_SENSOR, sensor=sensor_label)
         if command == "switch_water_canal":
-            return "Toggle Water Canal"
+            return tr_key(CommandDisplay.TOGGLE_WATER_CANAL)
         if command == "switch_fan":
-            return "Toggle Fan"
+            return tr_key(CommandDisplay.TOGGLE_FAN)
         if command == "switch_heater":
-            return "Toggle Heater"
+            return tr_key(CommandDisplay.TOGGLE_HEATER)
         if command == "switch_actuator":
-            return "Toggle Actuator"
-        return normalized.replace("_", " ").title() if normalized else "Command"
+            return tr_key(CommandDisplay.TOGGLE_ACTUATOR)
+        if not normalized:
+            return tr_key(CommandDisplay.GENERIC)
+        return tr_key(CommandDisplay.FALLBACK, name=normalized.replace("_", " ").title())
 
     @staticmethod
     def _normalize_control_status(status: str) -> str:
         """Normalize status values for clean table scanability."""
         text = str(status or "").strip().lower()
         if not text:
-            return "Unknown"
+            return tr_key(Tables.STATUS_UNKNOWN)
         if "cache" in text and "success" in text:
-            return "Success (Cached)"
+            return tr_key(Tables.STATUS_SUCCESS_CACHED)
         if "success" in text or text in {"ok", "done", "completed"}:
-            return "Success"
+            return tr_key(Tables.STATUS_SUCCESS)
         if "error" in text or "fail" in text or "timeout" in text:
-            return "Failed"
+            return tr_key(Tables.STATUS_FAILED)
         return str(status).strip()
 
     def _on_control_table_selection_changed(self):
@@ -116,8 +139,10 @@ class CommandPanelMixin:
         disconnected = not bool(getattr(self, "rabbitmq_connected", False))
         reconnecting = bool(getattr(self, "_is_reconnecting", False))
         self.control_connection_banner.setVisible(disconnected)
-        banner_text = "Reconnecting..." if reconnecting else "No connection. Reconnecting automatically..."
-        self.control_connection_banner.setText(banner_text)
+        banner_key = (
+            Connection.BANNER_RECONNECTING if reconnecting else Connection.BANNER_DISCONNECTED
+        )
+        self.control_connection_banner.setText(tr_key(banner_key))
         if hasattr(self, "retry_connection_button") and self.retry_connection_button:
             self.retry_connection_button.setVisible(disconnected)
             self.retry_connection_button.setEnabled(not reconnecting)
@@ -127,9 +152,17 @@ class CommandPanelMixin:
         if not getattr(self, "command_worker", None):
             return
         self._is_reconnecting = True
-        self.status_label.setText("Reconnecting...")
+        self._set_status_localized(Status.RECONNECTING)
         self.update_connection_status(False)
         self.command_worker.setup_rabbitmq()
+
+    def _set_status_localized(self, key: str, **params) -> None:
+        """Update bottom status label and store its key/params for retranslation."""
+        if hasattr(self, "set_status_state") and callable(self.set_status_state):
+            self.set_status_state(key, **params)
+            return
+        if hasattr(self, "status_label") and self.status_label is not None:
+            self.status_label.setText(tr_key(key, **params))
 
     def view_selected_control_details(self):
         """Open details for selected control row using explicit button action."""
@@ -137,7 +170,11 @@ class CommandPanelMixin:
             return
         row = self.control_table.table.currentRow()
         if row < 0:
-            StyledMessageDialog.show_warning(self, "No Selection", "Select a row to view details.")
+            StyledMessageDialog.show_warning(
+                self,
+                tr_key(Dialogs.NO_SELECTION_TITLE),
+                tr_key(Dialogs.NO_SELECTION_CONTROL),
+            )
             return
         self.show_control_details(row, 0)
 
@@ -165,7 +202,7 @@ class CommandPanelMixin:
             columns, rows = build_user_friendly_rows(payload, summary_text="")
 
             dialog = QDialog(self)
-            dialog.setWindowTitle(f"Command Result Details - {command_name}")
+            dialog.setWindowTitle(tr_key(Dialogs.COMMAND_DETAILS_TITLE, name=command_name))
             dialog.setMinimumSize(800, 400)
 
             layout = QVBoxLayout(dialog)
@@ -187,7 +224,7 @@ class CommandPanelMixin:
         self.rabbitmq_connected = connected
         if connected:
             self._is_reconnecting = False
-            self.connection_status.setText("Connection")
+            self.connection_status.setText(tr_key(Connection.CONNECTED))
             self.connection_status.setStyleSheet(f"""
                 color: {self.theme.colors.success}; 
                 font-weight: {self.theme.typography.medium};
@@ -198,10 +235,12 @@ class CommandPanelMixin:
                 border-left: 2px solid {self.theme.colors.success};
             """)
         else:
-            if bool(getattr(self, "_is_reconnecting", False)):
-                self.connection_status.setText("Reconnecting")
-            else:
-                self.connection_status.setText("No Connection")
+            label_key = (
+                Connection.RECONNECTING
+                if bool(getattr(self, "_is_reconnecting", False))
+                else Connection.DISCONNECTED
+            )
+            self.connection_status.setText(tr_key(label_key))
             self.connection_status.setStyleSheet(f"""
                 color: {self.theme.colors.error}; 
                 font-weight: {self.theme.typography.medium};
@@ -229,7 +268,7 @@ class CommandPanelMixin:
             if key not in self._busy_button_states:
                 self._busy_button_states[key] = button.text()
             button.setEnabled(False)
-            button.setText("Working...")
+            button.setText(tr_key(CommandStatus.BUSY_BUTTON))
             return
 
         original_text = self._busy_button_states.pop(key, "")
@@ -261,7 +300,7 @@ class CommandPanelMixin:
 
         self.logger.info(f"Sending user command {command_id}: {command}")
         action_name = self._command_display_name(command, parameters)
-        self.status_label.setText(f"In progress: {action_name}...")
+        self._set_status_localized(CommandStatus.IN_PROGRESS, action=action_name)
         self._set_button_busy(source_button, True)
         return self._send_pending_command(command_id)
 
@@ -287,7 +326,7 @@ class CommandPanelMixin:
             self.logger.error(f"Failed to send command {command_id} after retry")
             self.pending_commands.pop(command_id, None)
             command_name = self._command_display_name(command_info.get("command"), command_info.get("parameters"))
-            self.status_label.setText(f"Failed: {command_name}")
+            self._set_status_localized(CommandStatus.FAILED, action=command_name, cached="")
             self._set_button_busy(command_info.get("source_button"), False)
             return False
 
@@ -318,7 +357,7 @@ class CommandPanelMixin:
             command_name = command_info.get("command", "unknown")
             self.logger.error(f"Command timed out waiting for response: {command_id} ({command_name})")
             action_name = self._command_display_name(command_name, command_info.get("parameters"))
-            self.status_label.setText(f"Timed out: {action_name}")
+            self._set_status_localized(CommandStatus.TIMED_OUT, action=action_name)
             self._set_button_busy(command_info.get("source_button"), False)
 
     def handle_response(self, response):
@@ -339,9 +378,8 @@ class CommandPanelMixin:
 
         timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
 
-        # Get command name from pending commands or response
         command_name = "unknown"
-        display_command_name = "Command"
+        display_command_name = tr_key(CommandDisplay.GENERIC)
         command_info = {}
         if command_id in self.pending_commands:
             command_info = self.pending_commands[command_id]
@@ -382,12 +420,10 @@ class CommandPanelMixin:
                 # Users can always open full data by double-clicking the row.
                 if rows:
                     rendered_row = rows[0]
-                    # Expected from renderer: [timestamp, command, status, result_str, cached_str]
                     if len(rendered_row) >= 5:
                         _, _, status, result_str, cached_str = rendered_row
-                        display_result = f"{result_str} (Cached: {cached_str})"
+                        display_result = f"{result_str} ({cached_str})"
                     else:
-                        # Fallback if renderer shape changes
                         status = rendered_row[2] if len(rendered_row) > 2 else ""
                         display_result = rendered_row[3] if len(rendered_row) > 3 else ""
                     status = self._normalize_control_status(status)
@@ -421,10 +457,12 @@ class CommandPanelMixin:
         else:
             self.logger.warning("Control table not initialized, cannot display command result")
 
-        status_suffix = " (cached)" if cached else ""
+        cached_suffix = tr_key(CommandStatus.CACHED_SUFFIX) if cached else ""
         action_name = self._command_display_name(command_name, command_info.get("parameters"))
         if error:
-            self.status_label.setText(f"Failed: {action_name}{status_suffix}")
+            self._set_status_localized(
+                CommandStatus.FAILED, action=action_name, cached=cached_suffix
+            )
             self.status_label.setStyleSheet(f"""
                 color: {self.theme.colors.error};
                 font-weight: {self.theme.typography.medium};
@@ -435,7 +473,9 @@ class CommandPanelMixin:
                 border-left: 3px solid {self.theme.colors.error};
             """)
         else:
-            self.status_label.setText(f"Done: {action_name}{status_suffix}")
+            self._set_status_localized(
+                CommandStatus.DONE, action=action_name, cached=cached_suffix
+            )
             self.status_label.setStyleSheet(f"""
                 color: {self.theme.colors.success};
                 font-weight: {self.theme.typography.medium};
@@ -451,7 +491,7 @@ class CommandPanelMixin:
     # ------------------------------------------------------------------
     def handle_error(self, error_message):
         self.logger.error(f"Command worker error: {error_message}")
-        self.show_error("System Error", error_message)
+        self.show_error(tr_key(Dialogs.SYSTEM_ERROR_TITLE), error_message)
 
     def show_error(self, title, message):
         self.logger.warning(f"Showing error dialog: {title} - {message}")

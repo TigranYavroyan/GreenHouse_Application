@@ -5,6 +5,26 @@ from PyQt5.QtCore import QTimer
 
 from modules.core_api_client import UnauthorizedError
 from modules.ui_dialogs import StyledMessageDialog
+from modules.localization import tr_key
+from modules.localization.localization_keys import (
+    Common,
+    Dialogs,
+    ScheduleDelay,
+    ScheduleStatus,
+    ScheduleTargets,
+    Schedule,
+    Status,
+    Sensors,
+)
+
+
+_DELAY_PRESETS = (
+    (ScheduleDelay.AFTER_1M, 60),
+    (ScheduleDelay.AFTER_15M, 15 * 60),
+    (ScheduleDelay.AFTER_30M, 30 * 60),
+    (ScheduleDelay.AFTER_1H, 60 * 60),
+    (ScheduleDelay.CUSTOM, -1),
+)
 
 
 class GreenhouseSchedulingMixin:
@@ -16,12 +36,7 @@ class GreenhouseSchedulingMixin:
 
         self._refresh_schedule_targets()
 
-        self.scheduleDelayPresetCombo.clear()
-        self.scheduleDelayPresetCombo.addItem("After 1 minute", 60)
-        self.scheduleDelayPresetCombo.addItem("After 15 minutes", 15 * 60)
-        self.scheduleDelayPresetCombo.addItem("After 30 minutes", 30 * 60)
-        self.scheduleDelayPresetCombo.addItem("After 1 hour", 60 * 60)
-        self.scheduleDelayPresetCombo.addItem("Custom delay (hh:mm:ss)", -1)
+        self._populate_schedule_delay_presets()
         self.scheduleDelayPresetCombo.setCurrentIndex(0)
 
         self.schedule_clock_timer = QTimer(self)
@@ -31,6 +46,27 @@ class GreenhouseSchedulingMixin:
         self.update_custom_delay_enabled()
         self.update_schedule_live_time()
         self.refresh_schedule_table()
+
+    def _populate_schedule_delay_presets(self):
+        """Re-populate delay presets in the active language."""
+        if not hasattr(self, "scheduleDelayPresetCombo") or not self.scheduleDelayPresetCombo:
+            return
+        combo = self.scheduleDelayPresetCombo
+        previous_data = combo.currentData()
+        combo.blockSignals(True)
+        combo.clear()
+        for key, value in _DELAY_PRESETS:
+            combo.addItem(tr_key(key), value)
+        if previous_data is not None:
+            for index in range(combo.count()):
+                if combo.itemData(index) == previous_data:
+                    combo.setCurrentIndex(index)
+                    break
+        combo.blockSignals(False)
+
+    def _refresh_schedule_delay_preset_labels(self):
+        """Refresh delay preset visible labels (called by retranslate_ui)."""
+        self._populate_schedule_delay_presets()
 
     def _refresh_schedule_targets(self):
         """
@@ -61,47 +97,54 @@ class GreenhouseSchedulingMixin:
             parameters = {"action": "toggle"}
             label_prefix = None
 
+            icon_prefix = ""
             if "water" in lowered and "canal" in lowered:
                 command = "switch_water_canal"
-                label_prefix = "🚰 Toggle"
+                icon_prefix = "🚰 "
             elif "fan" in lowered:
                 command = "switch_fan"
                 parameters["fanId"] = name
-                label_prefix = "🌀 Toggle"
+                icon_prefix = "🌀 "
             elif "heater" in lowered:
                 command = "switch_heater"
                 parameters["heaterId"] = name
-                label_prefix = "🔥 Toggle"
+                icon_prefix = "🔥 "
             elif "actuator" in lowered:
                 command = "switch_actuator"
                 parameters["actuatorId"] = name
-                label_prefix = "⚙️ Toggle"
+                icon_prefix = "⚙️ "
 
-            # Keep scheduler useful even when executor naming is custom:
-            # treat any unrecognized executor as a toggle-capable actuator target.
             if not command:
                 command = "switch_actuator"
                 parameters["actuatorId"] = name
-                label_prefix = "⚙️ Toggle"
-
-            if not command:
-                continue
+                icon_prefix = "⚙️ "
 
             key = f"{command}:{name.lower()}"
             if key in seen:
                 continue
             seen.add(key)
-            options.append((f"{label_prefix} {name}", (command, parameters), key))
+            label = icon_prefix + tr_key(ScheduleTargets.TOGGLE_NAMED, name=name)
+            options.append((label, (command, parameters), key))
 
-        # Fallback to known default controls so scheduling remains usable even if
-        # executor names don't follow expected fan/heater/actuator naming.
         if not options:
             options = [
-                ("Toggle water canal", ("switch_water_canal", {"action": "toggle"}), "switch_water_canal:default"),
-                ("Toggle fan", ("switch_fan", {"fanId": "fan_1", "action": "toggle"}), "switch_fan:fan_1"),
-                ("Toggle heater", ("switch_heater", {"heaterId": "heater_1", "action": "toggle"}), "switch_heater:heater_1"),
                 (
-                    "Toggle actuator",
+                    tr_key(ScheduleTargets.TOGGLE_WATER_CANAL),
+                    ("switch_water_canal", {"action": "toggle"}),
+                    "switch_water_canal:default",
+                ),
+                (
+                    tr_key(ScheduleTargets.TOGGLE_FAN),
+                    ("switch_fan", {"fanId": "fan_1", "action": "toggle"}),
+                    "switch_fan:fan_1",
+                ),
+                (
+                    tr_key(ScheduleTargets.TOGGLE_HEATER),
+                    ("switch_heater", {"heaterId": "heater_1", "action": "toggle"}),
+                    "switch_heater:heater_1",
+                ),
+                (
+                    tr_key(ScheduleTargets.TOGGLE_ACTUATOR),
                     ("switch_actuator", {"actuatorId": "actuator_1", "action": "toggle"}),
                     "switch_actuator:actuator_1",
                 ),
@@ -117,13 +160,15 @@ class GreenhouseSchedulingMixin:
             self.scheduleTargetCombo.addItem(label, payload)
 
         if not options:
-            self.scheduleTargetCombo.addItem("No available devices", None)
+            self.scheduleTargetCombo.addItem(tr_key(Schedule.NO_DEVICES), None)
 
     def update_schedule_live_time(self):
         """Update live time UI elements in scheduling tab."""
         now_text = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if hasattr(self, "scheduleCurrentTimeLabel"):
-            self.scheduleCurrentTimeLabel.setText(f"Current Time: {now_text}")
+            self.scheduleCurrentTimeLabel.setText(
+                tr_key(Schedule.CURRENT_TIME, datetime=now_text)
+            )
         self._schedule_refresh_tick_count += 1
         if self._schedule_refresh_tick_count >= 5:
             self._schedule_refresh_tick_count = 0
@@ -138,10 +183,10 @@ class GreenhouseSchedulingMixin:
         """
         load_previous = StyledMessageDialog.ask_yes_no(
             self,
-            "Load Previous Data",
-            "Load your previously saved logs and schedules from database?",
-            yes_text="Load",
-            no_text="Start Fresh",
+            tr_key(Dialogs.RESTORE_DATA_TITLE),
+            tr_key(Dialogs.RESTORE_DATA_BODY),
+            yes_text=tr_key(Common.LOAD),
+            no_text=tr_key(Common.START_FRESH),
         )
         self.include_historical_user_data = bool(load_previous)
         self.hidden_schedule_ids = set()
@@ -173,7 +218,11 @@ class GreenhouseSchedulingMixin:
         else:
             schedule_id = self._get_selected_schedule_id()
         if not schedule_id:
-            StyledMessageDialog.show_warning(self, "No Selection", "Select a schedule row to remove.")
+            StyledMessageDialog.show_warning(
+                self,
+                tr_key(Dialogs.NO_SELECTION_TITLE),
+                tr_key(Dialogs.NO_SELECTION_SCHEDULE_REMOVE),
+            )
             return
         self.hidden_schedule_ids.add(schedule_id)
         self._render_schedule_rows()
@@ -283,26 +332,38 @@ class GreenhouseSchedulingMixin:
     def schedule_selected_task(self):
         """Create one-time backend-persisted schedule for the selected action."""
         if not hasattr(self, "core_api"):
-            self.show_error("Scheduling Error", "Core API client is not available.")
+            self.show_error(
+                tr_key(Dialogs.SCHEDULING_ERROR_TITLE),
+                tr_key(Dialogs.SCHEDULING_ERROR_API),
+            )
             return
 
         self._refresh_schedule_targets()
         selected_data = self.scheduleTargetCombo.currentData()
         if not isinstance(selected_data, (tuple, list)) or len(selected_data) != 2:
-            self.show_error("Scheduling Error", "Please choose a valid target action.")
+            self.show_error(
+                tr_key(Dialogs.SCHEDULING_ERROR_TITLE),
+                tr_key(Dialogs.SCHEDULING_ERROR_TARGET),
+            )
             return
 
         command, parameters = selected_data
         target_label = str(self.scheduleTargetCombo.currentText())
         interval_seconds = self.get_selected_interval_seconds()
         if interval_seconds <= 0:
-            self.show_error("Invalid Interval", "Recurring interval must be greater than zero.")
+            self.show_error(
+                tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL_TITLE),
+                tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL),
+            )
             return
 
         try:
             device_id = self._get_or_resolve_schedule_device_id(preferred_name=target_label)
             if not device_id:
-                self.show_error("Scheduling Error", "No device is available. Create a device first.")
+                self.show_error(
+                    tr_key(Dialogs.SCHEDULING_ERROR_TITLE),
+                    tr_key(Dialogs.SCHEDULING_ERROR_NO_DEVICE),
+                )
                 return
 
             run_at_local = datetime.now().astimezone() + timedelta(seconds=interval_seconds)
@@ -338,10 +399,17 @@ class GreenhouseSchedulingMixin:
                     if isinstance(nested, dict):
                         schedule_id = str(nested.get("id", "")).strip()[:8]
             schedule_label = schedule_id or "created"
-            self.status_label.setText(f"One-time task {schedule_label} scheduled for {target_label}")
+            if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                self.set_status_state(
+                    Status.SCHEDULE_CREATED, label=schedule_label, target=target_label
+                )
+            else:
+                self.status_label.setText(
+                    tr_key(Status.SCHEDULE_CREATED, label=schedule_label, target=target_label)
+                )
             self.refresh_schedule_table()
         except Exception as error:
-            self._handle_api_exception("Scheduling Error", error)
+            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), error)
 
     def _get_selected_schedule_id(self):
         if not self.schedule_table:
@@ -362,12 +430,19 @@ class GreenhouseSchedulingMixin:
     def cancel_selected_schedule(self):
         """Mark selected schedule as canceled."""
         if not hasattr(self, "core_api"):
-            self.show_error("Scheduling Error", "Core API client is not available.")
+            self.show_error(
+                tr_key(Dialogs.SCHEDULING_ERROR_TITLE),
+                tr_key(Dialogs.SCHEDULING_ERROR_API),
+            )
             return
 
         schedule_id = self._get_selected_schedule_id()
         if not schedule_id:
-            StyledMessageDialog.show_warning(self, "No Selection", "Select a schedule row to delete.")
+            StyledMessageDialog.show_warning(
+                self,
+                tr_key(Dialogs.NO_SELECTION_TITLE),
+                tr_key(Dialogs.NO_SELECTION_SCHEDULE_DELETE),
+            )
             return
 
         try:
@@ -383,22 +458,29 @@ class GreenhouseSchedulingMixin:
                 },
             )
             self.refresh_schedule_table()
-            self.status_label.setText(f"Canceled task {str(schedule_id)[:8]}")
+            short_id = str(schedule_id)[:8]
+            if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                self.set_status_state(Status.SCHEDULE_CANCELED, id=short_id)
+            else:
+                self.status_label.setText(tr_key(Status.SCHEDULE_CANCELED, id=short_id))
         except Exception as error:
-            self._handle_api_exception("Scheduling Error", error)
+            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), error)
 
     def clear_all_schedules(self):
         """Cancel all pending schedules visible to current user context."""
         if not hasattr(self, "core_api"):
-            self.show_error("Scheduling Error", "Core API client is not available.")
+            self.show_error(
+                tr_key(Dialogs.SCHEDULING_ERROR_TITLE),
+                tr_key(Dialogs.SCHEDULING_ERROR_API),
+            )
             return
 
         confirmation = StyledMessageDialog.ask_yes_no(
             self,
-            "Delete All Schedules",
-            "Cancel all pending schedules for the current user?",
-            yes_text="Yes",
-            no_text="No",
+            tr_key(Dialogs.DELETE_ALL_TITLE),
+            tr_key(Dialogs.DELETE_ALL_BODY),
+            yes_text=tr_key(Common.YES),
+            no_text=tr_key(Common.NO),
         )
         if not confirmation:
             return
@@ -421,7 +503,10 @@ class GreenhouseSchedulingMixin:
                     schedule_map[sid] = schedule
 
             if not schedule_ids:
-                self.status_label.setText("No pending schedules to cancel")
+                if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                    self.set_status_state(Status.NO_PENDING_TO_CANCEL)
+                else:
+                    self.status_label.setText(tr_key(Status.NO_PENDING_TO_CANCEL))
                 return
 
             canceled = 0
@@ -447,13 +532,20 @@ class GreenhouseSchedulingMixin:
             if errors:
                 summary = "\n".join(errors[:5])
                 self.show_error(
-                    "Scheduling Error",
-                    f"Canceled {canceled} schedule(s), but some failed:\n{summary}",
+                    tr_key(Dialogs.SCHEDULE_PARTIAL_FAIL_TITLE),
+                    tr_key(
+                        Dialogs.SCHEDULE_PARTIAL_FAIL_BODY,
+                        count=canceled,
+                        summary=summary,
+                    ),
                 )
             else:
-                self.status_label.setText(f"Canceled {canceled} pending schedule(s)")
+                if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                    self.set_status_state(Status.BULK_CANCELED, count=canceled)
+                else:
+                    self.status_label.setText(tr_key(Status.BULK_CANCELED, count=canceled))
         except Exception as error:
-            self._handle_api_exception("Scheduling Error", error)
+            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), error)
 
     def refresh_schedule_table(self):
         """Render backend schedules into the schedule table."""
@@ -506,10 +598,11 @@ class GreenhouseSchedulingMixin:
             task_label = self._format_schedule_target_label(action, parameters)
             started_at = self._format_schedule_start_time(schedule, metadata)
             ended_at = self._format_schedule_end_time(metadata)
-            status = self._format_schedule_status(enabled, metadata)
+            status_token = self._resolve_schedule_status_token(enabled, metadata)
+            status = tr_key(self._SCHEDULE_STATUS_TOKEN_KEYS[status_token])
             time_remaining = self._format_schedule_time_remaining(schedule, cron_expression, enabled, metadata, status)
 
-            if status == "completed":
+            if status_token == "completed":
                 continue
             if schedule_id in self.hidden_schedule_ids:
                 continue
@@ -549,7 +642,7 @@ class GreenhouseSchedulingMixin:
 
     def _format_local_datetime(self, dt):
         if not dt:
-            return "-"
+            return tr_key(Common.DASH)
         return dt.astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
     def _format_duration(self, seconds):
@@ -621,33 +714,53 @@ class GreenhouseSchedulingMixin:
         )
         return self._format_local_datetime(self._parse_datetime(ended_raw))
 
-    def _format_schedule_status(self, enabled, metadata):
+    _SCHEDULE_STATUS_TOKEN_KEYS = {
+        "pending": ScheduleStatus.PENDING,
+        "completed": ScheduleStatus.COMPLETED,
+        "canceled": ScheduleStatus.CANCELED,
+        "not_done": ScheduleStatus.NOT_DONE,
+    }
+
+    def _resolve_schedule_status_token(self, enabled, metadata):
+        """Return a stable, locale-independent status token."""
         status = str(metadata.get("scheduleStatus", "")).strip().lower()
-        if status in {"pending", "completed", "canceled", "not_done"}:
-            return status.replace("_", " ")
+        if status in self._SCHEDULE_STATUS_TOKEN_KEYS:
+            return status
         if enabled:
             return "pending"
         dispatch_status = str(metadata.get("lastDispatchStatus", "")).strip().lower()
         if dispatch_status == "completed":
             return "completed"
         if dispatch_status == "failed":
-            return "not done"
+            return "not_done"
         return "canceled"
 
+    def _format_schedule_status(self, enabled, metadata):
+        token = self._resolve_schedule_status_token(enabled, metadata)
+        return tr_key(self._SCHEDULE_STATUS_TOKEN_KEYS[token])
+
+    def _is_terminal_schedule_status(self, status):
+        terminal_labels = {
+            tr_key(ScheduleStatus.COMPLETED),
+            tr_key(ScheduleStatus.CANCELED),
+            tr_key(ScheduleStatus.NOT_DONE),
+        }
+        return status in terminal_labels
+
     def _format_schedule_time_remaining(self, schedule, cron_expression, enabled, metadata, status):
-        if status in {"completed", "canceled", "not done"}:
-            return "-"
+        if self._is_terminal_schedule_status(status):
+            return tr_key(Common.DASH)
         if not enabled:
-            return "-"
+            return tr_key(Common.DASH)
 
         run_at = self._resolve_run_at(schedule, cron_expression, metadata)
         if not run_at:
-            return "-"
+            return tr_key(Common.DASH)
 
         now = datetime.now(timezone.utc)
         seconds_left = int((run_at - now).total_seconds())
         if seconds_left <= 0:
-            return "Running..."
+            return tr_key(ScheduleStatus.RUNNING)
         return self._format_duration(seconds_left)
 
     def _is_schedule_visible_for_current_login(self, schedule, metadata):
@@ -665,16 +778,26 @@ class GreenhouseSchedulingMixin:
             return False
         return created_at >= self.schedule_visibility_cutoff_utc
 
+    _SENSOR_KEY_MAP = {
+        "temperature": Sensors.TEMPERATURE,
+        "humidity": Sensors.HUMIDITY,
+        "light": Sensors.LIGHT,
+        "co2": Sensors.CO2,
+        "soil_moisture": Sensors.SOIL_MOISTURE,
+        "soil_ph": Sensors.SOIL_PH,
+    }
+
     def _format_schedule_target_label(self, action, parameters):
         if action == "read_sensor":
-            sensor = parameters.get("sensor", "sensor")
-            return f"Read {sensor}"
+            sensor = str(parameters.get("sensor", "")).strip().lower()
+            sensor_key = self._SENSOR_KEY_MAP.get(sensor, Sensors.GENERIC)
+            return tr_key(ScheduleTargets.READ_NAMED, sensor=tr_key(sensor_key))
         if action == "switch_water_canal":
-            return "Toggle water canal"
+            return tr_key(ScheduleTargets.TOGGLE_WATER_CANAL)
         if action == "switch_fan":
-            return "Toggle fan"
+            return tr_key(ScheduleTargets.TOGGLE_FAN)
         if action == "switch_heater":
-            return "Toggle heater"
+            return tr_key(ScheduleTargets.TOGGLE_HEATER)
         if action == "switch_actuator":
-            return "Toggle actuator"
+            return tr_key(ScheduleTargets.TOGGLE_ACTUATOR)
         return action

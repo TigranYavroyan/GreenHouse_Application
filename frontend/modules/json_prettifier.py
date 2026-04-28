@@ -10,6 +10,9 @@ Designed to keep JSON handling generic and reusable, following SOLID and KISS:
 
 from typing import Any, List, Tuple
 
+from modules.localization import tr_key
+from modules.localization.localization_keys import JsonPretty, TableColumns
+
 
 def prettify_key(key: str) -> str:
     """
@@ -74,9 +77,8 @@ def build_user_friendly_rows(
     # Normalise summary text (e.g. strip "(Cached: Yes/No)")
     base_summary = summary_text.split("(Cached:")[0].strip() if summary_text else ""
 
-    # Dict payload -> Property/Value table
     if isinstance(payload, dict):
-        columns = ["Property", "Value"]
+        columns = [tr_key(TableColumns.PROPERTY), tr_key(TableColumns.VALUE)]
         rows: List[List[str]] = []
 
         # For keys that typically hold the actual JSON result (e.g. "data", "output"),
@@ -130,37 +132,42 @@ def build_user_friendly_rows(
                 value_str = str(value)
                 rows.append([label, value_str])
 
-        # If there is only one row and it matches the summary, avoid duplication
         if len(rows) == 1 and base_summary:
             if rows[0][1] == base_summary or rows[0][1] in base_summary:
-                return ["Info", "Value"], [["Info", "No additional details beyond the main result."]]
+                info_label = tr_key(TableColumns.INFO)
+                return (
+                    [info_label, tr_key(TableColumns.VALUE)],
+                    [[info_label, tr_key(JsonPretty.NO_ADDITIONAL_DETAILS)]],
+                )
 
         return columns, rows
 
-    # List payload -> one item per row
     if isinstance(payload, list):
-        # If the list is a list of scalars, keep it very simple
         if all(not isinstance(item, (dict, list)) for item in payload):
-            columns = ["Item"]
+            columns = [tr_key(TableColumns.ITEM)]
             rows = [[str(item)] for item in payload]
 
             if len(rows) == 1 and base_summary:
                 if rows[0][0] == base_summary or rows[0][0] in base_summary:
-                    return ["Info"], [["No additional details beyond the main result."]]
+                    return (
+                        [tr_key(TableColumns.INFO)],
+                        [[tr_key(JsonPretty.NO_ADDITIONAL_DETAILS)]],
+                    )
 
             return columns, rows
 
-        # If items are dicts/lists, fall back to a simple indexed list
-        columns = ["Item #", "Value"]
+        columns = [tr_key(TableColumns.ITEM_NUMBER), tr_key(TableColumns.VALUE)]
         rows = []
         for idx, item in enumerate(payload, 1):
             rows.append([str(idx), str(item)])
         return columns, rows
 
-    # Scalar payload
     value_str = str(payload)
     if base_summary and (value_str == base_summary or value_str in base_summary):
-        return ["Info"], [["No additional details beyond the main result."]]
+        return (
+            [tr_key(TableColumns.INFO)],
+            [[tr_key(JsonPretty.NO_ADDITIONAL_DETAILS)]],
+        )
 
-    return ["Result"], [[value_str]]
+    return [tr_key(TableColumns.RESULT)], [[value_str]]
 

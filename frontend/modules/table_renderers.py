@@ -6,6 +6,12 @@ import json
 from datetime import datetime
 from typing import List, Tuple, Dict, Any
 from modules.json_prettifier import build_user_friendly_rows
+from modules.localization import tr_key
+from modules.localization.localization_keys import (
+    TableColumns,
+    Tables,
+    Units,
+)
 
 
 def flatten_dict(d: Dict, parent_key: str = '', sep: str = '.') -> Dict:
@@ -64,12 +70,18 @@ def format_stamp_ms(stamp_ms: Any) -> str:
 
 
 def format_size(size_bytes: int) -> str:
-    """Format file size to human-readable format"""
-    for unit in ['B', 'KB', 'MB', 'GB']:
+    """Format file size to human-readable format using localized unit suffixes."""
+    units = (
+        tr_key(Units.SIZE_B),
+        tr_key(Units.SIZE_KB),
+        tr_key(Units.SIZE_MB),
+        tr_key(Units.SIZE_GB),
+    )
+    for unit in units:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024.0
-    return f"{size_bytes:.1f} TB"
+    return f"{size_bytes:.1f} {tr_key(Units.SIZE_TB)}"
 
 
 def render_health_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
@@ -82,13 +94,11 @@ def render_health_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Property', 'Value']
+    columns = [tr_key(TableColumns.PROPERTY), tr_key(TableColumns.VALUE)]
     rows = []
     
-    # Flatten the data, handling nested structures
     flat_data = flatten_dict(data)
     
-    # Order important fields first
     priority_fields = ['status', 'timestamp', 'redis', 'rabbitmq', 'platform', 
                        'totalSessions', 'logsDirectory']
     
@@ -120,7 +130,14 @@ def render_sessions_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Session ID', 'Session #', 'Created', 'Last Activity', 'Current Path', 'Log File']
+    columns = [
+        tr_key(TableColumns.ID),
+        tr_key(TableColumns.ITEM_NUMBER),
+        tr_key(TableColumns.TIMESTAMP),
+        tr_key(TableColumns.INFO),
+        tr_key(TableColumns.PROPERTY),
+        tr_key(TableColumns.VALUE),
+    ]
     rows = []
     
     sessions = data.get('sessions', [])
@@ -148,7 +165,7 @@ def render_cache_keys_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Index', 'Cache Key']
+    columns = [tr_key(TableColumns.ITEM_NUMBER), tr_key(TableColumns.KEY)]
     rows = []
     
     keys = data.get('keys', [])
@@ -169,7 +186,12 @@ def render_queues_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Queue Name', 'Messages', 'Consumers', 'Status']
+    columns = [
+        tr_key(TableColumns.NAME),
+        tr_key(TableColumns.VALUE),
+        tr_key(TableColumns.INFO),
+        tr_key(TableColumns.STATUS),
+    ]
     rows = []
     
     # Handle different queue data structures
@@ -204,7 +226,7 @@ def render_stats_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Metric', 'Value']
+    columns = [tr_key(TableColumns.PROPERTY), tr_key(TableColumns.VALUE)]
     rows = []
     
     # Flatten stats
@@ -236,7 +258,12 @@ def render_logs_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['File Name', 'Size', 'Modified', 'Type']
+    columns = [
+        tr_key(TableColumns.NAME),
+        tr_key(TableColumns.VALUE),
+        tr_key(TableColumns.TIMESTAMP),
+        tr_key(TableColumns.TYPE),
+    ]
     rows = []
     
     logs = data.get('logs', [])
@@ -266,22 +293,25 @@ def render_command_result_data(data: Dict, command: str = '', timestamp: str = '
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Timestamp', 'Command', 'Status', 'Result', 'Cached']
+    columns = [
+        tr_key(TableColumns.TIMESTAMP),
+        tr_key(TableColumns.COMMAND),
+        tr_key(TableColumns.STATUS),
+        tr_key(TableColumns.RESULT),
+        tr_key(TableColumns.CACHED),
+    ]
     rows = []
     
-    # Determine status
     error = data.get('error')
     success = data.get('success', error is None)
-    status = 'Success' if success else 'Failed'
+    status = tr_key(Tables.STATUS_SUCCESS) if success else tr_key(Tables.STATUS_FAILED)
     
-    # Extract result
     result = data.get('result', data.get('data', {}))
+    click_for_details = tr_key(Tables.CLICK_FOR_DETAILS)
     
-    # Format result based on type - keep it user-friendly and non-technical.
     if isinstance(result, dict):
         summary_pairs = []
 
-        # Prefer common payload keys, otherwise use the dict itself.
         candidate_payload = result.get('data', result.get('output', result))
         if isinstance(candidate_payload, dict):
             for key, value in candidate_payload.items():
@@ -295,29 +325,28 @@ def render_command_result_data(data: Dict, command: str = '', timestamp: str = '
             result_str = "; ".join(summary_pairs)
             total_fields = len(candidate_payload) if isinstance(candidate_payload, dict) else 1
             if total_fields > len(summary_pairs):
-                result_str = f"{result_str}; ... (click for details)"
+                result_str = f"{result_str}; ... ({click_for_details})"
         else:
-            result_str = "Completed (click for details)"
+            result_str = tr_key(Tables.COMPLETED_CLICK)
     elif isinstance(result, list):
         if not result:
-            result_str = "No items returned"
+            result_str = tr_key(Tables.NO_ITEMS)
         else:
             preview_items = [str(item) for item in result[:3]]
             result_str = "; ".join(preview_items)
             if len(result) > 3:
-                result_str = f"{result_str}; ... (click for details)"
+                result_str = f"{result_str}; ... ({click_for_details})"
     elif isinstance(result, str):
         result_str = result[:200]
     else:
         result_str = str(result)[:200]
     
-    # Handle errors
     if error:
-        result_str = f"Error: {error}"
+        result_str = tr_key(Tables.ERROR_PREFIX, error=str(error))
     
-    cached_str = 'Yes' if cached else 'No'
+    cached_str = tr_key(Tables.CACHED_YES) if cached else tr_key(Tables.CACHED_NO)
     if success and cached:
-        status = "Success (Cached)"
+        status = tr_key(Tables.STATUS_SUCCESS_CACHED)
     
     rows.append([timestamp, command, status, result_str, cached_str])
     
@@ -334,7 +363,16 @@ def render_fog_aggregated_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Sensor Type', 'Location', 'Timeframe', 'Average', 'Min', 'Max', 'Count', 'Quality']
+    columns = [
+        tr_key(TableColumns.TYPE),
+        tr_key(TableColumns.NAME),
+        tr_key(TableColumns.TIMESTAMP),
+        tr_key(TableColumns.VALUE),
+        tr_key(TableColumns.PROPERTY),
+        tr_key(TableColumns.INFO),
+        tr_key(TableColumns.ITEM_NUMBER),
+        tr_key(TableColumns.STATUS),
+    ]
     rows = []
     
     data_list = data.get('data', [])
@@ -371,7 +409,14 @@ def render_fog_devices_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Device ID', 'Type', 'Location', 'IP Address', 'Capabilities', 'Status']
+    columns = [
+        tr_key(TableColumns.ID),
+        tr_key(TableColumns.TYPE),
+        tr_key(TableColumns.NAME),
+        tr_key(TableColumns.VALUE),
+        tr_key(TableColumns.PROPERTY),
+        tr_key(TableColumns.STATUS),
+    ]
     rows = []
     
     devices = data.get('devices', [])
@@ -399,7 +444,16 @@ def render_fog_anomalies_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Anomaly ID', 'Sensor Type', 'Location', 'Type', 'Severity', 'Message', 'Timestamp', 'Value']
+    columns = [
+        tr_key(TableColumns.ID),
+        tr_key(TableColumns.TYPE),
+        tr_key(TableColumns.NAME),
+        tr_key(TableColumns.PROPERTY),
+        tr_key(TableColumns.STATUS),
+        tr_key(TableColumns.INFO),
+        tr_key(TableColumns.TIMESTAMP),
+        tr_key(TableColumns.VALUE),
+    ]
     rows = []
     
     anomalies = data.get('anomalies', [])
@@ -429,36 +483,35 @@ def render_session_log_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
     Returns:
         Tuple of (columns, rows)
     """
-    columns = ['Property', 'Value']
+    columns = [tr_key(TableColumns.PROPERTY), tr_key(TableColumns.VALUE)]
     rows = []
     
-    # Extract key information
-    session_id = data.get('sessionId', 'Unknown')
-    session_number = data.get('sessionNumber', 'Unknown')
-    log_file = data.get('logFile', 'Unknown')
+    unknown_label = tr_key(Tables.STATUS_UNKNOWN)
+    session_id = data.get('sessionId', unknown_label)
+    session_number = data.get('sessionNumber', unknown_label)
+    log_file = data.get('logFile', unknown_label)
     content = data.get('content', '')
     
-    rows.append(['Session ID', str(session_id)])
-    rows.append(['Session Number', str(session_number)])
-    rows.append(['Log File', str(log_file)])
+    rows.append([tr_key(TableColumns.ID), str(session_id)])
+    rows.append([tr_key(TableColumns.ITEM_NUMBER), str(session_number)])
+    rows.append([tr_key(TableColumns.NAME), str(log_file)])
     
-    # For log content, show first few lines or summary
     if content:
         lines = content.split('\n')
         if len(lines) > 10:
-            rows.append(['Log Content', f"{len(lines)} lines (showing first 10)"])
+            rows.append([tr_key(TableColumns.INFO), str(len(lines))])
             for i, line in enumerate(lines[:10], 1):
-                rows.append([f'Line {i}', line[:100]])  # Limit line length
+                rows.append([str(i), line[:100]])
         else:
-            rows.append(['Log Content', ''])
+            rows.append([tr_key(TableColumns.INFO), ''])
             for i, line in enumerate(lines, 1):
-                rows.append([f'Line {i}', line[:100]])  # Limit line length
+                rows.append([str(i), line[:100]])
     
     return columns, rows
 
 
 def render_core_status_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Field', 'Value']
+    columns = [tr_key(TableColumns.FIELD), tr_key(TableColumns.VALUE)]
     rows = []
     if isinstance(data, dict):
         status = str(data.get('status', 'unknown'))
@@ -471,7 +524,7 @@ def render_core_status_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
 
 
 def render_getter_schema_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Getter', 'Type']
+    columns = [tr_key(TableColumns.GETTER), tr_key(TableColumns.TYPE)]
     rows = []
     if isinstance(data, dict):
         for key, value in sorted(data.items(), key=lambda item: str(item[0]).lower()):
@@ -480,7 +533,7 @@ def render_getter_schema_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
 
 
 def render_executor_schema_data(data: Dict) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Executor', 'Type']
+    columns = [tr_key(TableColumns.EXECUTOR), tr_key(TableColumns.TYPE)]
     rows = []
     if isinstance(data, dict):
         for key, value in sorted(data.items(), key=lambda item: str(item[0]).lower()):
@@ -489,7 +542,13 @@ def render_executor_schema_data(data: Dict) -> Tuple[List[str], List[List[str]]]
 
 
 def render_getters_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Key', 'Valid', 'Timestamp', 'Type', 'Value']
+    columns = [
+        tr_key(TableColumns.KEY),
+        tr_key(TableColumns.VALID),
+        tr_key(TableColumns.TIMESTAMP),
+        tr_key(TableColumns.TYPE),
+        tr_key(TableColumns.VALUE),
+    ]
     rows = []
 
     if isinstance(data, list):
@@ -517,7 +576,15 @@ def render_getters_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]
 
 
 def render_executors_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Id', 'Name', 'Valid', 'Timestamp', 'Mode', 'Type', 'Value']
+    columns = [
+        tr_key(TableColumns.ID),
+        tr_key(TableColumns.NAME),
+        tr_key(TableColumns.VALID),
+        tr_key(TableColumns.TIMESTAMP),
+        tr_key(TableColumns.MODE),
+        tr_key(TableColumns.TYPE),
+        tr_key(TableColumns.VALUE),
+    ]
     rows = []
 
     if isinstance(data, list):
@@ -549,7 +616,7 @@ def render_executors_snapshot_data(data: Any) -> Tuple[List[str], List[List[str]
 
 
 def render_core_action_result_data(data: Any) -> Tuple[List[str], List[List[str]]]:
-    columns = ['Field', 'Value']
+    columns = [tr_key(TableColumns.FIELD), tr_key(TableColumns.VALUE)]
     rows = []
     if isinstance(data, dict):
         flat_data = flatten_dict(data)

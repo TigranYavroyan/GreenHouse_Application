@@ -8,6 +8,24 @@ from PyQt5.QtCore import QDateTime, QTimer
 
 from modules.core_api_client import UnauthorizedError
 from modules.ui_dialogs import StyledMessageDialog
+from modules.localization import tr_key
+from modules.localization.localization_keys import (
+    Charts,
+    Common,
+    Dialogs,
+    Statistics,
+    StatisticsInterval,
+    Status,
+)
+
+
+_STATISTICS_INTERVAL_OPTIONS = (
+    (StatisticsInterval.NO_TIMER, 0),
+    (StatisticsInterval.ONE_SECOND, 1000),
+    (StatisticsInterval.FIVE_SECONDS, 5000),
+    (StatisticsInterval.FIFTEEN_SECONDS, 15000),
+    (StatisticsInterval.THIRTY_SECONDS, 30000),
+)
 
 
 class GreenhouseStatisticsMixin:
@@ -30,8 +48,8 @@ class GreenhouseStatisticsMixin:
             self.statistics_plot_widget.setObjectName("statisticsPlotWidget")
             self.statistics_plot_widget.showGrid(x=True, y=True, alpha=0.25)
             self.statistics_plot_widget.setMouseEnabled(x=True, y=True)
-            self.statistics_plot_widget.setLabel("left", "Value")
-            self.statistics_plot_widget.setLabel("bottom", "Time")
+            self.statistics_plot_widget.setLabel("left", tr_key(Charts.AXIS_VALUE))
+            self.statistics_plot_widget.setLabel("bottom", tr_key(Charts.AXIS_TIME))
             self.statistics_plot_widget.setClipToView(True)
             self.statistics_plot_widget.addLegend(offset=(10, 10))
             self.statistics_plot_layout.addWidget(self.statistics_plot_widget)
@@ -39,8 +57,12 @@ class GreenhouseStatisticsMixin:
                 [],
                 [],
                 pen=pg.mkPen(color="#57CCF2", width=2),
-                name="Sensor value",
+                name=tr_key(Charts.LEGEND_SENSOR),
             )
+        self._statistics_chart_state = {
+            "title_name": "",
+            "title_unit": "",
+        }
 
         now_local = datetime.now().astimezone()
         from_local = now_local - timedelta(days=1)
@@ -86,16 +108,45 @@ class GreenhouseStatisticsMixin:
     def _setup_statistics_refresh_interval_controls(self):
         if not hasattr(self, "statisticsRefreshIntervalCombo"):
             return
+        self._populate_statistics_interval_combo(default_first=True)
+
+    def _populate_statistics_interval_combo(self, default_first=False):
         combo = self.statisticsRefreshIntervalCombo
+        previous_data = combo.currentData()
         combo.blockSignals(True)
         combo.clear()
-        combo.addItem("No timer", 0)
-        combo.addItem("1s", 1000)
-        combo.addItem("5s", 5000)
-        combo.addItem("15s", 15000)
-        combo.addItem("30s", 30000)
-        combo.setCurrentIndex(0)
+        for key, value in _STATISTICS_INTERVAL_OPTIONS:
+            combo.addItem(tr_key(key), value)
+        if default_first:
+            combo.setCurrentIndex(0)
+        elif previous_data is not None:
+            for index in range(combo.count()):
+                if combo.itemData(index) == previous_data:
+                    combo.setCurrentIndex(index)
+                    break
         combo.blockSignals(False)
+
+    def _refresh_statistics_interval_labels(self):
+        """Refresh refresh-interval combo labels (called from retranslate_ui)."""
+        if not hasattr(self, "statisticsRefreshIntervalCombo") or not self.statisticsRefreshIntervalCombo:
+            return
+        self._populate_statistics_interval_combo(default_first=False)
+
+    def _retranslate_statistics_chart(self):
+        """Update axis/legend/title text on language change."""
+        if not hasattr(self, "statistics_plot_widget") or not self.statistics_plot_widget:
+            return
+        self.statistics_plot_widget.setLabel("left", tr_key(Charts.AXIS_VALUE))
+        self.statistics_plot_widget.setLabel("bottom", tr_key(Charts.AXIS_TIME))
+        state = getattr(self, "_statistics_chart_state", None) or {}
+        title_name = str(state.get("title_name", "")).strip()
+        if title_name:
+            unit = str(state.get("title_unit", "")).strip()
+            if unit:
+                title = tr_key(Charts.TITLE_SENSOR, name=title_name, unit=unit)
+            else:
+                title = title_name
+            self.statistics_plot_widget.getPlotItem().setTitle(title)
 
     def _current_statistics_refresh_interval_ms(self):
         if not hasattr(self, "statisticsRefreshIntervalCombo"):
@@ -217,7 +268,7 @@ class GreenhouseStatisticsMixin:
             )
 
         if self.statisticsDeviceCombo.count() == 0:
-            self.statisticsDeviceCombo.addItem("No sensors available", "")
+            self.statisticsDeviceCombo.addItem(tr_key(Statistics.NO_SENSORS), "")
             return
 
         self.logger.info(
@@ -814,8 +865,8 @@ class GreenhouseStatisticsMixin:
             if not suppress_missing_device_warning:
                 StyledMessageDialog.show_warning(
                     self,
-                    "Statistics",
-                    "Please select a sensor first.",
+                    tr_key(Dialogs.STATISTICS_TITLE),
+                    tr_key(Dialogs.STATISTICS_SELECT_SENSOR),
                 )
             return
 
@@ -834,8 +885,8 @@ class GreenhouseStatisticsMixin:
             if from_dt > to_dt:
                 StyledMessageDialog.show_warning(
                     self,
-                    "Invalid Time Range",
-                    "From date-time must be before To date-time.",
+                    tr_key(Dialogs.STATISTICS_INVALID_RANGE_TITLE),
+                    tr_key(Dialogs.STATISTICS_INVALID_RANGE_BODY),
                 )
                 return
 
@@ -849,7 +900,7 @@ class GreenhouseStatisticsMixin:
             self.logger.info("Statistics query: %s", query_kwargs)
             readings = self.core_api.list_sensor_readings(**query_kwargs)
         except Exception as error:
-            self._handle_api_exception("Statistics Error", error)
+            self._handle_api_exception(tr_key(Dialogs.STATISTICS_ERROR_TITLE), error)
             return
 
         self.logger.info("Statistics readings fetched: count=%d", len(readings))
@@ -859,18 +910,30 @@ class GreenhouseStatisticsMixin:
 
         if not x_values:
             self.statistics_curve.setData([], [])
-            if use_all_data:
-                self.status_label.setText(f"No readings found for {display_name}")
+            empty_key = (
+                Statistics.NO_READINGS if use_all_data else Statistics.NO_READINGS_IN_RANGE
+            )
+            if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                self.set_status_state(empty_key, name=display_name)
             else:
-                self.status_label.setText(f"No readings in time range for {display_name}")
+                self.status_label.setText(tr_key(empty_key, name=display_name))
             return
 
         self.statistics_curve.setData(x_values, y_values)
         unit = str(sensor.get("sensor_type", "")).strip()
-        title = f"{display_name} ({unit})" if unit else display_name
+        if unit:
+            title = tr_key(Charts.TITLE_SENSOR, name=display_name, unit=unit)
+        else:
+            title = display_name
+        self._statistics_chart_state = {"title_name": display_name, "title_unit": unit}
         self.statistics_plot_widget.getPlotItem().setTitle(title)
         self.statistics_plot_widget.enableAutoRange(axis="xy", enable=True)
-        self.status_label.setText(f"Loaded {len(x_values)} reading(s) for {display_name}")
+        if hasattr(self, "set_status_state") and callable(self.set_status_state):
+            self.set_status_state(Statistics.LOADED_COUNT, count=len(x_values), name=display_name)
+        else:
+            self.status_label.setText(
+                tr_key(Statistics.LOADED_COUNT, count=len(x_values), name=display_name)
+            )
         self.logger.info("Statistics plot updated: sensor=%s points=%d", display_name, len(x_values))
 
     def persist_user_log(self, category, title, payload, metadata=None):
@@ -920,7 +983,7 @@ class GreenhouseStatisticsMixin:
                 ts_dt = datetime.fromisoformat(timestamp) if timestamp else None
             except ValueError:
                 ts_dt = None
-            display_time = ts_dt.astimezone().strftime("%H:%M:%S") if ts_dt else "-"
+            display_time = ts_dt.astimezone().strftime("%H:%M:%S") if ts_dt else tr_key(Common.DASH)
 
             command = str(payload.get("command", title or "command"))
             command_display = (
@@ -952,5 +1015,8 @@ class GreenhouseStatisticsMixin:
         if hasattr(self, "_on_control_table_selection_changed"):
             self._on_control_table_selection_changed()
         if restored_count > 0:
-            self.status_label.setText(f"Restored {restored_count} previous action(s)")
+            if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                self.set_status_state(Status.RESTORED_PREVIOUS, count=restored_count)
+            else:
+                self.status_label.setText(tr_key(Status.RESTORED_PREVIOUS, count=restored_count))
 

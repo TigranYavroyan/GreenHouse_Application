@@ -9,6 +9,14 @@ from modules import table_renderers
 from modules.core_api_client import CoreApiClient, UnauthorizedError
 from modules.core_dtos import ExecutorSnapshotDto, GetterSnapshotDto
 from modules.ui_dialogs import StyledInputDialog, StyledMessageDialog
+from modules.localization import tr_key
+from modules.localization.localization_keys import (
+    Dialogs,
+    Errors,
+    ServerData,
+    Status,
+    Tables,
+)
 
 
 class ServerPanelMixin:
@@ -64,11 +72,10 @@ class ServerPanelMixin:
                 }
             )
 
-            # Compute a short status summary for the main server table
             timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
-            status = "Success"
+            status = tr_key(Tables.STATUS_SUCCESS)
             if isinstance(data, dict) and data.get("error"):
-                status = "Failed"
+                status = tr_key(Tables.STATUS_FAILED)
 
             # Append a compact summary row; detailed view is available on double-click
             self.server_table.add_row([timestamp, title, status])
@@ -98,7 +105,7 @@ class ServerPanelMixin:
             return
 
         entry = self.server_history[row]
-        title = entry.get("title", "Server Data")
+        title = entry.get("title", tr_key(Dialogs.SERVER_DETAILS_FALLBACK))
         data = entry.get("data", {})
         data_type = entry.get("data_type", "generic")
 
@@ -121,7 +128,7 @@ class ServerPanelMixin:
                 columns, rows = table_renderers.render_generic_data(data)
 
             dialog = QDialog(self)
-            dialog.setWindowTitle(f"{title} - Details")
+            dialog.setWindowTitle(tr_key(Dialogs.SERVER_DETAILS_TITLE, title=title))
             dialog.setMinimumSize(800, 400)
 
             layout = QVBoxLayout(dialog)
@@ -140,7 +147,7 @@ class ServerPanelMixin:
     # Backend core helper
     # ------------------------------------------------------------------
     def _show_core_error(self, action_label: str, error: Exception):
-        message = str(error) or "Unknown error"
+        message = str(error) or tr_key(Errors.UNKNOWN)
         if isinstance(error, UnauthorizedError) and hasattr(self, "handle_unauthorized_error"):
             self.handle_unauthorized_error(message)
             return
@@ -199,23 +206,23 @@ class ServerPanelMixin:
         if hasattr(self, "testCommandButton"):
             self.testCommandButton.setEnabled(has_manual_digital)
             self.testCommandButton.setToolTip(
-                "Turn selected MANUAL digital executor ON."
+                tr_key(Dialogs.EXECUTOR_ON_TITLE)
                 if has_manual_digital
-                else "No MANUAL digital executors available."
+                else tr_key(Dialogs.EXECUTORS_NONE_MANUAL)
             )
         if hasattr(self, "logFilesButton"):
             self.logFilesButton.setEnabled(has_manual_digital)
             self.logFilesButton.setToolTip(
-                "Turn selected MANUAL digital executor OFF."
+                tr_key(Dialogs.EXECUTOR_OFF_TITLE)
                 if has_manual_digital
-                else "No MANUAL digital executors available."
+                else tr_key(Dialogs.EXECUTORS_NONE_MANUAL)
             )
         if hasattr(self, "viewLogButton"):
             self.viewLogButton.setEnabled(has_manual_value)
             self.viewLogButton.setToolTip(
-                "Set value for selected MANUAL value executor."
+                tr_key(Dialogs.EXECUTOR_SET_TITLE)
                 if has_manual_value
-                else "No MANUAL value executors available."
+                else tr_key(Dialogs.EXECUTORS_NONE_MANUAL)
             )
 
     def _pick_executor_name(
@@ -241,16 +248,23 @@ class ServerPanelMixin:
         if not candidates:
             StyledMessageDialog.show_warning(
                 self,
-                "No Executors",
+                tr_key(Dialogs.EXECUTORS_NONE_TITLE),
                 (
-                    "No matching MANUAL executors are available."
+                    tr_key(Dialogs.EXECUTORS_NONE_MANUAL)
                     if manual_only
-                    else "No matching executors are available."
+                    else tr_key(Dialogs.EXECUTORS_NONE_GENERIC)
                 ),
             )
             return None
 
-        selected, ok = StyledInputDialog.get_item(self, title, "Select executor:", candidates, 0, False)
+        selected, ok = StyledInputDialog.get_item(
+            self,
+            title,
+            tr_key(Dialogs.EXECUTOR_SELECT_LABEL),
+            candidates,
+            0,
+            False,
+        )
         if not ok or not selected:
             return None
         return str(selected)
@@ -261,18 +275,15 @@ class ServerPanelMixin:
             self._refresh_executors()
             target = self._find_executor(executor_name)
             if not target:
-                raise RuntimeError(f'Executor "{executor_name}" not found')
+                raise RuntimeError(tr_key(Errors.EXECUTOR_NOT_FOUND, name=executor_name))
 
             if str(target.mode).upper() == "MANUAL":
                 return True
 
             StyledMessageDialog.show_warning(
                 self,
-                "Executor in AUTO mode",
-                (
-                    f'Executor "{executor_name}" is in AUTO mode.\n'
-                    "Switch it to MANUAL mode first."
-                ),
+                tr_key(Dialogs.EXECUTOR_AUTO_TITLE),
+                tr_key(Dialogs.EXECUTOR_AUTO_BODY, name=executor_name),
             )
             return False
         except Exception as error:
@@ -298,78 +309,91 @@ class ServerPanelMixin:
         """Poll greenhouse status/schemas/data and display them."""
         try:
             status = self.core_api.get_status()
-            self.display_data_table("Core Status", {"status": status.status}, "core_status")
+            self.display_data_table(tr_key(ServerData.CORE_STATUS), {"status": status.status}, "core_status")
 
             self._refresh_getter_schema()
-            self.display_data_table("Getter Schema", self.core_getter_schema, "getter_schema")
+            self.display_data_table(tr_key(ServerData.GETTER_SCHEMA), self.core_getter_schema, "getter_schema")
 
             self._refresh_executor_schema()
-            self.display_data_table("Executor Schema", self.core_executor_schema, "executor_schema")
+            self.display_data_table(tr_key(ServerData.EXECUTOR_SCHEMA), self.core_executor_schema, "executor_schema")
 
             self._refresh_getters()
-            self.display_data_table("Getters", self.core_getters, "getters")
+            self.display_data_table(tr_key(ServerData.GETTERS), self.core_getters, "getters")
 
             self._refresh_executors()
-            self.display_data_table("Executors", self.core_executors, "executors")
+            self.display_data_table(tr_key(ServerData.EXECUTORS), self.core_executors, "executors")
 
-            self.status_label.setText("Greenhouse state refreshed")
+            if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                self.set_status_state(Status.GREENHOUSE_REFRESHED)
+            else:
+                self.status_label.setText(tr_key(Status.GREENHOUSE_REFRESHED))
         except Exception as error:
             self._show_core_error("Refresh greenhouse snapshot", error)
 
     def view_core_status(self):
         try:
             status = self.core_api.get_status()
-            self.display_data_table("Core Status", {"status": status.status}, "core_status")
+            self.display_data_table(tr_key(ServerData.CORE_STATUS), {"status": status.status}, "core_status")
         except Exception as error:
             self._show_core_error("Core status", error)
 
     def view_getter_schema(self):
         try:
             self._refresh_getter_schema()
-            self.display_data_table("Getter Schema", self.core_getter_schema, "getter_schema")
+            self.display_data_table(tr_key(ServerData.GETTER_SCHEMA), self.core_getter_schema, "getter_schema")
         except Exception as error:
             self._show_core_error("Getter schema", error)
 
     def view_executor_schema(self):
         try:
             self._refresh_executor_schema()
-            self.display_data_table("Executor Schema", self.core_executor_schema, "executor_schema")
+            self.display_data_table(tr_key(ServerData.EXECUTOR_SCHEMA), self.core_executor_schema, "executor_schema")
         except Exception as error:
             self._show_core_error("Executor schema", error)
 
     def view_getters(self):
         try:
             self._refresh_getters()
-            self.display_data_table("Getters", self.core_getters, "getters")
+            self.display_data_table(tr_key(ServerData.GETTERS), self.core_getters, "getters")
         except Exception as error:
             self._show_core_error("Getters", error)
 
     def view_executors(self):
         try:
             self._refresh_executors()
-            self.display_data_table("Executors", self.core_executors, "executors")
+            self.display_data_table(tr_key(ServerData.EXECUTORS), self.core_executors, "executors")
         except Exception as error:
             self._show_core_error("Executors", error)
 
     def prompt_switch_executor_mode(self):
         try:
-            name = self._pick_executor_name("Switch Executor Mode")
+            name = self._pick_executor_name(tr_key(Dialogs.SWITCH_MODE_TITLE))
             if not name:
                 return
 
             selected_mode, ok = StyledInputDialog.get_item(
                 self,
-                "Executor Mode",
-                "Mode:",
-                ["manual", "auto"],
+                tr_key(Dialogs.EXECUTOR_MODE_TITLE),
+                tr_key(Dialogs.EXECUTOR_MODE_LABEL),
+                [tr_key(Dialogs.EXECUTOR_MODE_MANUAL), tr_key(Dialogs.EXECUTOR_MODE_AUTO)],
                 0,
                 False,
             )
             if not ok or not selected_mode:
                 return
 
-            result = self.core_api.set_executor_mode(name, str(selected_mode))
-            self.display_data_table(f"Set Mode ({name})", result, "core_action")
+            mode_value = str(selected_mode).strip().lower()
+            manual_label = tr_key(Dialogs.EXECUTOR_MODE_MANUAL).strip().lower()
+            auto_label = tr_key(Dialogs.EXECUTOR_MODE_AUTO).strip().lower()
+            if mode_value == manual_label:
+                mode_value = "manual"
+            elif mode_value == auto_label:
+                mode_value = "auto"
+
+            result = self.core_api.set_executor_mode(name, mode_value)
+            self.display_data_table(
+                tr_key(ServerData.SET_MODE, name=name), result, "core_action"
+            )
             self.refresh_core_snapshot()
         except Exception as error:
             self._show_core_error("Set executor mode", error)
@@ -377,7 +401,7 @@ class ServerPanelMixin:
     def prompt_executor_on(self):
         try:
             name = self._pick_executor_name(
-                "Turn Executor ON",
+                tr_key(Dialogs.EXECUTOR_ON_TITLE),
                 for_kind="digital",
                 manual_only=True,
             )
@@ -388,7 +412,9 @@ class ServerPanelMixin:
                 return
 
             result = self.core_api.executor_on(name)
-            self.display_data_table(f"Executor ON ({name})", result, "core_action")
+            self.display_data_table(
+                tr_key(ServerData.EXECUTOR_ON, name=name), result, "core_action"
+            )
             self.refresh_core_snapshot()
         except Exception as error:
             self._show_core_error("Executor ON", error)
@@ -396,7 +422,7 @@ class ServerPanelMixin:
     def prompt_executor_off(self):
         try:
             name = self._pick_executor_name(
-                "Turn Executor OFF",
+                tr_key(Dialogs.EXECUTOR_OFF_TITLE),
                 for_kind="digital",
                 manual_only=True,
             )
@@ -407,7 +433,9 @@ class ServerPanelMixin:
                 return
 
             result = self.core_api.executor_off(name)
-            self.display_data_table(f"Executor OFF ({name})", result, "core_action")
+            self.display_data_table(
+                tr_key(ServerData.EXECUTOR_OFF, name=name), result, "core_action"
+            )
             self.refresh_core_snapshot()
         except Exception as error:
             self._show_core_error("Executor OFF", error)
@@ -415,7 +443,7 @@ class ServerPanelMixin:
     def prompt_executor_set(self):
         try:
             name = self._pick_executor_name(
-                "Set Executor Value",
+                tr_key(Dialogs.EXECUTOR_SET_TITLE),
                 for_kind="value",
                 manual_only=True,
             )
@@ -425,16 +453,26 @@ class ServerPanelMixin:
             if not self.ensure_executor_manual(name):
                 return
 
-            value, ok = StyledInputDialog.get_text(self, "Set Executor Value", "Value:")
+            value, ok = StyledInputDialog.get_text(
+                self,
+                tr_key(Dialogs.EXECUTOR_SET_TITLE),
+                tr_key(Dialogs.EXECUTOR_SET_LABEL),
+            )
             if not ok:
                 return
             value = str(value).strip()
             if not value:
-                StyledMessageDialog.show_warning(self, "Invalid value", "Value is required.")
+                StyledMessageDialog.show_warning(
+                    self,
+                    tr_key(Dialogs.INVALID_VALUE_TITLE),
+                    tr_key(Dialogs.INVALID_VALUE_BODY),
+                )
                 return
 
             result = self.core_api.executor_set(name, value)
-            self.display_data_table(f"Executor SET ({name})", result, "core_action")
+            self.display_data_table(
+                tr_key(ServerData.EXECUTOR_SET, name=name), result, "core_action"
+            )
             self.refresh_core_snapshot()
         except Exception as error:
             self._show_core_error("Executor SET", error)

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>🌿 Greenhouse Automation Control System</string>
+   <string></string>
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow {
@@ -445,17 +445,17 @@ QScrollBar::handle:horizontal:hover {
       <item>
        <widget class="QLabel" name="sessionTitleLabel">
         <property name="text">
-         <string>Session:</string>
+         <string></string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="session_label">
         <property name="toolTip">
-         <string>Full Session ID</string>
+         <string></string>
         </property>
         <property name="text">
-         <string>session_id</string>
+         <string></string>
         </property>
        </widget>
       </item>
@@ -475,7 +475,7 @@ QScrollBar::handle:horizontal:hover {
       <item>
        <widget class="QLabel" name="connection_status">
         <property name="text">
-         <string>Connecting to RabbitMQ...</string>
+         <string></string>
         </property>
        </widget>
       </item>
@@ -491,7 +491,7 @@ QScrollBar::handle:horizontal:hover {
       </property>
       <widget class="QWidget" name="userTab">
        <attribute name="title">
-        <string>🏠 Control</string>
+        <string></string>
        </attribute>
        <layout class="QVBoxLayout" name="userTabLayout">
         <property name="spacing">
@@ -518,7 +518,7 @@ QScrollBar::handle:horizontal:hover {
            </sizepolicy>
           </property>
           <property name="title">
-           <string>🌱 Greenhouse Controls</string>
+           <string></string>
           </property>
           <layout class="QGridLayout" name="controlGridLayout">
            <property name="leftMargin">
@@ -539,77 +539,77 @@ QScrollBar::handle:horizontal:hover {
            <item row="0" column="0">
             <widget class="QPushButton" name="tempButton">
              <property name="text">
-              <string>🌡️ Temperature</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="humidityButton">
              <property name="text">
-              <string>💧 Humidity</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="co2Button">
              <property name="text">
-              <string>🌬️ CO2</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
             <widget class="QPushButton" name="lightButton">
              <property name="text">
-              <string>💡 Light</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
             <widget class="QPushButton" name="soilPHButton">
              <property name="text">
-              <string>🧪 Soil pH</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="1" column="2">
             <widget class="QPushButton" name="soilMoistureButton">
              <property name="text">
-              <string>🌱 Soil Moisture</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
             <widget class="QPushButton" name="fanButton">
              <property name="text">
-              <string>🌀 Fan</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="2" column="1">
             <widget class="QPushButton" name="waterCanalButton">
              <property name="text">
-              <string>🚰 Water Canal</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="2" column="2">
             <widget class="QPushButton" name="actuatorButton">
              <property name="text">
-              <string>⚙️ Actuator</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
             <widget class="QPushButton" name="heaterButton">
              <property name="text">
-              <string>🔥 Heater</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="3" column="1" colspan="2">
             <widget class="QPushButton" name="statusButton">
              <property name="text">
-              <string>📊 System Status</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -653,7 +653,7 @@ QScrollBar::handle:horizontal:hover {
       </widget>
       <widget class="QWidget" name="schedulingTab">
        <attribute name="title">
-        <string>⏱️ Scheduling</string>
+        <string></string>
        </attribute>
        <layout class="QVBoxLayout" name="schedulingTabLayout">
         <property name="spacing">
@@ -680,7 +680,7 @@ QScrollBar::handle:horizontal:hover {
            </sizepolicy>
           </property>
           <property name="title">
-           <string>📅 Schedule One-Time Tasks</string>
+           <string></string>
           </property>
           <layout class="QGridLayout" name="scheduleGridLayout">
            <property name="leftMargin">
@@ -704,7 +704,7 @@ QScrollBar::handle:horizontal:hover {
            <item row="0" column="0">
             <widget class="QLabel" name="scheduleTargetLabel">
              <property name="text">
-              <string>Target Action</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -714,7 +714,7 @@ QScrollBar::handle:horizontal:hover {
            <item row="1" column="0">
             <widget class="QLabel" name="scheduleDelayLabel">
              <property name="text">
-              <string>Delay</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -724,7 +724,7 @@ QScrollBar::handle:horizontal:hover {
            <item row="2" column="0">
             <widget class="QLabel" name="scheduleCustomDelayLabel">
              <property name="text">
-              <string>Custom Delay</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -754,7 +754,7 @@ QScrollBar::handle:horizontal:hover {
                 <number>999</number>
                </property>
                <property name="suffix">
-                <string> h</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -767,7 +767,7 @@ QScrollBar::handle:horizontal:hover {
                 <number>59</number>
                </property>
                <property name="suffix">
-                <string> m</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -780,7 +780,7 @@ QScrollBar::handle:horizontal:hover {
                 <number>59</number>
                </property>
                <property name="suffix">
-                <string> s</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -789,35 +789,35 @@ QScrollBar::handle:horizontal:hover {
            <item row="2" column="2" colspan="2">
             <widget class="QLabel" name="scheduleHintLabel">
              <property name="text">
-              <string>Use custom delay when preset is set to Custom.</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
             <widget class="QPushButton" name="scheduleTaskButton">
              <property name="text">
-              <string>➕ Schedule Task</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
             <widget class="QPushButton" name="cancelScheduledButton">
              <property name="text">
-              <string>✖ Cancel Selected</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="3" column="2">
             <widget class="QPushButton" name="clearScheduledButton">
              <property name="text">
-              <string>🧹 Clear All</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="3" column="3">
             <widget class="QLabel" name="scheduleCurrentTimeLabel">
              <property name="text">
-              <string>Current Time: --:--:--</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -861,7 +861,7 @@ QScrollBar::handle:horizontal:hover {
       </widget>
       <widget class="QWidget" name="serverTab">
        <attribute name="title">
-        <string>📊 Server</string>
+        <string></string>
        </attribute>
        <layout class="QVBoxLayout" name="serverTabLayout">
         <property name="spacing">
@@ -909,70 +909,70 @@ QScrollBar::handle:horizontal:hover {
            <item row="0" column="0">
             <widget class="QPushButton" name="healthButton">
              <property name="text">
-              <string>❤️ Check Health</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="statsButton">
              <property name="text">
-              <string>📈 View Statistics</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="sessionsButton">
              <property name="text">
-              <string>👥 List Sessions</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
             <widget class="QPushButton" name="cacheKeysButton">
              <property name="text">
-              <string>🔑 List Cache Keys</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
             <widget class="QPushButton" name="clearCacheButton">
              <property name="text">
-              <string>🧹 Clear All Cache</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="1" column="2">
             <widget class="QPushButton" name="queuesButton">
              <property name="text">
-              <string>📨 Check Queues</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
             <widget class="QPushButton" name="testCommandButton">
              <property name="text">
-              <string>⚡ Test Command</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="2" column="1">
             <widget class="QPushButton" name="refreshButton">
              <property name="text">
-              <string>🔄 Refresh All</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="2" column="2">
             <widget class="QPushButton" name="logFilesButton">
              <property name="text">
-              <string>📋 List Log Files</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
             <widget class="QPushButton" name="viewLogButton">
              <property name="text">
-              <string>📖 View Session Log</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1069,7 +1069,7 @@ QScrollBar::handle:horizontal:hover {
       </widget>
       <widget class="QWidget" name="statisticsTab">
        <attribute name="title">
-        <string>📊 Statistics</string>
+        <string></string>
        </attribute>
        <layout class="QVBoxLayout" name="statisticsTabLayout">
         <property name="spacing">
@@ -1096,7 +1096,7 @@ QScrollBar::handle:horizontal:hover {
            </sizepolicy>
           </property>
           <property name="title">
-           <string>Device Statistics</string>
+           <string></string>
           </property>
           <layout class="QGridLayout" name="statisticsGridLayout">
            <property name="leftMargin">
@@ -1120,7 +1120,7 @@ QScrollBar::handle:horizontal:hover {
            <item row="0" column="0">
             <widget class="QLabel" name="statisticsDeviceLabel">
              <property name="text">
-              <string>Device</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1130,7 +1130,7 @@ QScrollBar::handle:horizontal:hover {
            <item row="0" column="2">
             <widget class="QLabel" name="statisticsSensorLabel">
              <property name="text">
-              <string>Sensor</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1140,7 +1140,7 @@ QScrollBar::handle:horizontal:hover {
            <item row="1" column="0">
             <widget class="QLabel" name="statisticsFromLabel">
              <property name="text">
-              <string>From</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1157,7 +1157,7 @@ QScrollBar::handle:horizontal:hover {
            <item row="1" column="2">
             <widget class="QLabel" name="statisticsToLabel">
              <property name="text">
-              <string>To</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1191,21 +1191,21 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QCheckBox" name="statisticsAllDataCheck">
                <property name="text">
-                <string>All Data</string>
+                <string></string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="statisticsLoadButton">
                <property name="text">
-                <string>Load Statistics</string>
+                <string></string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLabel" name="statisticsRefreshIntervalLabel">
                <property name="text">
-                <string>Refresh</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -1215,7 +1215,7 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QLabel" name="statisticsHintLabel">
                <property name="text">
-                <string>Mouse controls: wheel zoom, drag to pan.</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -1274,7 +1274,7 @@ QScrollBar::handle:horizontal:hover {
       </widget>
       <widget class="QWidget" name="logicTab">
        <attribute name="title">
-        <string>🧠 Logic Builder</string>
+        <string></string>
        </attribute>
        <layout class="QVBoxLayout" name="logicTabLayout">
         <property name="spacing">
@@ -1295,7 +1295,7 @@ QScrollBar::handle:horizontal:hover {
         <item>
          <widget class="QGroupBox" name="logicControlsGroup">
           <property name="title">
-           <string>Logic Editor Controls</string>
+           <string></string>
           </property>
           <layout class="QGridLayout" name="logicControlsLayout">
            <property name="leftMargin">
@@ -1319,35 +1319,35 @@ QScrollBar::handle:horizontal:hover {
            <item row="0" column="0">
             <widget class="QPushButton" name="logicAddRootButton">
              <property name="text">
-              <string>Add Root</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="logicAddConditionButton">
              <property name="text">
-              <string>Add Condition Node</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="logicAddActionButton">
              <property name="text">
-              <string>Add Action Node</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="3">
             <widget class="QPushButton" name="logicDeleteSelectedButton">
              <property name="text">
-              <string>Delete Selected</string>
+              <string></string>
              </property>
             </widget>
            </item>
            <item row="0" column="4">
             <widget class="QPushButton" name="logicConnectSelectedButton">
              <property name="text">
-              <string>Connect Selected</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1357,7 +1357,7 @@ QScrollBar::handle:horizontal:hover {
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Load (next step)</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1367,7 +1367,7 @@ QScrollBar::handle:horizontal:hover {
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Validate (next step)</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1377,7 +1377,7 @@ QScrollBar::handle:horizontal:hover {
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Upload (next step)</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1387,7 +1387,7 @@ QScrollBar::handle:horizontal:hover {
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Reload (next step)</string>
+              <string></string>
              </property>
             </widget>
            </item>
@@ -1414,7 +1414,7 @@ QScrollBar::handle:horizontal:hover {
              </size>
             </property>
             <property name="title">
-             <string>Node Toolbox</string>
+             <string></string>
             </property>
             <layout class="QVBoxLayout" name="logicToolboxLayout">
              <property name="leftMargin">
@@ -1435,7 +1435,7 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QLabel" name="logicToolboxHintLabel">
                <property name="text">
-                <string>Drag block types into canvas or use Add buttons.</string>
+                <string></string>
                </property>
                <property name="wordWrap">
                 <bool>true</bool>
@@ -1451,7 +1451,7 @@ QScrollBar::handle:horizontal:hover {
           <item>
            <widget class="QGroupBox" name="logicCanvasGroup">
             <property name="title">
-             <string>Block-Scheme Canvas</string>
+             <string></string>
             </property>
             <layout class="QVBoxLayout" name="logicCanvasLayout">
              <property name="leftMargin">
@@ -1502,7 +1502,7 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QLabel" name="logicCanvasStatusLabel">
                <property name="text">
-                <string>Canvas ready. API calls are disabled in this step.</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -1524,7 +1524,7 @@ QScrollBar::handle:horizontal:hover {
              </size>
             </property>
             <property name="title">
-             <string>Selected Node Properties</string>
+             <string></string>
             </property>
             <layout class="QVBoxLayout" name="logicPropertiesLayout">
              <property name="leftMargin">
@@ -1545,14 +1545,14 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QLabel" name="logicPropertyNodeTypeLabel">
                <property name="text">
-                <string>Type: none</string>
+                <string></string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLineEdit" name="logicPropertyTitleEdit">
                <property name="placeholderText">
-                <string>Node title</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -1562,7 +1562,7 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QLineEdit" name="logicPropertyArgsEdit">
                <property name="placeholderText">
-                <string>Args (comma-separated)</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -1575,7 +1575,7 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QLineEdit" name="logicPropertyValueEdit">
                <property name="placeholderText">
-                <string>Action value</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -1585,14 +1585,14 @@ QScrollBar::handle:horizontal:hover {
              <item>
               <widget class="QCheckBox" name="logicPropertyEnabledCheck">
                <property name="text">
-                <string>Action enabled</string>
+                <string></string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="logicApplyPropertyButton">
                <property name="text">
-                <string>Apply to selected node</string>
+                <string></string>
                </property>
               </widget>
              </item>
@@ -1604,7 +1604,7 @@ QScrollBar::handle:horizontal:hover {
         <item>
          <widget class="QGroupBox" name="logicValidationGroup">
           <property name="title">
-           <string>Validation</string>
+           <string></string>
           </property>
           <layout class="QVBoxLayout" name="logicValidationLayout">
            <property name="leftMargin">
@@ -1641,14 +1641,14 @@ QScrollBar::handle:horizontal:hover {
       <item>
        <widget class="QLabel" name="statusTitleLabel">
         <property name="text">
-         <string>Status:</string>
+         <string></string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="status_label">
         <property name="text">
-         <string>Ready</string>
+         <string></string>
         </property>
        </widget>
       </item>

@@ -1,10 +1,6 @@
-import sys
 import uuid
 import logging
 import os
-import json
-import re
-from datetime import datetime, timedelta, timezone
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -14,9 +10,8 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QLabel,
 )
-from PyQt5.QtCore import Qt, QTimer, QDateTime
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5 import uic
-import pyqtgraph as pg
 
 from modules.styles import GreenhouseTheme, StyleSheetGenerator
 from modules.edge_fog_aggregator import EdgeToFogAggregator
@@ -31,7 +26,20 @@ from modules.greenhouse_statistics_mixin import GreenhouseStatisticsMixin
 from modules.greenhouse_scheduling_mixin import GreenhouseSchedulingMixin
 from modules.greenhouse_logic_mixin import GreenhouseLogicMixin
 from modules.auth_session import AuthSessionManager
-from modules.ui_dialogs import StyledMessageDialog
+from modules.localization import IRetranslatable, tr_key
+from modules.localization.language_switcher import LanguageSwitcherWidget
+from modules.localization.localization_keys import (
+    App,
+    CommandStatus,
+    Connection,
+    Empty,
+    Hints,
+    Session,
+    Status,
+    TableColumns,
+    Tabs,
+)
+from modules.localization.ui_text_map import MAIN_WINDOW_TEXT_MAP, apply_ui_text_map
 
 
 class GreenhouseDesktop(
@@ -43,6 +51,7 @@ class GreenhouseDesktop(
     CommandPanelMixin,
     ServerPanelMixin,
     EdgeFogMixin,
+    IRetranslatable,
 ):
     def __init__(self, auth_session=None):
         super().__init__()
@@ -54,11 +63,12 @@ class GreenhouseDesktop(
         self.auth_session = auth_session or AuthSessionManager()
         self.auth_user_label = None
         self.logoutButton = None
+        self.language_switcher = None
         # History for detailed views
-        self.control_history = []  # One entry per control_table row
-        self.server_history = []   # One entry per server_table row
-        self.schedule_table_rows = []  # Maps schedule table row index -> schedule_id
-        self.schedule_rows = []  # Raw backend schedule rows
+        self.control_history = []
+        self.server_history = []
+        self.schedule_table_rows = []
+        self.schedule_rows = []
         self.schedule_device_id = None
         self.schedule_target_keys = []
         self._schedule_refresh_tick_count = 0
@@ -72,52 +82,43 @@ class GreenhouseDesktop(
         self._statistics_signals_connected = False
         self._sensor_persistence_device_cache = {}
         self._sensor_persistence_sensor_cache = {}
-        
-        # Import config after it's initialized
+
+        # Dynamic-text state used by retranslate_ui to re-render runtime strings.
+        self._status_state = (Status.READY, {})
+
         from modules.config import config
         self.backend_url = config.BACKEND_URL
-        
-        # Initialize Edge-to-Fog aggregator + local Redis client
+
         self.edge_aggregator = EdgeToFogAggregator()
         self.redis_edge_client = RedisEdgeClient()
 
-        # Initialize styling
         self.theme = GreenhouseTheme()
         self.styler = StyleSheetGenerator(self.theme)
-        
+
         self.logger = logging.getLogger('GreenhouseDesktop')
         self.logger.info(f"Starting application with session ID: {self.session_id}")
         self.logger.info(f"Backend URL: {self.backend_url}")
-        
-        # Load UI from .ui file
+
         self.setupUI()
         self.setup_auth_controls()
-        
-        # Setup functionality and signal connections
+        self._install_language_switcher()
+
         self.add_functions()
         self.setup_core_panel()
         self.setup_scheduler()
         self.setup_statistics_tab()
         self.setup_logic_tab()
         self.remove_unused_core_controls()
-        self.configure_core_server_buttons()
-        
-        # No need to connect tab change - layout handles sizing
-        
-        # Setup command worker (mixin)
-        self.setup_command_worker()
 
-        # Setup edge-to-fog aggregator (mixin)
+        self.setup_command_worker()
         self.setup_edge_aggregator()
-        
-        # Apply custom styles (UI file already has styles, but we can override if needed)
+
         self.apply_styles()
+        self.init_localization()
         self._prompt_restore_user_data_preference()
-        
+
     def setupUI(self):
         """Load UI from .ui file in frontend directory"""
-        # UI file is always in the frontend directory (same level as modules/)
-        # From frontend/modules/greenhouse.py -> frontend/front.ui
         frontend_dir = os.path.dirname(os.path.dirname(__file__))
         ui_path = os.path.join(frontend_dir, 'front.ui')
 
@@ -129,38 +130,36 @@ class GreenhouseDesktop(
         self.logger.info(f"Loading UI from: {ui_path}")
         uic.loadUi(ui_path, self)
 
-        # Update session label with actual session ID
         self.session_label.setText(self.session_id[:8] + "...")
-        self.session_label.setToolTip(f"Full Session ID: {self.session_id}")
 
-        # Initialize auto-refresh timer
         self.auto_refresh_timer = QTimer()
         self.auto_refresh_timer.timeout.connect(self.refresh_all_status)
 
-        # Initialize table management before setting up tables
-        self.control_table = None  # Simple table for control tab - adds rows from RabbitMQ
-        self.schedule_table = None  # Simple table for scheduling tab
-        self.server_table = None  # Simple table for server tab - adds rows from button clicks
+        self.control_table = None
+        self.schedule_table = None
+        self.server_table = None
         self.schedule_clock_timer = None
 
-        # Ensure layouts are properly set up
         self._ensure_layouts_initialized()
-
-        # Force find containers if they weren't found
         self._find_containers()
-
-        # Setup tables after UI is loaded
         self.setup_tables()
         self._setup_layout_stretch()
 
     def _setup_layout_stretch(self):
-        """Main layout stretch for tab widget."""
         if hasattr(self, "mainLayout") and self.mainLayout:
             self.mainLayout.setStretch(1, 1)
 
+    def _install_language_switcher(self):
+        """Add the flag switcher to the top-right of `sessionLayout`."""
+        if not hasattr(self, "sessionLayout") or not self.sessionLayout:
+            return
+        if self.language_switcher is not None:
+            return
+        self.language_switcher = LanguageSwitcherWidget(self)
+        self.sessionLayout.addWidget(self.language_switcher)
+
     def add_functions(self):
         """Setup signal connections and functionality"""
-        # User Tab - Sensor reading buttons
         self.tempButton.clicked.connect(
             lambda: self.send_user_command("read_sensor", {"sensor": "temperature"}, source_button=self.tempButton)
         )
@@ -184,7 +183,6 @@ class GreenhouseDesktop(
             lambda: self.send_user_command("read_sensor", {"sensor": "soil_ph"}, source_button=self.soilPHButton)
         )
 
-        # User Tab - Device control buttons
         self.waterCanalButton.clicked.connect(
             lambda: self.send_user_command(
                 "switch_water_canal",
@@ -214,7 +212,6 @@ class GreenhouseDesktop(
             )
         )
 
-        # Server Tab - Server management buttons
         self.healthButton.clicked.connect(self.view_core_status)
         self.refreshButton.clicked.connect(self.refresh_all_status)
         if hasattr(self, "statsButton"):
@@ -234,11 +231,9 @@ class GreenhouseDesktop(
         if hasattr(self, "viewLogButton"):
             self.viewLogButton.clicked.connect(self.prompt_executor_set)
 
-        # Server Tab - Auto-refresh checkbox (if exists in UI)
         if hasattr(self, 'auto_refresh'):
             self.auto_refresh.toggled.connect(self.toggle_auto_refresh)
 
-        # Scheduling Tab - Persistent schedule controls
         if hasattr(self, "scheduleTaskButton"):
             self.scheduleTaskButton.clicked.connect(self.schedule_selected_task)
         if hasattr(self, "cancelScheduledButton"):
@@ -277,37 +272,12 @@ class GreenhouseDesktop(
             self.logoutButton.clicked.connect(self.logout_user)
 
     def apply_styles(self):
-        """Apply custom styles if needed (UI file already has styles)"""
-        # The UI file already contains styles, but we can override specific widgets if needed
-        # For example, update connection status and status label styles dynamically
         pass
 
-
-    def configure_core_server_buttons(self):
-        """Retitle existing server-tab buttons for greenhouse core controls."""
-        server_labels = {
-            "healthButton": "System Health",
-            "refreshButton": "Refresh All Data",
-            "statsButton": "Available Sensor Types",
-            "sessionsButton": "Available Device Controls",
-            "cacheKeysButton": "All Sensor Readings",
-            "queuesButton": "All Device States",
-            "clearCacheButton": "Change Device Mode",
-            "testCommandButton": "Turn Device ON",
-            "logFilesButton": "Turn Device OFF",
-            "viewLogButton": "Set Device Value",
-        }
-        for widget_name, label in server_labels.items():
-            if hasattr(self, widget_name):
-                getattr(self, widget_name).setText(label)
-
     def remove_unused_core_controls(self):
-        """
-        Hide controls that are not connected to active core logic flows.
-        """
         unused_buttons = (
-            "statusButton",            # legacy duplicate in Control tab
-            "pathButton",              # legacy/no-op control
+            "statusButton",
+            "pathButton",
         )
         for widget_name in unused_buttons:
             if hasattr(self, widget_name):
@@ -316,8 +286,6 @@ class GreenhouseDesktop(
                 button.setEnabled(False)
 
     def _find_containers(self):
-        """Find containers from UI"""
-        # Containers are loaded from UI file, just ensure server_info_container is set
         if hasattr(self, 'server_info_scroll') and self.server_info_scroll:
             container = self.server_info_scroll.widget()
             if container:
@@ -326,22 +294,17 @@ class GreenhouseDesktop(
         else:
             self.logger.warning("server_info_scroll not found in UI")
 
-        # Ensure user_output_container exists
         if not hasattr(self, 'user_output_container') or not self.user_output_container:
             self.logger.error("user_output_container not found in UI!")
 
     def _ensure_layouts_initialized(self):
-        """Ensure all layouts are properly initialized after UI load"""
         if hasattr(self, 'user_output_container') and self.user_output_container:
             if not self.user_output_container.layout():
                 layout = QVBoxLayout()
                 layout.setContentsMargins(0, 0, 0, 0)
                 layout.setSpacing(0)
                 self.user_output_container.setLayout(layout)
-            # Ensure it's visible
             self.user_output_container.setVisible(True)
-        else:
-            self.logger.error("user_output_container not available for layout initialization")
 
         if hasattr(self, 'server_info_container') and self.server_info_container:
             if not self.server_info_container.layout():
@@ -349,10 +312,7 @@ class GreenhouseDesktop(
                 layout.setContentsMargins(0, 0, 0, 0)
                 layout.setSpacing(0)
                 self.server_info_container.setLayout(layout)
-            # Ensure it's visible
             self.server_info_container.setVisible(True)
-        else:
-            self.logger.warning("server_info_container not available for layout initialization")
 
         if hasattr(self, 'schedule_output_container') and self.schedule_output_container:
             if not self.schedule_output_container.layout():
@@ -361,23 +321,31 @@ class GreenhouseDesktop(
                 layout.setSpacing(0)
                 self.schedule_output_container.setLayout(layout)
             self.schedule_output_container.setVisible(True)
-        else:
-            self.logger.warning("schedule_output_container not available for layout initialization")
 
     def setup_tables(self):
         """Initialize simple table widgets for displaying RabbitMQ + server data"""
-        # Setup control table for command results from RabbitMQ
         if not hasattr(self, "userTabLayout") or not self.userTabLayout:
             self.logger.error("Cannot setup control table - userTabLayout not found")
             return
 
         self.control_table = SimpleDataTable(
-            columns=["Timestamp", "Command", "Status"],
+            columns=[
+                tr_key(TableColumns.TIMESTAMP),
+                tr_key(TableColumns.COMMAND),
+                tr_key(TableColumns.STATUS),
+            ],
             parent=self.userTab,
             show_clear_button=True,
             on_clear_requested=self.clear_control_table,
             on_remove_selected_requested=self._remove_selected_control_row,
         )
+        # Internal column key tokens used for locale-independent semantic styling.
+        self.control_table.set_column_role_tokens(["timestamp", "command", "status"])
+        self.control_table.set_column_keys([
+            TableColumns.TIMESTAMP,
+            TableColumns.COMMAND,
+            TableColumns.STATUS,
+        ])
         control_insert_index = self.userTabLayout.count()
         if hasattr(self, "user_output_container") and self.user_output_container:
             existing_index = self.userTabLayout.indexOf(self.user_output_container)
@@ -387,16 +355,14 @@ class GreenhouseDesktop(
                 self.user_output_container.setVisible(False)
                 self.user_output_container.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.userTabLayout.insertWidget(control_insert_index, self.control_table, 1)
-        # Double-click on a control row opens detailed view (mixin)
         self.control_table.table.cellDoubleClicked.connect(self.show_control_details)
         self.control_table.table.itemSelectionChanged.connect(self._on_control_table_selection_changed)
 
-        # Connection banner in user tab for clear reconnect guidance.
         control_connection_row = QHBoxLayout()
         control_connection_row.setContentsMargins(0, 0, 0, 0)
-        self.control_connection_banner = QLabel("No connection. Reconnecting automatically...")
+        self.control_connection_banner = QLabel("")
         self.control_connection_banner.setObjectName("controlConnectionBanner")
-        self.retry_connection_button = QPushButton("Retry now")
+        self.retry_connection_button = QPushButton("")
         self.retry_connection_button.setObjectName("retryConnectionButton")
         self.retry_connection_button.clicked.connect(self.retry_connection_now)
         control_connection_row.addWidget(self.control_connection_banner, 0, Qt.AlignLeft)
@@ -404,10 +370,9 @@ class GreenhouseDesktop(
         control_connection_row.addStretch(1)
         self.userTabLayout.insertLayout(control_insert_index + 1, control_connection_row)
 
-        # Explicit action for details improves discoverability versus double-click only.
         control_actions = QHBoxLayout()
         control_actions.setContentsMargins(0, 0, 0, 0)
-        self.view_control_details_button = QPushButton("View Selected Details")
+        self.view_control_details_button = QPushButton("")
         self.view_control_details_button.setObjectName("viewControlDetailsButton")
         self.view_control_details_button.setEnabled(False)
         self.view_control_details_button.clicked.connect(self.view_selected_control_details)
@@ -415,35 +380,47 @@ class GreenhouseDesktop(
         control_actions.addStretch(1)
         self.userTabLayout.insertLayout(control_insert_index + 2, control_actions)
 
-        # Add a small hint below the control table so users know how to open details.
-        control_hint = QLabel("Tip: select a row and click 'View Selected Details' (or double-click a row).")
-        control_hint.setObjectName("controlTableHintLabel")
-        self.userTabLayout.insertWidget(control_insert_index + 3, control_hint, 0)
+        self.control_hint_label = QLabel("")
+        self.control_hint_label.setObjectName("controlTableHintLabel")
+        self.userTabLayout.insertWidget(control_insert_index + 3, self.control_hint_label, 0)
 
-        self.control_empty_state_label = QLabel(
-            "No actions yet. Use any control above to run your first command."
-        )
+        self.control_empty_state_label = QLabel("")
         self.control_empty_state_label.setObjectName("controlEmptyStateLabel")
         self.userTabLayout.insertWidget(control_insert_index + 4, self.control_empty_state_label, 0)
 
-        # Also set a tooltip on the table itself
-        self.control_table.table.setToolTip(
-            "Select a row and click 'View Selected Details', or double-click a row."
-        )
         self._on_control_table_selection_changed()
         self._update_connection_banner()
 
         self.logger.info(f"Control table created: visible={self.control_table.isVisible()}")
 
-        # Setup scheduling table
         if hasattr(self, "schedulingTabLayout") and self.schedulingTabLayout:
             self.schedule_table = SimpleDataTable(
-                columns=["Task", "Time Remaining", "Starts At", "Ends At", "Status"],
+                columns=[
+                    tr_key(TableColumns.TASK),
+                    tr_key(TableColumns.TIME_REMAINING),
+                    tr_key(TableColumns.STARTS_AT),
+                    tr_key(TableColumns.ENDS_AT),
+                    tr_key(TableColumns.STATUS),
+                ],
                 parent=self.schedulingTab,
                 show_clear_button=True,
                 on_clear_requested=self.hide_all_schedule_rows_from_view,
                 on_remove_selected_requested=self.remove_selected_schedule_row_from_view,
             )
+            self.schedule_table.set_column_role_tokens([
+                "task",
+                "time_remaining",
+                "starts_at",
+                "ends_at",
+                "status",
+            ])
+            self.schedule_table.set_column_keys([
+                TableColumns.TASK,
+                TableColumns.TIME_REMAINING,
+                TableColumns.STARTS_AT,
+                TableColumns.ENDS_AT,
+                TableColumns.STATUS,
+            ])
             schedule_insert_index = self.schedulingTabLayout.count()
             if hasattr(self, "schedule_output_container") and self.schedule_output_container:
                 existing_index = self.schedulingTabLayout.indexOf(self.schedule_output_container)
@@ -454,32 +431,38 @@ class GreenhouseDesktop(
                     self.schedule_output_container.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
             self.schedulingTabLayout.insertWidget(schedule_insert_index, self.schedule_table, 1)
-            self.schedule_table.table.setToolTip("One-time tasks with live countdown and status.")
 
-            schedule_hint = QLabel("Tip: one-time tasks update countdown every second. Hide rows if needed.")
-            schedule_hint.setObjectName("scheduleTableHintLabel")
-            self.schedulingTabLayout.insertWidget(schedule_insert_index + 1, schedule_hint, 0)
+            self.schedule_hint_label = QLabel("")
+            self.schedule_hint_label.setObjectName("scheduleTableHintLabel")
+            self.schedulingTabLayout.insertWidget(schedule_insert_index + 1, self.schedule_hint_label, 0)
 
-            self.schedule_empty_state_label = QLabel(
-                "No schedules yet. Create a one-time task from the controls above."
-            )
+            self.schedule_empty_state_label = QLabel("")
             self.schedule_empty_state_label.setObjectName("scheduleEmptyStateLabel")
             self.schedulingTabLayout.insertWidget(schedule_insert_index + 2, self.schedule_empty_state_label, 0)
         else:
             self.logger.warning("schedule_output_container not found - scheduling table not created")
 
-        # Setup server info table
         if not hasattr(self, "infoGroupLayout") or not self.infoGroupLayout:
             self.logger.error("Cannot setup server table - infoGroupLayout not found")
             return
 
         self.server_table = SimpleDataTable(
-            columns=["Timestamp", "Type", "Data"],
+            columns=[
+                tr_key(TableColumns.TIMESTAMP),
+                tr_key(TableColumns.TYPE),
+                tr_key(TableColumns.DATA),
+            ],
             parent=self.infoGroup,
             show_clear_button=True,
             on_clear_requested=self.clear_server_tables,
             on_remove_selected_requested=self._remove_selected_server_row,
         )
+        self.server_table.set_column_role_tokens(["timestamp", "type", "status"])
+        self.server_table.set_column_keys([
+            TableColumns.TIMESTAMP,
+            TableColumns.TYPE,
+            TableColumns.DATA,
+        ])
 
         server_insert_index = self.infoGroupLayout.count()
         if hasattr(self, "server_info_scroll") and self.server_info_scroll:
@@ -491,22 +474,16 @@ class GreenhouseDesktop(
                 self.server_info_scroll.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.infoGroupLayout.insertWidget(server_insert_index, self.server_table, 1)
 
-        # Double-click on a server row opens detailed view (mixin)
         self.server_table.table.cellDoubleClicked.connect(self.show_server_details)
 
-        # Add a small hint below the server table for discoverability
-        server_hint = QLabel("Tip: double-click a row in the table to see detailed server or fog data.")
-        server_hint.setObjectName("serverTableHintLabel")
-        self.infoGroupLayout.insertWidget(server_insert_index + 1, server_hint, 0)
+        self.server_hint_label = QLabel("")
+        self.server_hint_label.setObjectName("serverTableHintLabel")
+        self.infoGroupLayout.insertWidget(server_insert_index + 1, self.server_hint_label, 0)
 
-        self.server_empty_state_label = QLabel(
-            "No server checks yet. Click any server action above to load data."
-        )
+        self.server_empty_state_label = QLabel("")
         self.server_empty_state_label.setObjectName("serverEmptyStateLabel")
         self.infoGroupLayout.insertWidget(server_insert_index + 2, self.server_empty_state_label, 0)
 
-        # Tooltip on the server table itself
-        self.server_table.table.setToolTip("Double-click a row to open a detailed view of the selected entry.")
         if hasattr(self, "_update_schedule_empty_state"):
             self._update_schedule_empty_state()
         if hasattr(self, "_update_server_empty_state"):
@@ -514,16 +491,15 @@ class GreenhouseDesktop(
 
         self.logger.info(f"Server table created: visible={self.server_table.isVisible()}")
 
-        # Set stretch factors for tab layouts - tables should fill space between buttons and status
         for i in range(self.userTabLayout.count()):
             item = self.userTabLayout.itemAt(i)
             if item and item.widget():
                 widget = item.widget()
                 widget_name = widget.objectName()
                 if widget_name == 'controlGroup':
-                    self.userTabLayout.setStretch(i, 0)  # Buttons take minimal space
+                    self.userTabLayout.setStretch(i, 0)
                 elif widget_name == 'simpleDataTable':
-                    self.userTabLayout.setStretch(i, 1)  # Table takes all remaining space
+                    self.userTabLayout.setStretch(i, 1)
 
         for i in range(self.serverTabLayout.count()):
             item = self.serverTabLayout.itemAt(i)
@@ -531,9 +507,9 @@ class GreenhouseDesktop(
                 widget = item.widget()
                 widget_name = widget.objectName()
                 if widget_name == 'serverGroup':
-                    self.serverTabLayout.setStretch(i, 0)  # Buttons take minimal space
+                    self.serverTabLayout.setStretch(i, 0)
                 elif widget_name == 'infoGroup':
-                    self.serverTabLayout.setStretch(i, 1)  # Table takes all remaining space
+                    self.serverTabLayout.setStretch(i, 1)
 
         if hasattr(self, "schedulingTabLayout"):
             for i in range(self.schedulingTabLayout.count()):
@@ -545,9 +521,7 @@ class GreenhouseDesktop(
                     elif widget_name == 'simpleDataTable':
                         self.schedulingTabLayout.setStretch(i, 1)
 
-
     def resizeEvent(self, event):
-        """Handle window resize and keep table widgets responsive."""
         super().resizeEvent(event)
         for table_widget in (self.control_table, self.schedule_table, self.server_table):
             if not table_widget:
@@ -569,3 +543,88 @@ class GreenhouseDesktop(
         if self.redis_edge_client:
             self.redis_edge_client.disconnect()
         event.accept()
+
+    def set_status_state(self, key: str, **params) -> None:
+        """Update the bottom status label using a translation key + params.
+
+        Storing the state lets `retranslate_ui()` re-render in the new
+        language without losing the current message context.
+        """
+        self._status_state = (key, dict(params or {}))
+        if hasattr(self, "status_label") and self.status_label is not None:
+            self.status_label.setText(tr_key(key, **params))
+
+    def retranslate_ui(self) -> None:
+        self.setWindowTitle(tr_key(App.WINDOW_TITLE))
+        apply_ui_text_map(self, MAIN_WINDOW_TEXT_MAP)
+        if hasattr(self, "tabWidget") and self.tabWidget:
+            tab_keys = [Tabs.CONTROL, Tabs.SCHEDULING, Tabs.SERVER, Tabs.STATISTICS, Tabs.LOGIC]
+            for index, key in enumerate(tab_keys):
+                if index < self.tabWidget.count():
+                    self.tabWidget.setTabText(index, tr_key(key))
+
+        if hasattr(self, "session_label") and self.session_label is not None:
+            self.session_label.setToolTip(tr_key(Session.TOOLTIP_BODY, session_id=self.session_id))
+
+        if hasattr(self, "view_control_details_button") and self.view_control_details_button:
+            from modules.localization.localization_keys import Controls
+            self.view_control_details_button.setText(tr_key(Controls.VIEW_SELECTED_DETAILS))
+        if hasattr(self, "control_hint_label") and self.control_hint_label is not None:
+            self.control_hint_label.setText(tr_key(Hints.CONTROL_TABLE_USAGE))
+        if hasattr(self, "control_empty_state_label") and self.control_empty_state_label is not None:
+            self.control_empty_state_label.setText(tr_key(Empty.CONTROL_NO_ACTIONS))
+        if self.control_table is not None and hasattr(self.control_table, "table"):
+            self.control_table.table.setToolTip(tr_key(Hints.CONTROL_TABLE_TOOLTIP))
+        if hasattr(self, "retry_connection_button") and self.retry_connection_button:
+            self.retry_connection_button.setText(tr_key(Connection.RETRY_NOW))
+        if hasattr(self, "control_connection_banner"):
+            self._update_connection_banner()
+
+        if hasattr(self, "schedule_hint_label") and self.schedule_hint_label is not None:
+            self.schedule_hint_label.setText(tr_key(Hints.SCHEDULE_COUNTDOWN))
+        if hasattr(self, "schedule_empty_state_label") and self.schedule_empty_state_label is not None:
+            self.schedule_empty_state_label.setText(tr_key(Empty.SCHEDULE_NONE))
+        if self.schedule_table is not None and hasattr(self.schedule_table, "table"):
+            self.schedule_table.table.setToolTip(tr_key(Hints.SCHEDULE_TABLE_TOOLTIP))
+
+        if hasattr(self, "server_hint_label") and self.server_hint_label is not None:
+            self.server_hint_label.setText(tr_key(Hints.SERVER_DOUBLE_CLICK))
+        if hasattr(self, "server_empty_state_label") and self.server_empty_state_label is not None:
+            self.server_empty_state_label.setText(tr_key(Empty.SERVER_NONE))
+        if self.server_table is not None and hasattr(self.server_table, "table"):
+            self.server_table.table.setToolTip(tr_key(Hints.SERVER_TABLE_TOOLTIP))
+
+        for table in (self.control_table, self.schedule_table, self.server_table):
+            if table is None:
+                continue
+            if hasattr(table, "retranslate_ui"):
+                table.retranslate_ui()
+
+        if hasattr(self, "scheduleDelayPresetCombo") and self.scheduleDelayPresetCombo:
+            self._refresh_schedule_delay_preset_labels()
+
+        if hasattr(self, "logicNodePaletteList") and self.logicNodePaletteList:
+            self._refresh_logic_palette_labels()
+
+        if hasattr(self, "statisticsRefreshIntervalCombo") and self.statisticsRefreshIntervalCombo:
+            self._refresh_statistics_interval_labels()
+
+        if hasattr(self, "statistics_plot_widget") and self.statistics_plot_widget:
+            self._retranslate_statistics_chart()
+
+        if hasattr(self, "scheduleCurrentTimeLabel"):
+            self.update_schedule_live_time()
+
+        if self.auth_user_label is not None:
+            self.update_auth_user_label()
+        if self.logoutButton is not None:
+            from modules.localization.localization_keys import Common
+            self.logoutButton.setText(tr_key(Common.LOGOUT))
+
+        if hasattr(self, "connection_status") and self.connection_status:
+            self.update_connection_status(self.rabbitmq_connected)
+
+        if getattr(self, "_status_state", None):
+            key, params = self._status_state
+            if hasattr(self, "status_label") and self.status_label is not None:
+                self.status_label.setText(tr_key(key, **(params or {})))

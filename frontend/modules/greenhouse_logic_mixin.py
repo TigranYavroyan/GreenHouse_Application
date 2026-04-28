@@ -37,6 +37,28 @@ from modules.logic_constants import (
 from modules.logic_graph_mapper import build_document
 from modules.logic_serializer import normalize_existing_logic_payload, to_core_logic_payload
 from modules.logic_validator import validate_logic_document
+from modules.localization import tr_key
+from modules.localization.localization_keys import (
+    Dialogs,
+    Logic,
+    LogicPalette,
+    LogicValidation,
+)
+
+
+_PALETTE_KIND_TO_KEY = {
+    NODE_KIND_ROOT: LogicPalette.ROOT,
+    NODE_KIND_CONDITION: LogicPalette.CONDITION,
+    NODE_KIND_ACTION: LogicPalette.ACTION,
+    NODE_KIND_LITERAL: LogicPalette.LITERAL,
+}
+
+
+_SEVERITY_KEY_MAP = {
+    "error": LogicValidation.SEVERITY_ERROR,
+    "warning": LogicValidation.SEVERITY_WARNING,
+    "info": LogicValidation.SEVERITY_INFO,
+}
 
 
 class LogicPaletteListWidget(QListWidget):
@@ -76,17 +98,49 @@ class GreenhouseLogicMixin:
         self.logic_canvas_adapter.set_graph_changed_callback(self._on_logic_graph_changed)
         if hasattr(self, "logicLoadButton"):
             self.logicLoadButton.setEnabled(True)
-            self.logicLoadButton.setText("Get Configuration (local placeholder)")
+            self.logicLoadButton.setText(tr_key(Logic.GET_CONFIG))
             self.logicLoadButton.clicked.connect(self.get_configuration_placeholder)
         if hasattr(self, "logicValidateButton"):
             self.logicValidateButton.setEnabled(True)
-            self.logicValidateButton.setText("Generate JSON")
+            self.logicValidateButton.setText(tr_key(Logic.GENERATE_JSON))
             self.logicValidateButton.clicked.connect(self.generate_logic_json_preview)
         if hasattr(self, "logicCanvasStatusLabel"):
-            self.logicCanvasStatusLabel.setText(
-                f"Canvas ready ({self.logic_canvas_adapter.backend_name}). API calls are disabled in this step."
+            self._set_logic_canvas_status(
+                Logic.CANVAS_READY, backend=self.logic_canvas_adapter.backend_name
             )
         self.logger.info("Logic tab initialized with local block-scheme canvas.")
+
+    def _set_logic_canvas_status(self, key: str, **params) -> None:
+        """Update logic canvas status label.
+
+        Accepts either a translation key (recommended) or raw text. Raw text is
+        not stored for retranslation since we have no key to re-render with.
+        """
+        if isinstance(key, str) and "." in key:
+            self._logic_canvas_status_state = (key, dict(params or {}))
+            text = tr_key(key, **params)
+        else:
+            self._logic_canvas_status_state = None
+            text = str(key)
+        if hasattr(self, "logicCanvasStatusLabel") and self.logicCanvasStatusLabel:
+            self.logicCanvasStatusLabel.setText(text)
+
+    def _refresh_logic_palette_labels(self) -> None:
+        """Apply localized labels to the palette items (called by retranslate_ui)."""
+        if not hasattr(self, "logicNodePaletteList") or not self.logicNodePaletteList:
+            return
+        for index in range(self.logicNodePaletteList.count()):
+            item = self.logicNodePaletteList.item(index)
+            kind = item.data(Qt.UserRole)
+            key = _PALETTE_KIND_TO_KEY.get(kind)
+            if key:
+                item.setText(tr_key(key))
+        if getattr(self, "_logic_canvas_status_state", None):
+            key, params = self._logic_canvas_status_state
+            if hasattr(self, "logicCanvasStatusLabel") and self.logicCanvasStatusLabel:
+                self.logicCanvasStatusLabel.setText(tr_key(key, **(params or {})))
+        if hasattr(self, "logicValidationList") and self.logicValidationList:
+            self._render_validation_issues(getattr(self, "_logic_last_issues", None) or [])
 
     def _wrap_logic_tab_in_scroll_area(self):
         if getattr(self, "_logic_tab_scroll_wrapped", False):
@@ -143,7 +197,9 @@ class GreenhouseLogicMixin:
         layout.addWidget(self.logicNodePaletteList, 1)
 
         for item in NODE_PALETTE:
-            lw_item = QListWidgetItem(item.label)
+            label_key = _PALETTE_KIND_TO_KEY.get(item.kind)
+            display_label = tr_key(label_key) if label_key else item.label
+            lw_item = QListWidgetItem(display_label)
             lw_item.setData(Qt.UserRole, item.kind)
             self.logicNodePaletteList.addItem(lw_item)
 
@@ -181,7 +237,7 @@ class GreenhouseLogicMixin:
         args_layout.setVerticalSpacing(6)
 
         for _ in range(4):
-            label = QLabel("Arg", args_editor)
+            label = QLabel(tr_key(Logic.ARG_FALLBACK_LABEL), args_editor)
             field = QLineEdit(args_editor)
             field.setClearButtonEnabled(True)
             args_layout.addRow(label, field)
@@ -211,14 +267,18 @@ class GreenhouseLogicMixin:
                 existing_value = args[idx] if idx < len(args) else ""
                 value = existing_value or arg_spec.auto_value
                 label.setText(arg_spec.label)
-                field.setPlaceholderText(arg_spec.placeholder or f"Argument {idx + 1}")
+                placeholder = (
+                    arg_spec.placeholder
+                    or tr_key(Logic.ARG_FALLBACK_PLACEHOLDER, index=idx + 1)
+                )
+                field.setPlaceholderText(placeholder)
                 field.setText(value)
                 field.setReadOnly(not arg_spec.editable)
                 field.setEnabled(arg_spec.editable)
                 if arg_spec.editable:
                     field.setToolTip("")
                 else:
-                    field.setToolTip("Automatically managed for safety in Basic mode.")
+                    field.setToolTip(tr_key(Logic.ARG_LOCKED_TOOLTIP))
                 label.setVisible(True)
                 field.setVisible(True)
             else:
@@ -230,12 +290,10 @@ class GreenhouseLogicMixin:
         if self.logicConditionHelpLabel:
             if spec:
                 self.logicConditionHelpLabel.setText(
-                    f"{spec.description}. Auto fields are locked in Basic mode; decision values stay editable."
+                    tr_key(Logic.HELP_DESCRIBE, description=spec.description)
                 )
             else:
-                self.logicConditionHelpLabel.setText(
-                    "Unknown condition. Use comma-separated args fallback field."
-                )
+                self.logicConditionHelpLabel.setText(tr_key(Logic.HELP_UNKNOWN))
 
     def _collect_condition_args_from_editor(self) -> List[str]:
         if not self.logicConditionArgRows:
@@ -279,13 +337,15 @@ class GreenhouseLogicMixin:
                 button.clicked.connect(self._show_logic_call_placeholder_message)
 
     def _show_logic_call_placeholder_message(self):
-        if hasattr(self, "status_label"):
-            self.status_label.setText("Logic API calls will be enabled in the next implementation step.")
+        if hasattr(self, "set_status_state") and callable(self.set_status_state):
+            self.set_status_state(Logic.API_NEXT_STEP)
+        elif hasattr(self, "status_label"):
+            self.status_label.setText(tr_key(Logic.API_NEXT_STEP))
 
     def _seed_logic_validation_panel(self):
         if hasattr(self, "logicValidationList"):
             self.logicValidationList.clear()
-            self.logicValidationList.addItem("info: Add or drop nodes to start building logic.")
+            self.logicValidationList.addItem(tr_key(Logic.SEED_INFO))
 
     def _create_logic_node(self, kind: str):
         node_id = self.logic_canvas_adapter.add_node(kind=kind)
@@ -314,20 +374,18 @@ class GreenhouseLogicMixin:
         count = self.logic_canvas_adapter.delete_selected_nodes()
         for node_id in selected:
             self.logic_node_metadata.pop(node_id, None)
-        if hasattr(self, "logicCanvasStatusLabel"):
-            self.logicCanvasStatusLabel.setText(f"Deleted {count} node(s).")
+        self._set_logic_canvas_status(Logic.DELETED_COUNT, count=count)
         self._on_logic_graph_changed()
 
     def _connect_selected_logic_nodes(self):
         selected = self.logic_canvas_adapter.selected_node_ids()
         if len(selected) != 2:
-            if hasattr(self, "logicCanvasStatusLabel"):
-                self.logicCanvasStatusLabel.setText("Select exactly two nodes to connect.")
+            self._set_logic_canvas_status(Logic.SELECT_TWO_NODES)
             return
         source_id, target_id = selected[0], selected[1]
         ok, message = self._connect_with_rules(source_id, target_id)
-        if hasattr(self, "logicCanvasStatusLabel"):
-            self.logicCanvasStatusLabel.setText(message)
+        if not ok:
+            self._set_logic_canvas_status(message)
         if ok:
             self._on_logic_graph_changed()
 
@@ -335,25 +393,22 @@ class GreenhouseLogicMixin:
         source = self.logic_canvas_adapter.nodes.get(source_id)
         target = self.logic_canvas_adapter.nodes.get(target_id)
         if not source or not target:
-            return False, "Source/target node not found."
+            return False, Logic.SOURCE_TARGET_NOT_FOUND
 
-        # Rule flow: rule -> rule
         if source.kind in RULE_NODE_KINDS and target.kind in RULE_NODE_KINDS:
             return self.logic_canvas_adapter.connect_nodes(source_id, target_id)
 
-        # Action attach: action <-> rule
         if source.kind == NODE_KIND_ACTION and target.kind in RULE_NODE_KINDS:
             return self.logic_canvas_adapter.connect_nodes(source_id, target_id)
         if target.kind == NODE_KIND_ACTION and source.kind in RULE_NODE_KINDS:
             return self.logic_canvas_adapter.connect_nodes(target_id, source_id)
 
-        # Literal attach: literal <-> rule
         if source.kind == NODE_KIND_LITERAL and target.kind in RULE_NODE_KINDS:
             return self.logic_canvas_adapter.connect_nodes(source_id, target_id)
         if target.kind == NODE_KIND_LITERAL and source.kind in RULE_NODE_KINDS:
             return self.logic_canvas_adapter.connect_nodes(target_id, source_id)
 
-        return False, "Invalid connection. Use rule->rule, action->rule, or literal->rule."
+        return False, Logic.INVALID_CONNECTION
 
     def _on_logic_selection_changed(self, node_id: Optional[str]):
         self.logic_selected_node_id = node_id
@@ -363,12 +418,12 @@ class GreenhouseLogicMixin:
         node_id = self.logic_selected_node_id
         node_item = self.logic_canvas_adapter.nodes.get(node_id) if node_id else None
         if not node_item:
-            self.logicPropertyNodeTypeLabel.setText("Type: none")
+            self.logicPropertyNodeTypeLabel.setText(tr_key(Logic.TYPE_NONE))
             self.logicPropertyTitleEdit.setText("")
             return
 
         meta = self.logic_node_metadata.get(node_id, {})
-        self.logicPropertyNodeTypeLabel.setText(f"Type: {node_item.kind}")
+        self.logicPropertyNodeTypeLabel.setText(tr_key(Logic.TYPE_VALUE, kind=node_item.kind))
         self.logicPropertyTitleEdit.setText(node_item.title)
         condition = str(meta.get("condition", "always"))
         args = list(meta.get("args", []))
@@ -405,8 +460,7 @@ class GreenhouseLogicMixin:
         meta["enabled"] = bool(self.logicPropertyEnabledCheck.isChecked())
 
         self.logic_canvas_adapter.update_node(node_id=node_id, title=title)
-        if hasattr(self, "logicCanvasStatusLabel"):
-            self.logicCanvasStatusLabel.setText(f"Updated node '{title}'.")
+        self._set_logic_canvas_status(Logic.UPDATED_NODE, title=title)
         self._on_logic_graph_changed()
 
     def _on_logic_graph_changed(self):
@@ -434,12 +488,25 @@ class GreenhouseLogicMixin:
                 node.action.enabled = bool(meta.get("enabled", True))
 
         issues = validate_logic_document(document)
-        if hasattr(self, "logicValidationList"):
-            self.logicValidationList.clear()
-            for issue in issues:
-                prefix = issue.severity.upper()
-                suffix = f" [node:{issue.node_id[:8]}]" if issue.node_id else ""
-                self.logicValidationList.addItem(f"{prefix}: {issue.message}{suffix}")
+        self._logic_last_issues = issues
+        self._render_validation_issues(issues)
+
+    def _render_validation_issues(self, issues) -> None:
+        """Render validation issues using the active language."""
+        if not hasattr(self, "logicValidationList") or not self.logicValidationList:
+            return
+        self.logicValidationList.clear()
+        for issue in issues:
+            severity_key = _SEVERITY_KEY_MAP.get(issue.severity, LogicValidation.SEVERITY_INFO)
+            severity_text = tr_key(severity_key)
+            node_hint = f" [node:{issue.node_id[:8]}]" if issue.node_id else ""
+            line = tr_key(
+                LogicValidation.LIST_LINE,
+                severity=severity_text,
+                message=issue.message,
+                node_hint=node_hint,
+            )
+            self.logicValidationList.addItem(line)
 
     def _build_current_document(self):
         nodes = self.logic_canvas_adapter.node_snapshot()
@@ -464,8 +531,7 @@ class GreenhouseLogicMixin:
             issues = validate_logic_document(document)
             errors = [issue for issue in issues if issue.severity == "error"]
             if errors:
-                if hasattr(self, "logicCanvasStatusLabel"):
-                    self.logicCanvasStatusLabel.setText("Cannot generate JSON: fix validation errors first.")
+                self._set_logic_canvas_status(Logic.GENERATE_BLOCKED_BY_ERRORS)
                 return
 
             payload = to_core_logic_payload(document)
@@ -475,7 +541,7 @@ class GreenhouseLogicMixin:
             preview_path.write_text(payload_text + "\n", encoding="utf-8")
 
             dialog = QDialog(self)
-            dialog.setWindowTitle("Generated Logic JSON Preview")
+            dialog.setWindowTitle(tr_key(Dialogs.JSON_PREVIEW_TITLE))
             dialog.setMinimumSize(900, 560)
             layout = QVBoxLayout(dialog)
             editor = QPlainTextEdit(dialog)
@@ -484,13 +550,9 @@ class GreenhouseLogicMixin:
             layout.addWidget(editor)
             dialog.exec_()
 
-            if hasattr(self, "logicCanvasStatusLabel"):
-                self.logicCanvasStatusLabel.setText(
-                    f"Generated JSON saved to {preview_path.name}. Compare with GreenHouse2/demo/logic.json"
-                )
+            self._set_logic_canvas_status(Logic.GENERATED_SAVED, filename=preview_path.name)
         except Exception as exc:
-            if hasattr(self, "logicCanvasStatusLabel"):
-                self.logicCanvasStatusLabel.setText(f"Generate JSON failed: {exc}")
+            self._set_logic_canvas_status(Logic.GENERATE_FAILED, error=str(exc))
 
     def _build_graph_from_payload(self, payload: dict):
         root = payload.get("root", {})
@@ -593,11 +655,7 @@ class GreenhouseLogicMixin:
 
             self._build_graph_from_payload(normalized_payload)
 
-            self._show_json_dialog("Configuration Preview (Local Placeholder)", payload_text)
-            if hasattr(self, "logicCanvasStatusLabel"):
-                self.logicCanvasStatusLabel.setText(
-                    "Loaded configuration from frontend/logic.json and rebuilt graph. Next: replace source with core API."
-                )
+            self._show_json_dialog(tr_key(Dialogs.CONFIG_PREVIEW_TITLE), payload_text)
+            self._set_logic_canvas_status(Logic.LOAD_CONFIG_DONE)
         except Exception as exc:
-            if hasattr(self, "logicCanvasStatusLabel"):
-                self.logicCanvasStatusLabel.setText(f"Get configuration failed: {exc}")
+            self._set_logic_canvas_status(Logic.LOAD_CONFIG_FAILED, error=str(exc))

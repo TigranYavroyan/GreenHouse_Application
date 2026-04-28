@@ -1,4 +1,4 @@
-from typing import List, Optional, Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -10,6 +10,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QVBoxLayout,
 )
+
+from modules.localization import tr_key
+from modules.localization.localization_keys import Common
 
 
 class _BaseStyledDialog(QDialog):
@@ -101,6 +104,13 @@ class _BaseStyledDialog(QDialog):
 
 
 class StyledMessageDialog(_BaseStyledDialog):
+    """One-shot message dialog used for info/warning/error/yes-no flows.
+
+    All button texts default to localized strings via translation keys.
+    Callers may override `confirm_text`/`cancel_text` with already-localized
+    text (e.g. `tr_key(Common.LOAD)`) to customize labels per dialog.
+    """
+
     def __init__(
         self,
         title: str,
@@ -108,7 +118,7 @@ class StyledMessageDialog(_BaseStyledDialog):
         parent=None,
         *,
         kind: str = "info",
-        confirm_text: str = "OK",
+        confirm_text: Optional[str] = None,
         cancel_text: Optional[str] = None,
     ):
         super().__init__(title, parent=parent)
@@ -123,12 +133,12 @@ class StyledMessageDialog(_BaseStyledDialog):
         buttons = QHBoxLayout()
         buttons.addStretch()
 
-        if cancel_text:
+        if cancel_text is not None:
             cancel_btn = QPushButton(cancel_text)
             cancel_btn.clicked.connect(self.reject)
             buttons.addWidget(cancel_btn)
 
-        confirm_btn = QPushButton(confirm_text)
+        confirm_btn = QPushButton(confirm_text if confirm_text is not None else tr_key(Common.OK))
         if kind == "error":
             confirm_btn.setProperty("role", "danger")
         else:
@@ -157,14 +167,20 @@ class StyledMessageDialog(_BaseStyledDialog):
         dialog.exec_()
 
     @staticmethod
-    def ask_yes_no(parent, title: str, message: str, yes_text: str = "Yes", no_text: str = "No") -> bool:
+    def ask_yes_no(
+        parent,
+        title: str,
+        message: str,
+        yes_text: Optional[str] = None,
+        no_text: Optional[str] = None,
+    ) -> bool:
         dialog = StyledMessageDialog(
             title,
             message,
             parent=parent,
             kind="warning",
-            confirm_text=yes_text,
-            cancel_text=no_text,
+            confirm_text=yes_text if yes_text is not None else tr_key(Common.YES),
+            cancel_text=no_text if no_text is not None else tr_key(Common.NO),
         )
         dialog.exec_()
         return dialog._confirmed
@@ -197,8 +213,8 @@ class StyledInputDialog:
 
         buttons = QHBoxLayout()
         buttons.addStretch()
-        cancel_btn = QPushButton("Cancel")
-        ok_btn = QPushButton("OK")
+        cancel_btn = QPushButton(tr_key(Common.CANCEL))
+        ok_btn = QPushButton(tr_key(Common.OK))
         ok_btn.setProperty("role", "primary")
         buttons.addWidget(cancel_btn)
         buttons.addWidget(ok_btn)
@@ -226,8 +242,8 @@ class StyledInputDialog:
 
         buttons = QHBoxLayout()
         buttons.addStretch()
-        cancel_btn = QPushButton("Cancel")
-        ok_btn = QPushButton("OK")
+        cancel_btn = QPushButton(tr_key(Common.CANCEL))
+        ok_btn = QPushButton(tr_key(Common.OK))
         ok_btn.setProperty("role", "primary")
         buttons.addWidget(cancel_btn)
         buttons.addWidget(ok_btn)

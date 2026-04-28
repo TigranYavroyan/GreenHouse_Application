@@ -12,6 +12,8 @@ import time
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 
 from modules.config import config
+from modules.localization import tr_key
+from modules.localization.localization_keys import EdgeFog
 
 
 class SensorType(Enum):
@@ -72,15 +74,21 @@ class Anomaly:
     location: str
     anomaly_type: str
     severity: str
-    message: str
+    message_key: str
+    message_params: Dict[str, Any]
     timestamp: datetime
     value: float
     expected_range: tuple
+
+    @property
+    def message(self) -> str:
+        return tr_key(self.message_key, **(self.message_params or {}))
 
     def to_dict(self):
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
         data['sensor_type'] = self.sensor_type.value
+        data['message'] = self.message
         return data
 
 class EdgeToFogAggregator(QObject):
@@ -210,7 +218,13 @@ class EdgeToFogAggregator(QObject):
                     location=reading.location,
                     anomaly_type="out_of_range",
                     severity="critical" if abs(reading.value - (min_expected + max_expected)/2) > 10 else "warning",
-                    message=f"{reading.sensor_type.value} out of range: {reading.value:.1f} (expected {min_expected}-{max_expected})",
+                    message_key=EdgeFog.ANOMALY_OUT_OF_RANGE,
+                    message_params={
+                        "sensor": reading.sensor_type.value,
+                        "value": reading.value,
+                        "min": min_expected,
+                        "max": max_expected,
+                    },
                     timestamp=datetime.now(),
                     value=reading.value,
                     expected_range=(min_expected, max_expected)
@@ -292,12 +306,12 @@ class EdgeToFogAggregator(QObject):
         """Detect advanced anomalies in aggregated data"""
         anomalies = []
         
-        # High variance detection
         if aggregated.std_dev > (aggregated.average * self.anomaly_thresholds['variance_threshold']):
             anomalies.append({
                 'type': 'high_variance',
                 'severity': 'warning',
-                'message': f'High variance detected in {aggregated.sensor_type.value} readings'
+                'message_key': EdgeFog.ANOMALY_HIGH_VARIANCE,
+                'message_params': {"sensor": aggregated.sensor_type.value},
             })
         
         # Rate of change detection (compare with previous aggregation)
@@ -310,7 +324,6 @@ class EdgeToFogAggregator(QObject):
         if trend_anomaly:
             anomalies.append(trend_anomaly)
         
-        # Create anomaly objects
         for anomaly_info in anomalies:
             anomaly = Anomaly(
                 anomaly_id=str(uuid.uuid4()),
@@ -318,7 +331,8 @@ class EdgeToFogAggregator(QObject):
                 location=aggregated.location,
                 anomaly_type=anomaly_info['type'],
                 severity=anomaly_info['severity'],
-                message=anomaly_info['message'],
+                message_key=anomaly_info['message_key'],
+                message_params=anomaly_info.get('message_params', {}),
                 timestamp=datetime.now(),
                 value=aggregated.average,
                 expected_range=self.expected_ranges.get(aggregated.sensor_type, (0, 100))
@@ -342,7 +356,11 @@ class EdgeToFogAggregator(QObject):
                     return {
                         'type': 'rapid_change',
                         'severity': 'warning',
-                        'message': f'Rapid change in {current_agg.sensor_type.value}: {rate_of_change:.1f}/min'
+                        'message_key': EdgeFog.ANOMALY_RAPID_CHANGE,
+                        'message_params': {
+                            "sensor": current_agg.sensor_type.value,
+                            "rate": rate_of_change,
+                        },
                     }
         
         return None
@@ -359,11 +377,17 @@ class EdgeToFogAggregator(QObject):
             if (all(values[i] < values[i+1] for i in range(len(values)-1)) or
                 all(values[i] > values[i+1] for i in range(len(values)-1))):
                 
-                trend = "increasing" if values[-1] > values[0] else "decreasing"
+                trend_increasing = values[-1] > values[0]
+                message_key = (
+                    EdgeFog.ANOMALY_TREND_INCREASING
+                    if trend_increasing
+                    else EdgeFog.ANOMALY_TREND_DECREASING
+                )
                 return {
                     'type': 'sustained_trend',
                     'severity': 'info',
-                    'message': f'Sustained {trend} trend in {current_agg.sensor_type.value}'
+                    'message_key': message_key,
+                    'message_params': {"sensor": current_agg.sensor_type.value},
                 }
         
         return None
