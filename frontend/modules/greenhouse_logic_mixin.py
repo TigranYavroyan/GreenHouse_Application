@@ -1,4 +1,4 @@
-"""Logic tab mixin: canvas editing and validation (no API calls yet)."""
+"""Logic tab mixin: canvas editing, validation, and core API sync."""
 
 from __future__ import annotations
 
@@ -91,7 +91,6 @@ class GreenhouseLogicMixin:
         self._setup_logic_property_controls()
         self._embed_logic_canvas_widget()
         self._bind_logic_buttons()
-        self._mark_logic_call_controls_placeholder()
         self._seed_logic_validation_panel()
 
         self.logic_canvas_adapter.set_selection_changed_callback(self._on_logic_selection_changed)
@@ -99,11 +98,17 @@ class GreenhouseLogicMixin:
         if hasattr(self, "logicLoadButton"):
             self.logicLoadButton.setEnabled(True)
             self.logicLoadButton.setText(tr_key(Logic.GET_CONFIG))
-            self.logicLoadButton.clicked.connect(self.get_configuration_placeholder)
+            self.logicLoadButton.clicked.connect(self.load_logic_from_core)
         if hasattr(self, "logicValidateButton"):
             self.logicValidateButton.setEnabled(True)
             self.logicValidateButton.setText(tr_key(Logic.GENERATE_JSON))
             self.logicValidateButton.clicked.connect(self.generate_logic_json_preview)
+        if hasattr(self, "logicUploadButton"):
+            self.logicUploadButton.setEnabled(True)
+            self.logicUploadButton.clicked.connect(self.upload_logic_to_core)
+        if hasattr(self, "logicReloadButton"):
+            self.logicReloadButton.setEnabled(True)
+            self.logicReloadButton.clicked.connect(self.reload_logic_from_core)
         if hasattr(self, "logicCanvasStatusLabel"):
             self._set_logic_canvas_status(
                 Logic.CANVAS_READY, backend=self.logic_canvas_adapter.backend_name
@@ -328,19 +333,6 @@ class GreenhouseLogicMixin:
         self.logicDeleteSelectedButton.clicked.connect(self._delete_selected_logic_nodes)
         self.logicConnectSelectedButton.clicked.connect(self._connect_selected_logic_nodes)
         self.logicApplyPropertyButton.clicked.connect(self._apply_selected_node_properties)
-
-    def _mark_logic_call_controls_placeholder(self):
-        # Call section is intentionally deferred to next implementation step.
-        for button_name in ("logicUploadButton", "logicReloadButton"):
-            if hasattr(self, button_name):
-                button = getattr(self, button_name)
-                button.clicked.connect(self._show_logic_call_placeholder_message)
-
-    def _show_logic_call_placeholder_message(self):
-        if hasattr(self, "set_status_state") and callable(self.set_status_state):
-            self.set_status_state(Logic.API_NEXT_STEP)
-        elif hasattr(self, "status_label"):
-            self.status_label.setText(tr_key(Logic.API_NEXT_STEP))
 
     def _seed_logic_validation_panel(self):
         if hasattr(self, "logicValidationList"):
@@ -639,23 +631,47 @@ class GreenhouseLogicMixin:
         layout.addWidget(editor)
         dialog.exec_()
 
-    def get_configuration_placeholder(self):
-        """Placeholder for future core API call: currently reads local logic.json."""
+    def load_logic_from_core(self, show_preview: bool = True):
+        """Fetch current logic config from core API and render into canvas."""
         try:
-            source_path = Path(__file__).resolve().parents[1] / "logic.json"
-            if not source_path.exists():
-                raise FileNotFoundError("frontend/logic.json not found for placeholder read.")
-
-            raw_payload = json.loads(source_path.read_text(encoding="utf-8"))
+            raw_payload = self.core_api.get_logic_full()
             normalized_payload = normalize_existing_logic_payload(raw_payload)
             payload_text = json.dumps(normalized_payload, indent=2, ensure_ascii=True)
 
-            out_path = Path(__file__).resolve().parents[1] / "generated_logic_from_file_preview.json"
+            out_path = Path(__file__).resolve().parents[1] / "generated_logic_from_core_preview.json"
             out_path.write_text(payload_text + "\n", encoding="utf-8")
 
             self._build_graph_from_payload(normalized_payload)
 
-            self._show_json_dialog(tr_key(Dialogs.CONFIG_PREVIEW_TITLE), payload_text)
+            if show_preview:
+                self._show_json_dialog(tr_key(Dialogs.CONFIG_PREVIEW_TITLE), payload_text)
             self._set_logic_canvas_status(Logic.LOAD_CONFIG_DONE)
         except Exception as exc:
             self._set_logic_canvas_status(Logic.LOAD_CONFIG_FAILED, error=str(exc))
+
+    def upload_logic_to_core(self):
+        """Validate current block-scheme and upload resulting JSON to core API."""
+        try:
+            document = self._build_current_document()
+            issues = validate_logic_document(document)
+            errors = [issue for issue in issues if issue.severity == "error"]
+            self._logic_last_issues = issues
+            self._render_validation_issues(issues)
+            if errors:
+                self._set_logic_canvas_status(Logic.GENERATE_BLOCKED_BY_ERRORS)
+                return
+
+            payload = to_core_logic_payload(document)
+            self.core_api.upload_logic(payload)
+            self._set_logic_canvas_status(Logic.UPLOAD_DONE)
+        except Exception as exc:
+            self._set_logic_canvas_status(Logic.UPLOAD_FAILED, error=str(exc))
+
+    def reload_logic_from_core(self):
+        """Trigger core logic reload and refresh canvas from current core config."""
+        try:
+            self.core_api.reload_logic()
+            self.load_logic_from_core(show_preview=False)
+            self._set_logic_canvas_status(Logic.RELOAD_DONE)
+        except Exception as exc:
+            self._set_logic_canvas_status(Logic.RELOAD_FAILED, error=str(exc))

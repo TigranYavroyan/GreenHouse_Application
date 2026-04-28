@@ -452,6 +452,24 @@ class GreenhouseCoreClient {
     });
   }
 
+  async getLogicFull() {
+    return this.requestJson('/api/json/logic/full');
+  }
+
+  async uploadLogic(payload = {}) {
+    return this.requestJson('/api/json/logic/upload', {
+      method: 'POST',
+      body: payload || {},
+    });
+  }
+
+  async reloadLogic() {
+    return this.requestJson('/api/json/logic/reload', {
+      method: 'POST',
+      body: {},
+    });
+  }
+
   /**
    * Execute command with retry logic
    */

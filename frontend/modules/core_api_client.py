@@ -198,6 +198,18 @@ class CoreApiClient:
         )
         return payload if isinstance(payload, dict) else {"result": payload}
 
+    def get_logic_full(self) -> Dict[str, Any]:
+        payload = self._request("/api/json/logic/full")
+        return payload if isinstance(payload, dict) else {"root": {}}
+
+    def upload_logic(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        response = self._request("/api/json/logic/upload", method="POST", data=payload or {})
+        return response if isinstance(response, dict) else {"result": response}
+
+    def reload_logic(self) -> Dict[str, Any]:
+        response = self._request("/api/json/logic/reload", method="POST", data={})
+        return response if isinstance(response, dict) else {"result": response}
+
     def list_devices(self) -> List[Dict[str, Any]]:
         payload = self._request("/devices")
         if isinstance(payload, dict):

@@ -30,7 +30,8 @@ This folder documents the **current implementation state** of the GreenHouse pro
 - For built-in greenhouse commands, command TTL is currently `0`, so response cache/idempotency is effectively bypassed.
 - Desktop sends AMQP commands with `replyTo=command_responses.<sessionId>` and backend publishes to `replyTo` when present.
 - Backend exposes greenhouse core passthrough APIs at root routes (`/status`, `/schema/*`, `/getters`, `/executors`, `/api/executors/:name/:action`).
-- Desktop includes a Logic tab with local canvas editing and JSON generation; backend passthrough routes for `/api/json/logic/*` are not implemented yet.
+- Backend also proxies GreenHouse2/demo logic endpoints (`/api/json/logic/full`, `/api/json/logic/upload`, `/api/json/logic/reload`).
+- Desktop Logic tab supports fetching current core logic JSON, editing as block-scheme, generating upload JSON, and pushing updates through backend passthrough.
 
 ## Quick Start (Local)
 

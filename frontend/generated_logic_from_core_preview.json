@@ -1,0 +1,46 @@
+{
+  "root": {
+    "title": "main",
+    "condition": "always",
+    "args": [],
+    "actions": [],
+    "children": [
+      {
+        "title": "Cooler1On",
+        "condition": "gt",
+        "args": [
+          "temp",
+          "30"
+        ],
+        "actions": [
+          {
+            "target": "LOW_DCM_D_0",
+            "valueType": "bool",
+            "value": "true",
+            "trigger": "on_enter",
+            "enabled": true
+          }
+        ],
+        "children": []
+      },
+      {
+        "title": "Cooler1Off",
+        "condition": "lt",
+        "args": [
+          "temp",
+          "30"
+        ],
+        "actions": [
+          {
+            "target": "LOW_DCM_D_0",
+            "valueType": "bool",
+            "value": "false",
+            "trigger": "on_enter",
+            "enabled": true
+          }
+        ],
+        "children": []
+      }
+    ]
+  }
+}

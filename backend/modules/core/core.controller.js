@@ -108,6 +108,19 @@ class CoreController {
       400
     );
   };
+
+  logicFull = (req, res) => {
+    return this.asyncHandler(res, () => this.coreService.getLogicFull());
+  };
+
+  logicUpload = (req, res) => {
+    const payload = req.body && typeof req.body === 'object' ? req.body : {};
+    return this.asyncHandler(res, () => this.coreService.uploadLogic(payload));
+  };
+
+  logicReload = (req, res) => {
+    return this.asyncHandler(res, () => this.coreService.reloadLogic());
+  };
 }
 
 export default CoreController;

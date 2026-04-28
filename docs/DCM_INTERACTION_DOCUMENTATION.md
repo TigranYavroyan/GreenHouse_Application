@@ -93,6 +93,16 @@ Backend response payload:
 
 On failure, backend adds top-level `error`.
 
+## 4.1) Logic JSON API (GreenHouse2/demo passthrough)
+
+The backend proxies demo logic endpoints to the configured core host:
+
+- `GET /api/json/logic/full`
+- `POST /api/json/logic/upload`
+- `POST /api/json/logic/reload`
+
+Upload expects a logic payload with top-level `root` compatible with demo logic JSON.
+
 ## 5) Practical cURL Examples
 
 ```bash

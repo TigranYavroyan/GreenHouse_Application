@@ -41,7 +41,7 @@ services:
       - REDIS_HOST=redis
       - RABBITMQ_HOST=rabbitmq
       - POSTGRES_HOST=postgres
-      - GREENHOUSE_CORE_URL=http://192.168.27.16:8080
+      - GREENHOUSE_CORE_URL=http://10.76.53.17:8080
       - GREENHOUSE_CORE_TIMEOUT=10000
       - GREENHOUSE_CORE_RETRIES=2
     depends_on:

@@ -42,6 +42,18 @@ class CoreService {
   executorSet(name, value) {
     return this.greenhouseCoreClient.executorSet(name, value);
   }
+
+  getLogicFull() {
+    return this.greenhouseCoreClient.getLogicFull();
+  }
+
+  uploadLogic(payload) {
+    return this.greenhouseCoreClient.uploadLogic(payload);
+  }
+
+  reloadLogic() {
+    return this.greenhouseCoreClient.reloadLogic();
+  }
 }
 
 export default CoreService;

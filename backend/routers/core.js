@@ -15,6 +15,9 @@ export default function createCoreRouter({ greenhouseCoreClient }) {
   router.get('/executors', controller.executors);
 
   router.post('/api/executors/:name/:action', controller.executorAction);
+  router.get('/api/json/logic/full', controller.logicFull);
+  router.post('/api/json/logic/upload', controller.logicUpload);
+  router.post('/api/json/logic/reload', controller.logicReload);
 
   return router;
 }
