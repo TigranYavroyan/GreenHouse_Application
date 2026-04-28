@@ -1,479 +1,91 @@
-# Greenhouse Automation Application - Architecture Description
-
-A distributed greenhouse automation system with a PyQt5 desktop frontend and Node.js backend, communicating via RabbitMQ message queues and using Redis for caching. The system implements edge-to-fog data aggregation for efficient data processing and offline-first operation.
-
-## System Architecture
-
-### High-Level Architecture
-
-The Greenhouse Automation Application follows a **microservices-style architecture** with clear separation between frontend, backend, and infrastructure services. The high‑level topology is shown below in Mermaid format:
-
-```mermaid
-flowchart TD
-    subgraph Desktop["PyQt5 Frontend (Desktop GUI)"]
-        FE[GreenhouseDesktop\n(PyQt5)]
-        AGG[EdgeToFogAggregator]
-        REDIS_EDGE[RedisEdgeClient\n(Local Redis)]
-        FE --> AGG
-        FE --> REDIS_EDGE
-    end
-
-    subgraph Broker["RabbitMQ (Message Broker)"]
-        QCMD["Queue: greenhouse_commands"]
-        QRES["Queue: command_responses"]
-    end
-
-    subgraph Backend["Node.js Backend (Express)"]
-        APP[App / Express Server]
-        CP[CommandProcessor]
-        CE[CommandExecutor]
-        SESS[SessionManager]
-        RCLIENT[RedisClientWrapper]
-        RABBIT[RabbitMQClient]
-
-        APP --> CP
-        APP --> SESS
-        APP --> RCLIENT
-        APP --> RABBIT
-        CP --> CE
-        CP --> RCLIENT
-        CP --> SESS
-    end
-
-    subgraph Infra["Backend Redis"]
-        R_BACKEND[(Redis Cache)]
-    end
-
-    subgraph Core["Greenhouse Core"]
-        CORE[Core Simulator / Real Core\n(HTTP API)]
-    end
-
-    %% Messaging paths
-    FE -->|"publish commands\n(JSON over AMQP)"| QCMD
-    QRES -->|"consume responses\n(JSON over AMQP)"| FE
-
-    QCMD -->|"manual-ack consume"| RABBIT
-    RABBIT --> APP
-
-    CP -->|"cache read/write"| R_BACKEND
-    CE -->|"HTTP commands\n/execute, etc."| CORE
-```
-
-## System Components
-
-### Infrastructure Services
-
-#### **Redis** (`greenhouse-redis`)
-- **Purpose**: In-memory cache for command results and fog data aggregation
-- **Port**: 6379 (internal only)
-- **Data Persistence**: Volume-mounted data directory
-- **Health Check**: Redis ping every 10 seconds
-- **Cache Namespaces**:
-  - `cmd:{sessionId}:{command}:{currentPath}:{parameters}` - Command results
-  - `fog:agg:{sensorType}:{location}:{timeframe}` - Aggregated fog data
-  - `fog:anomaly:{anomaly_id}` - Detected anomalies
-  - `fog:device:{device_id}` - Edge device information
-
-#### **RabbitMQ** (`greenhouse-rabbitmq`)
-- **Purpose**: Message broker for asynchronous command/response communication
-- **Ports**: 
-  - 5672 (AMQP, internal)
-  - 15672 (Management UI, commented out)
-- **Queues**:
-  - `greenhouse_commands`: Commands from frontend to backend (durable)
-  - `command_responses`: Responses from backend to frontend (durable)
-  - `notification.email.verification.v1`: Primary queue for verification email events (durable)
-  - `notification.email.verification.retry.v1`: Delayed retry queue for transient SMTP failures (durable, TTL + DL routing)
-  - `notification.email.verification.dlq.v1`: Dead-letter queue for poison/permanent email failures (durable)
-- **Exchange**:
-  - `greenhouse.events.v1` (topic): internal backend domain events
-- **Routing keys**:
-  - `notification.email.verification.requested.v1`
-- **Durability**: All listed queues are durable (survive broker restart)
-- **QoS**: Backend prefetch set to 5 messages
-
-#### **Backend** (`greenhouse-backend`)
-- **Technology**: Node.js 18+ with Express.js (ESM modules)
-- **Port**: 3000 (exposed to host)
-- **Dependencies**: Redis, RabbitMQ, PostgreSQL, Greenhouse Core Server
-- **Health Check**: HTTP GET `/metadata/health/` every 30 seconds
-- **Greenhouse Core Integration**: Uses `GreenhouseCoreClient` to communicate with greenhouse core via HTTP API
-- **Core HTTP API**: Exposes `/status`, `/schema/*`, `/getters`, `/executors`, and `/api/executors/:name/:action` for desktop state polling and executor controls
-- **Key Features**:
-  - Session management with automatic cleanup
-  - Command processing with caching
-  - Edge-to-fog data aggregation endpoints
-  - Generic IoT persistence with Sequelize models
-  - Comprehensive logging (system and session-level)
-
-#### **Greenhouse Core Server** (External Service)
-- **Technology**: External greenhouse core runtime (network service)
-- **Base URL**: `http://192.168.27.16:8080`
-- **Purpose**: Executes real greenhouse commands and exposes real state/executor APIs
-- **Required APIs**:
-  - `POST /api/v1/commands/execute`
-    - Body: `{ command, parameters, commandId, sessionId }`
-    - Returns: `{ success, result, error, commandId, timestamp }`
-  - `GET /status`
-  - `GET /schema/getters`
-  - `GET /schema/executors`
-  - `GET /getters`
-  - `GET /getters/:key`
-  - `GET /executors`
-  - `POST /api/executors/:name/mode`
-  - `POST /api/executors/:name/on`
-  - `POST /api/executors/:name/off`
-  - `POST /api/executors/:name/set`
-
-#### **Frontend** (`greenhouse-frontend`)
-- **Technology**: Python 3 with PyQt5
-- **Display**: X11 forwarding for GUI (Linux)
-- **Modes**: 
-  - GUI mode (default)
-  - Headless mode is removed (`--nogui` exits with warning)
-- **Dependencies**: RabbitMQ, Backend API, Redis (for edge caching)
-- **Key Features**:
-  - Startup authentication gate (`Sign In` / `Sign Up` dialog before main window)
-  - JWT session persistence using desktop `QSettings`
-  - Automatic re-authentication flow on `401/403` responses
-  - Four-tab interface (Control, Scheduling, Server, Statistics)
-  - Edge-to-fog data aggregation
-  - Local Redis caching
-  - Backend-persisted cron scheduling via `/schedules`
-  - Non-blocking UI operations
-
-## Persistent IoT Data Model (PostgreSQL + Sequelize)
-
-The backend includes an extensible entity model designed to support new sensor and actuator types without schema changes to core tables.
-
-### Core entity hierarchy
-- `User` → owns many `Device`
-- `Device` → owns many `Sensor`
-- `Device` → owns many `Actuator`
-- `Device` → owns many `Schedule`
-- `Sensor` → owns many `SensorReading`
-- `Sensor` → owns many `SensorAlertRule`
-- `SensorAlertRule` → owns many `SensorAlert`
-
-### Extensibility strategy
-- UUID primary keys for all entities.
-- `metadata` uses PostgreSQL `JSONB` for dynamic, per-entity configuration.
-- Sensor category is stored as open string (`Sensor.type`) to allow future sensor families.
-- `SensorReading` stores time-series points as `(sensor_id, timestamp, value)`.
-- `Schedule` uses cron expressions (`cron_expression`) for automation.
-- `SensorAlertRule` supports threshold-based monitoring using operators and threshold values/ranges.
-
-## Edge-to-Fog Data Aggregation System
-
-The system implements a complete Edge-to-Fog data aggregation architecture:
-
-### Frontend (PyQt5 Desktop Application)
-- **EdgeToFogAggregator**: Aggregates sensor data from edge devices
-  - Receives raw sensor readings (temperature, humidity, soil moisture, light, CO2, pH)
-  - Performs time-windowed aggregation (1min, 5min, 15min, 1h)
-  - Detects anomalies (out-of-range, high variance, rapid changes, trends)
-  - Manages edge device registration and status
-  - Emits Qt signals for UI updates (aggregated data, anomalies, device status)
-
-- **RedisEdgeClient**: Local edge caching
-  - Cache-aside pattern for aggregated data
-  - TTL-based expiration
-  - Namespace-based key organization
-  - Graceful degradation if Redis unavailable
-
-### Backend (Express.js)
-- **Fog Data Endpoints**:
-  - POST /fog/aggregated: Store aggregated sensor data
-  - GET /fog/aggregated: Retrieve aggregated data (with filtering by sensorType, location, timeframe)
-  - GET /fog/devices: List registered edge devices
-  - POST /fog/anomalies: Store detected anomalies
-  - GET /fog/anomalies: Retrieve recent anomalies (with limit)
-
-- **Redis Storage**:
-  - Aggregated data stored with namespace: `fog:agg:{sensorType}:{location}:{timeframe}`
-  - Anomalies stored with namespace: `fog:anomaly:{anomaly_id}`
-  - Devices stored with namespace: `fog:device:{device_id}`
-  - TTL-based expiration for automatic cleanup
-
-### Data Flow Architecture
-1. **Edge Layer**: Sensor devices collect raw readings
-2. **Fog Layer (Desktop App)**: 
-   - Receives raw sensor data
-   - Aggregates data in time windows
-   - Detects anomalies
-   - Caches locally in Redis
-   - Syncs to backend
-3. **Backend Layer**: 
-   - Receives aggregated data from fog nodes
-   - Stores in central Redis
-   - Provides API for querying aggregated data
-   - Supports edge-to-edge data sharing
-
-### Key Features
-- **Offline-first**: Local caching allows operation without backend connection
-- **Real-time aggregation**: Time-windowed aggregation (1min, 5min, 15min, 1h)
-- **Anomaly detection**: Multiple detection algorithms (range, variance, rate of change, trends)
-- **Quality scoring**: Quality-weighted aggregation based on sensor reliability
-- **Device management**: Registration, status tracking, battery monitoring
-- **Non-blocking UI**: All I/O operations run in background threads
-- **Cache-aside pattern**: Local edge cache with backend sync
-
-## Command Processing Flow
-
-### 1. Frontend Initialization
-- PyQt5 desktop application starts with a unique session ID
-- Frontend validates stored JWT (if present) against backend `/users`
-- If token is missing/invalid, auth dialog is shown before opening main UI
-- `CommandWorker` establishes connection to RabbitMQ
-- GUI displays connection status and session information
-- Edge-to-fog aggregator initialized with device registration
-
-### 2. Command Submission
-- User interacts with GUI (Control tab, Scheduling tab, or Server tab)
-- Frontend creates command payload with:
-  - `commandId` (UUID)
-  - `command` (e.g., "read_temperature_data", "switch_water_canal", "read_sensor", "switch_actuator", "switch_fan", "switch_heater")
-  - `parameters` (command-specific parameters)
-  - `sessionId` (unique session identifier)
-  - `type` ("user" or "developer")
-- Command is sent to RabbitMQ queue: `greenhouse_commands`
-- Server tab greenhouse polling/control actions use backend REST endpoints (`/status`, `/schema/*`, `/getters`, `/executors`, `/api/executors/:name/:action`).
-
-### 2.1 Scheduling (Backend Persistent Dispatch)
-- Frontend scheduling tab creates records through `POST /schedules`.
-- Backend runtime (`SchedulesRuntime`) loads enabled cron schedules and executes them.
-- On cron tick, runtime publishes command envelope to `greenhouse_commands`.
-- Schedule lifecycle supports `scheduleMode`:
-  - `one_time`: dispatch once, disable schedule, set `scheduleStatus` to `completed` or `not_done`.
-  - `recurring`: keep schedule enabled, keep `scheduleStatus` as `pending`, update `lastDispatchStatus` to `completed` or `failed`.
-- Core command completion remains asynchronous and is handled later in normal command pipeline (`command_responses`).
-
-### 2.2 Signup Email Verification (Auth -> Notification)
-- Frontend signs up via `POST /auth/register` with `username`, `password`, `email`.
-- Auth service persists user with `verified=false`.
-- Auth service generates JWT verification token (`type=email_verification`, exp default 1 hour).
-- Auth service publishes event to `greenhouse.events.v1` using routing key `notification.email.verification.requested.v1`.
-- Notification consumer reads from `notification.email.verification.v1` and sends email via SMTP (`nodemailer`).
-- Transient email failures are republished to `notification.email.verification.retry.v1` with `x-retry-count` header.
-- Retries are delayed by queue TTL and dead-lettered back to primary queue.
-- Max retry overflow or invalid payloads are moved to `notification.email.verification.dlq.v1`.
-- User confirms by opening `GET /auth/verify-email?token=...`; backend verifies token and marks user `verified=true`.
-
-### 3. Backend Command Consumption
-- Backend RabbitMQ consumer listens on `greenhouse_commands` queue
-- When message arrives:
-  - Parses JSON command data
-  - Routes to `CommandProcessor` for handling
-
-### 4. Command Processing
-- `CommandProcessor` checks if command is stateful (affects session state)
-- For non-stateful commands:
-  - Checks Redis cache first (cache key based on command, parameters, session, currentPath)
-  - If cache hit: returns cached result immediately
-  - If cache miss: proceeds to execution
-- For stateful commands (actuator control commands):
-  - Always executes (no caching)
-- Commands are queued per-session to ensure sequential execution
-
-### 5. Command Execution
-- `CommandExecutor` receives the command and routes it to Greenhouse Core via HTTP
-- **Greenhouse Commands** (routed to Greenhouse Core via HTTP):
-  - **Sensor Reading Commands**:
-    - `read_temperature_data`: Reads temperature sensor data
-    - `read_humidity_data`: Reads humidity sensor data
-    - `read_light_data`: Reads light intensity sensor data
-    - `read_co2_data`: Reads CO2 level sensor data
-    - `read_soil_moisture_data`: Reads soil moisture sensor data
-    - `read_soil_ph_data`: Reads soil pH sensor data
-    - `read_sensor`: Legacy command, routes to appropriate sensor command based on `sensor` parameter
-  - **Actuator Control Commands**:
-    - `switch_water_canal`: Controls water canal actuator (action: "on", "off", "toggle")
-    - `switch_actuator`: Controls generic actuators (actuatorId, action)
-    - `switch_fan`: Controls fan actuators (fanId, action)
-    - `switch_heater`: Controls heater actuators (heaterId, action)
-- **Execution Flow**:
-  1. Commands are routed to `GreenhouseCoreClient.executeCommand()`
-  2. Client sends HTTP POST to Greenhouse Core API (`/api/v1/commands/execute`)
-  3. Core processes command and returns JSON response
-  4. Client handles retries, timeouts, and error recovery
-  5. Response is normalized to standard format
-- Results include: `output` (JSON string), `data` (parsed object), `executionTime`, `error` (if any)
-
-### 6. Session Management
-- `SessionManager` maintains session state:
-  - Session creation time and last activity
-  - Per-session command queue (Promise chain)
-  - Session-specific logger
-- Sessions auto-cleanup after 30 minutes of inactivity
-
-### 7. Caching Strategy
-- Redis caches command results with TTL:
-  - **Greenhouse Commands**:
-    - `read_temperature_data`: No caching (TTL 0, live readings)
-    - `read_humidity_data`: No caching (TTL 0, live readings)
-    - `read_light_data`: No caching (TTL 0, live readings)
-    - `read_co2_data`: No caching (TTL 0, live readings)
-    - `read_soil_moisture_data`: No caching (TTL 0, live readings)
-    - `read_soil_ph_data`: No caching (TTL 0, live readings)
-    - `read_sensor`: No caching (TTL 0, live readings)
-    - `switch_water_canal`: No caching (stateful)
-    - `switch_actuator`: No caching (stateful)
-    - `switch_fan`: No caching (stateful)
-    - `switch_heater`: No caching (stateful)
-- Cache key format: `cmd:{sessionId}:{command}:{currentPath}:{parameters}`
-- Only successful results are cached (errors are not cached)
-
-### 8. Response Delivery
-- Processed command result is sent to RabbitMQ queue: `command_responses`
-- Response includes:
-  - `commandId` (matches request)
-  - `result` (execution output or error)
-  - `cached` (boolean indicating if result was from cache)
-  - `sessionId`
-  - `timestamp`
-  - `error` (if execution failed)
-
-### 9. Frontend Response Handling
-- `CommandWorker` polls `command_responses` queue (non-blocking)
-- When response arrives:
-  - Emits `response_received` signal
-  - `GreenhouseDesktop` handles the signal
-  - Updates appropriate output area (user output or developer terminal)
-  - Shows cache indicator if result was cached
-
-### 10. Logging & Monitoring
-- **System Logging**: Backend writes to `logs/backend_system.log`
-- **Session Logging**: Each session has dedicated log file `logs/session_{number}.log`
-- **Command Tracking**: All commands logged with ID, action, and details
-- **Statistics**: Backend tracks:
-  - Total commands processed
-  - Cache hits/misses
-  - Error count
-
-## Greenhouse Core Integration
-
-### Core Client Design
-
-The backend uses `GreenhouseCoreClient` as a dedicated integration layer for the real greenhouse core server. This design provides:
-
-1. **Configurability**: Core endpoint remains configurable through environment variables
-2. **Reliability**: Built-in retry logic, timeout handling, and connection status tracking
-3. **Consistency**: Normalized response format for command execution results
-
-### GreenhouseCoreClient Features
-
-- HTTP client for greenhouse core API communication
-- Generic `executeCommand()` method for all greenhouse commands
-- Dedicated state/executor methods for core protocol:
-  - `GET /status`
-  - `GET /schema/getters`
-  - `GET /schema/executors`
-  - `GET /getters`
-  - `GET /getters/:key`
-  - `GET /executors`
-  - `POST /api/executors/:name/mode`
-  - `POST /api/executors/:name/on`
-  - `POST /api/executors/:name/off`
-  - `POST /api/executors/:name/set`
-- Health check endpoint monitoring
-- Retry logic with exponential backoff (configurable retries, default: 2)
-- Timeout handling (configurable timeout, default: 10000ms)
-- Connection status tracking
-- Configurable via environment variables (URL, timeout, retries)
-- Normalized response format
-
-### Current Core Configuration
-
-The backend is configured to use the real core server at `http://192.168.27.16:8080` by default. `GREENHOUSE_CORE_URL` can still be overridden when needed.
-
-## API Endpoints
-
-### Health & Information
-- `GET /` - API information and endpoint list
-- `GET /metadata/health/` - System health check with component status
-
-### Authentication (JWT only)
-- `POST /auth/register` - Register user with username/password/email (`verified=false` initially)
-- `POST /auth/login` - Login and receive JWT token
-- `GET /auth/verify-email?token=<jwt>` - Verify email token and activate account
-- No refresh token flow is used for desktop-first login simplicity.
-- Desktop frontend sends JWT in `Authorization: Bearer <jwt>` headers.
-- Unauthorized/forbidden responses clear local token and trigger re-authentication dialog.
-- Login is denied with `403` until account email is verified.
-
-### Persistent IoT CRUD
-- `GET /users` - returns only authenticated user in `data[0]`
-- `GET|PATCH|DELETE /users/:id` - allowed only for authenticated user id
-- `POST /users` is disabled (use `POST /auth/register`)
-- `GET|POST /devices`, `GET|PATCH|DELETE /devices/:id`
-- `GET|POST /sensors`, `GET|PATCH|DELETE /sensors/:id`
-- `GET|POST /sensor-readings`, `GET|PATCH|DELETE /sensor-readings/:id`
-  - `GET /sensor-readings` supports optional query filters: `deviceId`, `deviceName`, `sensorId`, `from`, `to`, `limit`, `order`
-  - Statistics tab populates the combo with concrete sensor names from `GET /sensors` (user-scoped). On plot load, readings are fetched via `GET /sensor-readings?sensorId=<id>&order=ASC` with optional time filters. Sensor persistence auto-creates DB devices and sensors.
-- `GET|POST /actuators`, `GET|PATCH|DELETE /actuators/:id`
-- `GET|POST /schedules`, `GET|PATCH|DELETE /schedules/:id`
-- `GET|POST /sensor-alert-rules`, `GET|PATCH|DELETE /sensor-alert-rules/:id`
-- `GET|POST /sensor-alerts`, `GET|PATCH|DELETE /sensor-alerts/:id`
-- Protected CRUD endpoints require `Authorization: Bearer <jwt>`.
-- Ownership is enforced by JWT identity only.
-
-### Sessions
-- `GET /sessions` - List all active sessions
-- `GET /sessions/:sessionId/log` - Get session log content
-- `DELETE /sessions/:sessionId` - Terminate a session
-
-### Logs
-- `GET /logs` - List all log files
-- `GET /logs/system` - Get system log content
-
-### Cache (requires JWT: Authorization: Bearer <token>)
-- `GET /cache/keys` - List all cache keys (pattern: `cmd:*`)
-- `DELETE /cache/clear` - Clear all cached entries
-- `DELETE /cache/clear-errors` - Clear only error entries from cache
-
-### Edge/Fog Data Aggregation (requires JWT)
-- `POST /fog/aggregated` - Store aggregated sensor data from edge nodes
-  - Body: `{ sensorType, location, timeframe, data }`
-  - Stores in Redis with namespace: `fog:agg:{sensorType}:{location}:{timeframe}`
-- `GET /fog/aggregated` - Retrieve aggregated data with optional filtering
-  - Query params: `sensorType`, `location`, `timeframe` (all optional)
-  - Returns: `{ count, data: [...] }`
-- `GET /fog/devices` - List all registered edge devices
-  - Returns: `{ count, devices: [...] }`
-- `POST /fog/anomalies` - Store detected anomaly from edge node
-  - Body: `{ anomaly_id, sensor_type, location, anomaly_type, severity, message, timestamp, value, expected_range }`
-  - Stores in Redis: `fog:anomaly:{anomaly_id}` and adds to recent list
-- `GET /fog/anomalies` - Retrieve recent anomalies
-  - Query params: `limit` (default: 10)
-  - Returns: `{ count, anomalies: [...] }`
-
-### Statistics & Monitoring
-- `GET /metadata/stats/` - Get command processing statistics
-- `GET /metadata/queues/` - Get RabbitMQ queue status
-
-### Greenhouse Core HTTP API (Backend external)
-- `GET /status` - Core status (`{"status":"ok"}`)
-- `GET /schema/getters` - Getter schema
-- `GET /schema/executors` - Executor schema
-- `GET /getters` - Getter snapshots
-- `GET /getters/:key` - Single getter snapshot
-- `GET /executors` - Executor snapshots
-- `POST /api/executors/:name/:action` - Executor action route (`mode|on|off|set`)
-  - `mode` body `{ "value": "manual|auto|0|1" }`
-  - `set` body `{ "value": "..." }`
-- Compatibility aliases removed; use root core routes only.
-
-## Architecture Benefits
-
-1. **Scalability**: RabbitMQ allows multiple frontend instances and backend workers
-2. **Reliability**: Durable queues ensure message persistence
-3. **Performance**: Redis caching reduces redundant command execution
-4. **Isolation**: Per-session state prevents command interference
-5. **Observability**: Comprehensive logging at system and session levels
-6. **Flexibility**: GUI-first desktop operation with explicit server-side API controls
-7. **Modularity**: Abstract greenhouse core interface allows easy integration with different core implementations
-8. **Resilience**: Automatic retry and timeout handling for greenhouse core communication
-9. **Edge Computing**: Edge-to-Fog aggregation reduces network traffic and enables offline operation
-10. **Real-Time Insights**: Time-windowed aggregation provides near real-time data analysis
-11. **Anomaly Detection**: Automatic detection of unusual patterns in sensor data
-12. **Quality-Aware Processing**: Quality-weighted aggregation ensures reliable data processing
+# GreenHouse Architecture Description
+
+## 1) System Topology
+
+- **Frontend**: PyQt5 desktop app in `frontend/`.
+- **Backend**: Express monolith in `backend/`.
+- **Messaging**: RabbitMQ for desktop command/response + internal auth notification events.
+- **Data**: PostgreSQL for persistent entities, Redis for cache/operational keys.
+- **Core Runtime**: external greenhouse core HTTP API (`GREENHOUSE_CORE_URL`, default `http://127.0.0.1:3001`).
+
+## 2) Primary Runtime Flows
+
+### A. Desktop command flow (RabbitMQ)
+
+1. Desktop creates command envelope:
+   - `commandId`, `command`, `type`, `parameters`, `sessionId`.
+2. Desktop publishes to `greenhouse_commands` with `replyTo=command_responses.<sessionId>`.
+3. Backend consumes with manual ack (`noAck: false`), validates, then processes through `CommandProcessor`.
+4. `CommandExecutor` forwards greenhouse commands to core `POST /api/v1/commands/execute`.
+5. Backend publishes response to `replyTo` when present (fallback `command_responses`) and only then acks message.
+
+### B. Scheduling flow
+
+1. Desktop writes schedules via REST `/schedules`.
+2. Backend `SchedulesRuntime` loads enabled schedules and uses cron dispatch.
+3. Runtime publishes command envelopes to `greenhouse_commands`.
+4. One-time and recurring schedules update metadata/state differently (`completed`/`not_done` vs ongoing dispatch status).
+
+### C. Auth + email verification flow
+
+1. `POST /auth/register` creates user with `verified=false`.
+2. Backend publishes verification event on `greenhouse.events.v1`.
+3. Notification consumer sends email and retries via retry queue.
+4. `GET /auth/verify-email?token=...` marks user verified.
+5. `POST /auth/login` returns `403` for unverified users.
+
+## 3) Backend Architecture
+
+- `App` composes routers, service/repository layers, RabbitMQ consumer, schedules runtime.
+- Core command path:
+  - `CommandProcessor` - session queueing + cache/idempotency orchestration.
+  - `commandCachePolicy` - TTL/stateful policy.
+  - `redisCommandCache` - Redis read/write + idempotency helpers.
+  - `CommandExecutor` - command routing to greenhouse core.
+- Core proxy path:
+  - `GET /status`, `/schema/getters`, `/schema/executors`, `/getters`, `/getters/:key`, `/executors`
+  - `POST /api/executors/:name/:action` (`mode|on|off|set`)
+
+## 4) Caching/Idempotency State
+
+- Redis key format for result cache: `cmd:{sessionId}:{command}:{currentPath}:{sortedParametersJson}`.
+- Idempotency key: `idem:{commandId}`.
+- Current greenhouse command TTL map sets known commands to `0`.
+- Effective behavior today:
+  - stateful commands are never cached,
+  - TTL=0 commands skip cache/idempotency path.
+
+## 5) Frontend Architecture
+
+- `main.py` enforces auth dialog before opening `GreenhouseDesktop`.
+- `CommandWorker` runs RabbitMQ I/O in a background thread and emits Qt signals.
+- Main UI mixins:
+  - control commands,
+  - server/core controls,
+  - scheduling,
+  - statistics,
+  - edge/fog integration,
+  - auth session behavior,
+  - logic tab (local builder placeholder flow).
+- Logic tab status:
+  - local canvas model + validation + JSON preview is implemented,
+  - backend/core logic API passthrough routes are not yet wired in backend.
+
+## 6) Data Model
+
+Persistent PostgreSQL entities:
+
+- `users`, `devices`, `sensors`, `sensor_readings`, `actuators`, `schedules`, `sensor_alert_rules`, `sensor_alerts`, `user_logs`.
+
+High-level relations:
+
+- User -> Devices / UserLogs
+- Device -> Sensors / Actuators / Schedules
+- Sensor -> SensorReadings / SensorAlertRules
+- SensorAlertRule -> SensorAlerts
+
+## 7) Operational Notes
+
+- Graceful shutdown handles HTTP server, RabbitMQ client, Redis, and PostgreSQL.
+- Rabbit consumer prefetch is configurable (`RABBITMQ_CONSUMER_PREFETCH`, default `5`).
+- Config values are env-based and loaded from repository root `.env` when available.

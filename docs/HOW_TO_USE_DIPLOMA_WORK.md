@@ -1,5 +1,7 @@
 # How to Use the Diploma Work Document
 
+This helper file is informational only and is not tied to backend/frontend runtime contracts.
+
 ## Option 1: Import HTML Directly into Google Docs (Recommended)
 
 1. Open Google Docs in your browser

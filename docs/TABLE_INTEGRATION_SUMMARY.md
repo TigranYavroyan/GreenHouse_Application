@@ -18,9 +18,8 @@
 ### 4. **Code Integration** (`frontend/modules/greenhouse.py`)
 
 #### Initialization:
-- ✅ `setup_tables()` called after UI loads (line 104)
-- ✅ `server_tables = {}` initialized (line 107)
-- ✅ `control_table` initialized (line 108)
+- ✅ `setup_tables()` is called after UI load
+- ✅ `control_table`, `schedule_table`, `server_table` are initialized and rendered in tab layouts
 
 #### Server Information Tab - Tables Used:
 - ✅ `check_server_health()` → uses `display_data_table(..., 'health')`
@@ -61,7 +60,7 @@ Example:
 
 ### 6. **Verification Points**
 
-✅ **Imports**: All table modules imported (lines 19-25)
+✅ **Imports**: Table modules are imported in desktop UI layer
 ✅ **Initialization**: Tables initialized after UI loads
 ✅ **Usage**: All display methods use `display_data_table()`
 ✅ **Command Results**: `handle_response()` uses `control_table`

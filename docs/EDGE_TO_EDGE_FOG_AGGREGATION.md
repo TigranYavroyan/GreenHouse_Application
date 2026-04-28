@@ -173,7 +173,7 @@ Local Redis client for edge node caching.
 - `delete(key)`: Remove cached value
 - `clear_namespace(namespace)`: Clear all keys in a namespace
 
-### 3. Backend API (`backend/router/routes.js`)
+### 3. Backend API (`backend/routers/fog.js`)
 
 REST API endpoints for fog data management.
 
@@ -843,7 +843,7 @@ curl -H "Authorization: Bearer ${TOKEN}" \
   - `frontend/modules/edge_fog_aggregator.py`
   - `frontend/modules/redis_client.py`
   - `frontend/modules/greenhouse.py`
-  - `backend/router/routes.js`
+  - `backend/routers/fog.js`
 
 ---
 

@@ -1,330 +1,55 @@
 classDiagram
-    %% Frontend Classes
-    class GreenhouseDesktop {
-        -UUID session_id
-        -Dict pending_commands
-        -String backend_url
-        -EdgeToFogAggregator edge_aggregator
-        -RedisEdgeClient redis_edge_client
-        -CommandWorker command_worker
-        +setupUI()
-        +send_user_command(command, params)
-        +handle_response(response)
-        +check_server_health()
-        +view_server_stats()
-    }
-    
-    class CommandWorker {
-        -pika.Connection connection
-        -pika.Channel channel
-        -Dict pending_commands
-        +setup_rabbitmq()
-        +send_command(command_data)
-        +_check_for_messages()
-        +disconnect()
-    }
-    
-    class EdgeToFogAggregator {
-        -Dict raw_data_buffer
-        -Dict aggregated_data
-        -Dict edge_devices
-        -List anomalies
-        +register_edge_device()
-        +add_sensor_reading(reading)
-        +run_periodic_aggregation()
-        +detect_anomalies()
-        +get_aggregated_metrics()
-    }
-    
-    class RedisEdgeClient {
-        -redis.Redis redis_client
-        +get(key) Any
-        +set(key, value, ttl)
-        +delete(key)
-        +clear_namespace(namespace)
-    }
-    
-    %% Backend Classes
-    class App {
-        -express.Application app
-        -RedisClientWrapper redisClient
-        -RabbitMQClient rabbitClient
-        -GreenhouseCoreClient greenhouseCoreClient
-        -SessionManager sessionManager
-        -CommandExecutor commandExecutor
-        -CommandProcessor commandProcessor
-        +setupMiddleware()
-        +setupRoutes()
-        +setupRabbitAndConsumer()
-        +start(port)
-    }
-    
-    class CommandProcessor {
-        -RedisClientWrapper redis
-        -SessionManager sessions
-        -RabbitMQClient rabbit
-        -CommandExecutor executor
-        -Object commandStats
-        +processCommand(commandData) Promise
-        +generateCacheKey() String
-        +isStateful(command) Boolean
-        +getTTLForCommand(command, parameters) int
-    }
-    
-    class CommandExecutor {
-        -SystemLogger systemLogger
-        -GreenhouseCoreClient greenhouseCoreClient
-        +runCommand(command, params, session) Promise
-        +executeGreenhouseCommand(command, params, session) Promise
-        +isGreenhouseCommand(command) Boolean
-    }
-    
-    class SessionManager {
-        -Map~String,Session~ sessions
-        -int counter
-        +createSession(sessionId) Session
-        +getSession(sessionId) Session
-        +getOrCreate(sessionId) Session
-        +cleanupOldSessions()
-    }
-    
-    class Session {
-        +String sessionId
-        +int sessionNumber
-        +String currentPath
-        +String createdAt
-        +String lastActivity
-        +String lastCommandId
-        +Promise commandQueue
-        +SessionLogger logger
-    }
-    
-    class RedisClientWrapper {
-        -redis.Client client
-        -Boolean isOpen
-        +connect()
-        +get(key) Promise~String~
-        +setEx(key, ttl, value) Promise
-        +del(keys) Promise
-        +keys(pattern) Promise~Array~
-    }
-    
-    class RabbitMQClient {
-        -amqp.Connection connection
-        -amqp.Channel channel
-        +connect()
-        +assertQueue(queue, options) Promise
-        +sendToQueue(queue, message, options) Promise
-        +consume(queue, callback, options) Promise
-        +ack(message) Promise
-    }
-    
-    class GreenhouseCoreClient {
-        -String baseUrl
-        -int timeout
-        -int maxRetries
-        -Boolean isConnected
-        +connect() Promise
-        +disconnect() Promise
-        +executeCommand(command, params, metadata) Promise
-        +healthCheck() Promise
-        +get connected() Boolean
-    }
+    class GreenhouseDesktop
+    class CommandWorker
+    class EdgeToFogAggregator
+    class RedisEdgeClient
+    class CoreApiClient
 
-    %% Persistent DB Entities (Sequelize/PostgreSQL)
-    class UserEntity {
-        +UUID id
-        +String username
-        +String email
-        +String password
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
+    class App
+    class RabbitMQClient
+    class RedisClientWrapper
+    class GreenhouseCoreClient
+    class SessionManager
+    class CommandProcessor
+    class CommandExecutor
+    class SchedulesRuntime
+    class NotificationConsumer
 
-    class DeviceEntity {
-        +UUID id
-        +UUID user_id
-        +String name
-        +String type
-        +String status
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
+    class UserEntity
+    class DeviceEntity
+    class SensorEntity
+    class SensorReadingEntity
+    class ActuatorEntity
+    class ScheduleEntity
+    class SensorAlertRuleEntity
+    class SensorAlertEntity
+    class UserLogEntity
 
-    class SensorEntity {
-        +UUID id
-        +UUID device_id
-        +String name
-        +String type
-        +String unit
-        +Boolean is_active
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
+    GreenhouseDesktop *-- CommandWorker
+    GreenhouseDesktop *-- CoreApiClient
+    GreenhouseDesktop *-- EdgeToFogAggregator
+    GreenhouseDesktop *-- RedisEdgeClient
 
-    class SensorReadingEntity {
-        +UUID id
-        +UUID sensor_id
-        +float value
-        +DateTime timestamp
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
+    App *-- RabbitMQClient
+    App *-- RedisClientWrapper
+    App *-- GreenhouseCoreClient
+    App *-- SessionManager
+    App *-- CommandProcessor
+    App *-- CommandExecutor
+    App *-- SchedulesRuntime
+    App *-- NotificationConsumer
 
-    class ActuatorEntity {
-        +UUID id
-        +UUID device_id
-        +String name
-        +String type
-        +String status
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
+    CommandProcessor --> SessionManager
+    CommandProcessor --> RedisClientWrapper
+    CommandProcessor --> CommandExecutor
+    CommandExecutor --> GreenhouseCoreClient
+    SchedulesRuntime --> RabbitMQClient
 
-    class ScheduleEntity {
-        +UUID id
-        +UUID device_id
-        +String name
-        +String cron_expression
-        +String action
-        +Boolean enabled
-        +JSONB payload
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
-
-    class SensorAlertRuleEntity {
-        +UUID id
-        +UUID sensor_id
-        +String name
-        +String operator
-        +float threshold_value
-        +float threshold_min
-        +float threshold_max
-        +String severity
-        +Boolean enabled
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
-
-    class SensorAlertEntity {
-        +UUID id
-        +UUID sensor_alert_rule_id
-        +float value
-        +String message
-        +String status
-        +DateTime triggered_at
-        +DateTime acknowledged_at
-        +JSONB metadata
-        +DateTime created_at
-        +DateTime updated_at
-    }
-    
-    %% Data Models
-    class SensorReading {
-        +String device_id
-        +SensorType sensor_type
-        +float value
-        +DateTime timestamp
-        +String location
-        +float quality
-        +float battery_level
-        +float signal_strength
-    }
-    
-    class AggregatedData {
-        +String timeframe
-        +SensorType sensor_type
-        +float average
-        +float min
-        +float max
-        +int count
-        +float std_dev
-        +DateTime timestamp
-        +float quality_score
-        +String location
-    }
-    
-    class CommandData {
-        +UUID commandId
-        +String command
-        +Object parameters
-        +String sessionId
-        +String type
-    }
-    
-    class CommandResponse {
-        +UUID commandId
-        +Object result
-        +Boolean cached
-        +String sessionId
-        +DateTime timestamp
-        +String error
-    }
-    
-    %% Relationships
-    GreenhouseDesktop *-- CommandWorker : contains
-    GreenhouseDesktop *-- EdgeToFogAggregator : contains
-    GreenhouseDesktop *-- RedisEdgeClient : contains
-    EdgeToFogAggregator --> RedisEdgeClient : uses
-    
-    App *-- RedisClientWrapper : contains
-    App *-- RabbitMQClient : contains
-    App *-- GreenhouseCoreClient : contains
-    App *-- SessionManager : contains
-    App *-- CommandExecutor : contains
-    App *-- CommandProcessor : contains
-    
-    CommandProcessor --> RedisClientWrapper : uses
-    CommandProcessor --> SessionManager : uses
-    CommandProcessor --> RabbitMQClient : uses
-    CommandProcessor --> CommandExecutor : uses
-    
-    CommandExecutor --> GreenhouseCoreClient : uses
-    
-    SessionManager *-- Session : manages
-    
-    EdgeToFogAggregator --> SensorReading : creates
-    EdgeToFogAggregator --> AggregatedData : creates
-    CommandWorker --> CommandData : creates
-    CommandProcessor --> CommandResponse : creates
-
-    UserEntity --> DeviceEntity : owns
-    DeviceEntity --> SensorEntity : owns
-    DeviceEntity --> ActuatorEntity : owns
-    DeviceEntity --> ScheduleEntity : owns
+    UserEntity --> DeviceEntity : hasMany
+    UserEntity --> UserLogEntity : hasMany
+    DeviceEntity --> SensorEntity : hasMany
+    DeviceEntity --> ActuatorEntity : hasMany
+    DeviceEntity --> ScheduleEntity : hasMany
     SensorEntity --> SensorReadingEntity : hasMany
     SensorEntity --> SensorAlertRuleEntity : hasMany
     SensorAlertRuleEntity --> SensorAlertEntity : hasMany
-    
-    %% Simulator Classes
-    class DeviceSimulator {
-        -Object deviceStates
-        -Object sensorData
-        +readTemperatureData() Object
-        +readHumidityData() Object
-        +readLightData() Object
-        +readCO2Data() Object
-        +readSoilMoistureData() Object
-        +readSoilPHData() Object
-        +switchWaterCanal(action) Object
-        +switchActuator(actuatorId, action) Object
-        +switchFan(fanId, action) Object
-        +switchHeater(heaterId, action) Object
-        +getDeviceStates() Object
-        +getSensorData() Object
-    }
-    
-    class CommandController {
-        -DeviceSimulator simulator
-        +executeCommand(req, res)
-        +healthCheck(req, res)
-        +getDeviceStates(req, res)
-    }

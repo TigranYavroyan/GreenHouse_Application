@@ -1,7 +1,7 @@
 # Edge-to-Fog Data Aggregation Integration Summary
 
 ## Overview
-This document summarizes the integration of the Edge-to-Fog data aggregation system into the Greenhouse Automation application.
+This document summarizes the current Edge/Fog integration in the GreenHouse application.
 
 ## What Was Changed
 
@@ -21,7 +21,7 @@ This document summarizes the integration of the Edge-to-Fog data aggregation sys
   - Namespace-based key organization
   - Graceful degradation if Redis unavailable
 
-### 3. Backend Endpoints (`backend/router/routes.js`)
+### 3. Backend Endpoints (`backend/routers/fog.js`)
 Added new REST API endpoints for fog data:
 - `POST /fog/aggregated` - Store aggregated sensor data
   - Body: `{ sensorType, location, timeframe, data }`
@@ -99,14 +99,18 @@ Added new REST API endpoints for fog data:
 - **Advanced Visualization**: Add charts/graphs for aggregated metrics
 - **Device Discovery**: Automatic device discovery instead of manual registration
 
+## Auth Requirement
+
+All `/fog/*` endpoints are protected by JWT auth (`Authorization: Bearer <token>`).
+
 ## Testing
 
-### To Test the Integration:
+### To Test the Integration
 1. Start the backend: `cd backend && npm start`
 2. Start Redis: `docker compose up redis -d` (or use existing Redis)
 3. Start the frontend: `cd frontend && python main.py`
 4. Check Server tab - you should see aggregated data appearing every minute
-5. Test backend endpoints (use `Authorization: Bearer <JWT>` from login):
+5. Test backend endpoints (with JWT):
    - `GET http://localhost:3000/fog/aggregated`
    - `GET http://localhost:3000/fog/anomalies`
    - `GET http://localhost:3000/fog/devices`

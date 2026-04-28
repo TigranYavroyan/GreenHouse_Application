@@ -5,6 +5,8 @@ This project uses two data stores:
 - **PostgreSQL** for relational, persistent domain data.
 - **Redis** for cache and short-lived operational data.
 
+Last reviewed against entity definitions in `backend/entity/*.js`: 2026-04-28.
+
 ## What is saved in PostgreSQL
 
 The backend Sequelize entities persist these tables:

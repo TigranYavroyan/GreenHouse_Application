@@ -2,6 +2,8 @@
 
 This document describes the production email verification flow implemented in the backend monolith.
 
+Last reviewed against backend implementation: 2026-04-28.
+
 ## RabbitMQ Topology
 
 - Exchange: `greenhouse.events.v1` (`topic`, durable)

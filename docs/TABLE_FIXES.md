@@ -71,7 +71,9 @@ If tables still don't appear:
    - Server buttons should trigger `display_data_table()`
    - Check if renderers are returning data
 
-## Files Modified
+## Current Status
 
-- `frontend/modules/greenhouse.py`: Added logging, fallback creation, visibility fixes
-- `frontend/modules/table_widget.py`: Fixed column handling, added minimum height, visibility
+- Table widgets are integrated directly in control/scheduling/server tabs.
+- Legacy text containers are hidden when table widgets are inserted.
+- Row details are exposed through selection/double-click patterns.
+- Empty-state labels help users understand when no data has been loaded yet.
