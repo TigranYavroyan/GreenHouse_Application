@@ -4,14 +4,26 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5.QtGui import QDrag
-from PyQt5.QtWidgets import QDialog, QListWidget, QListWidgetItem, QPlainTextEdit, QVBoxLayout
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFormLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QPlainTextEdit,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from modules.logic_canvas_adapter import LogicCanvasAdapter
 from modules.logic_constants import (
+    CONDITION_SPECS,
     NODE_KIND_ACTION,
     NODE_KIND_CONDITION,
     NODE_KIND_LITERAL,
@@ -46,6 +58,8 @@ class LogicPaletteListWidget(QListWidget):
 
 class GreenhouseLogicMixin:
     def setup_logic_tab(self):
+        self._wrap_logic_tab_in_scroll_area()
+
         self.logic_canvas_adapter = LogicCanvasAdapter()
         self.logic_node_metadata: Dict[str, Dict] = {}
         self.logic_selected_node_id: Optional[str] = None
@@ -73,6 +87,40 @@ class GreenhouseLogicMixin:
                 f"Canvas ready ({self.logic_canvas_adapter.backend_name}). API calls are disabled in this step."
             )
         self.logger.info("Logic tab initialized with local block-scheme canvas.")
+
+    def _wrap_logic_tab_in_scroll_area(self):
+        if getattr(self, "_logic_tab_scroll_wrapped", False):
+            return
+        if not hasattr(self, "logicTabLayout"):
+            return
+
+        outer_layout = self.logicTabLayout
+        content = QWidget(self)
+        content.setObjectName("logicTabScrollContent")
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(8)
+
+        while outer_layout.count():
+            item = outer_layout.takeAt(0)
+            widget = item.widget()
+            child_layout = item.layout()
+            if widget is not None:
+                content_layout.addWidget(widget)
+            elif child_layout is not None:
+                content_layout.addLayout(child_layout)
+            elif item.spacerItem() is not None:
+                content_layout.addItem(item)
+
+        scroll_area = QScrollArea(self)
+        scroll_area.setObjectName("logicTabScrollArea")
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QScrollArea.NoFrame)
+        scroll_area.setWidget(content)
+        outer_layout.addWidget(scroll_area)
+
+        self.logicTabScrollArea = scroll_area
+        self._logic_tab_scroll_wrapped = True
 
     def _embed_logic_canvas_widget(self):
         if not hasattr(self, "logicCanvasContainerLayout"):
@@ -103,6 +151,7 @@ class GreenhouseLogicMixin:
         if hasattr(self, "logicPropertyConditionCombo"):
             self.logicPropertyConditionCombo.clear()
             self.logicPropertyConditionCombo.addItems(SUPPORTED_CONDITIONS)
+            self.logicPropertyConditionCombo.currentTextChanged.connect(self._refresh_condition_arg_fields_for_selected_node)
         if hasattr(self, "logicPropertyTargetCombo"):
             self.logicPropertyTargetCombo.clear()
             self.logicPropertyTargetCombo.addItem("LOW_DCM_D_0")
@@ -113,6 +162,106 @@ class GreenhouseLogicMixin:
         if hasattr(self, "logicPropertyTriggerCombo"):
             self.logicPropertyTriggerCombo.clear()
             self.logicPropertyTriggerCombo.addItems(TRIGGER_MODES)
+
+        self._setup_condition_arg_editor()
+
+    def _setup_condition_arg_editor(self):
+        self.logicConditionArgRows: List[Tuple[QLabel, QLineEdit]] = []
+        self.logicConditionHelpLabel = None
+        if not hasattr(self, "logicPropertiesLayout") or not hasattr(self, "logicPropertyArgsEdit"):
+            return
+
+        self.logicPropertyArgsEdit.setVisible(False)
+
+        args_editor = QWidget(self)
+        args_editor.setObjectName("logicConditionArgsEditor")
+        args_layout = QFormLayout(args_editor)
+        args_layout.setContentsMargins(0, 0, 0, 0)
+        args_layout.setHorizontalSpacing(8)
+        args_layout.setVerticalSpacing(6)
+
+        for _ in range(4):
+            label = QLabel("Arg", args_editor)
+            field = QLineEdit(args_editor)
+            field.setClearButtonEnabled(True)
+            args_layout.addRow(label, field)
+            self.logicConditionArgRows.append((label, field))
+
+        self.logicConditionHelpLabel = QLabel(args_editor)
+        self.logicConditionHelpLabel.setWordWrap(True)
+        self.logicConditionHelpLabel.setStyleSheet("color: #9FB0C8; font-size: 11px;")
+        args_layout.addRow(self.logicConditionHelpLabel)
+
+        insert_index = self.logicPropertiesLayout.indexOf(self.logicPropertyArgsEdit)
+        if insert_index < 0:
+            self.logicPropertiesLayout.addWidget(args_editor)
+        else:
+            self.logicPropertiesLayout.insertWidget(insert_index + 1, args_editor)
+
+        self._render_condition_arg_editor("always", [])
+
+    def _render_condition_arg_editor(self, condition: str, args: List[str]):
+        spec = CONDITION_SPECS.get(condition)
+        if not self.logicConditionArgRows:
+            return
+        spec_args = spec.args if spec else []
+        for idx, (label, field) in enumerate(self.logicConditionArgRows):
+            if idx < len(spec_args):
+                arg_spec = spec_args[idx]
+                existing_value = args[idx] if idx < len(args) else ""
+                value = existing_value or arg_spec.auto_value
+                label.setText(arg_spec.label)
+                field.setPlaceholderText(arg_spec.placeholder or f"Argument {idx + 1}")
+                field.setText(value)
+                field.setReadOnly(not arg_spec.editable)
+                field.setEnabled(arg_spec.editable)
+                if arg_spec.editable:
+                    field.setToolTip("")
+                else:
+                    field.setToolTip("Automatically managed for safety in Basic mode.")
+                label.setVisible(True)
+                field.setVisible(True)
+            else:
+                field.setText("")
+                field.setReadOnly(False)
+                field.setEnabled(True)
+                label.setVisible(False)
+                field.setVisible(False)
+        if self.logicConditionHelpLabel:
+            if spec:
+                self.logicConditionHelpLabel.setText(
+                    f"{spec.description}. Auto fields are locked in Basic mode; decision values stay editable."
+                )
+            else:
+                self.logicConditionHelpLabel.setText(
+                    "Unknown condition. Use comma-separated args fallback field."
+                )
+
+    def _collect_condition_args_from_editor(self) -> List[str]:
+        if not self.logicConditionArgRows:
+            return [part.strip() for part in self.logicPropertyArgsEdit.text().split(",") if part.strip()]
+        out: List[str] = []
+        spec = CONDITION_SPECS.get(self.logicPropertyConditionCombo.currentText().strip() or "always")
+        spec_args = spec.args if spec else []
+        for idx, (label, field) in enumerate(self.logicConditionArgRows):
+            if not label.isVisible():
+                continue
+            arg_spec = spec_args[idx] if idx < len(spec_args) else None
+            value = field.text().strip()
+            if arg_spec and not value and arg_spec.auto_value:
+                value = arg_spec.auto_value
+            if value:
+                out.append(value)
+        return out
+
+    def _refresh_condition_arg_fields_for_selected_node(self):
+        node_id = self.logic_selected_node_id
+        if not node_id:
+            return
+        meta = self.logic_node_metadata.get(node_id, {})
+        condition = self.logicPropertyConditionCombo.currentText().strip() or "always"
+        args = list(meta.get("args", []))
+        self._render_condition_arg_editor(condition, args)
 
     def _bind_logic_buttons(self):
         self.logicAddRootButton.clicked.connect(lambda: self._create_logic_node(NODE_KIND_ROOT))
@@ -221,8 +370,11 @@ class GreenhouseLogicMixin:
         meta = self.logic_node_metadata.get(node_id, {})
         self.logicPropertyNodeTypeLabel.setText(f"Type: {node_item.kind}")
         self.logicPropertyTitleEdit.setText(node_item.title)
-        self.logicPropertyConditionCombo.setCurrentText(str(meta.get("condition", "always")))
-        self.logicPropertyArgsEdit.setText(",".join(meta.get("args", [])))
+        condition = str(meta.get("condition", "always"))
+        args = list(meta.get("args", []))
+        self.logicPropertyConditionCombo.setCurrentText(condition)
+        self.logicPropertyArgsEdit.setText(",".join(args))
+        self._render_condition_arg_editor(condition, args)
         self.logicPropertyTargetCombo.setCurrentText(str(meta.get("target", "LOW_DCM_D_0")))
         self.logicPropertyValueTypeCombo.setCurrentText(str(meta.get("valueType", "bool")))
         self.logicPropertyValueEdit.setText(str(meta.get("value", "false")))
@@ -238,11 +390,14 @@ class GreenhouseLogicMixin:
             return
 
         title = self.logicPropertyTitleEdit.text().strip() or node.title
-        args = [part.strip() for part in self.logicPropertyArgsEdit.text().split(",") if part.strip()]
+        args = self._collect_condition_args_from_editor()
+        if not args and self.logicPropertyArgsEdit.text().strip():
+            args = [part.strip() for part in self.logicPropertyArgsEdit.text().split(",") if part.strip()]
 
         meta = self.logic_node_metadata.setdefault(node_id, self._default_node_meta(node.kind))
         meta["condition"] = self.logicPropertyConditionCombo.currentText().strip() or "always"
         meta["args"] = args
+        self.logicPropertyArgsEdit.setText(",".join(args))
         meta["target"] = self.logicPropertyTargetCombo.currentText().strip()
         meta["valueType"] = self.logicPropertyValueTypeCombo.currentText().strip()
         meta["value"] = self.logicPropertyValueEdit.text().strip()
