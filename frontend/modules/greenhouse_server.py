@@ -1,7 +1,8 @@
+import threading
 from typing import Any, Dict, List, Optional
 from copy import deepcopy
 
-from PyQt5.QtCore import QDateTime
+from PyQt5.QtCore import QDateTime, QObject, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 from modules.table_widget import SimpleDataTable
@@ -17,6 +18,11 @@ from modules.localization.localization_keys import (
     Status,
     Tables,
 )
+
+
+class _CoreSnapshotSignalBridge(QObject):
+    snapshot_ready = pyqtSignal(dict)
+    snapshot_error = pyqtSignal(str)
 
 
 class ServerPanelMixin:
@@ -43,6 +49,10 @@ class ServerPanelMixin:
         self.core_executor_schema: Dict[str, str] = {}
         self.core_getters: List[GetterSnapshotDto] = []
         self.core_executors: List[ExecutorSnapshotDto] = []
+        self._core_snapshot_in_flight = False
+        self._core_snapshot_signals = _CoreSnapshotSignalBridge()
+        self._core_snapshot_signals.snapshot_ready.connect(self._on_core_snapshot_ready)
+        self._core_snapshot_signals.snapshot_error.connect(self._on_core_snapshot_error)
         self._update_executor_action_buttons_state()
 
     # ------------------------------------------------------------------
@@ -306,21 +316,52 @@ class ServerPanelMixin:
         self.refresh_core_snapshot()
 
     def refresh_core_snapshot(self):
-        """Poll greenhouse status/schemas/data and display them."""
+        """Poll greenhouse status/schemas/data in a worker thread and display them."""
+        if self._core_snapshot_in_flight:
+            self.logger.debug("Core snapshot refresh skipped: previous request still running")
+            return
+        self._core_snapshot_in_flight = True
+
+        def _refresh_job():
+            try:
+                payload = self._fetch_core_snapshot_payload()
+                self._core_snapshot_signals.snapshot_ready.emit(payload)
+            except Exception as error:
+                self._core_snapshot_signals.snapshot_error.emit(str(error) or "Unknown core refresh error")
+
+        threading.Thread(target=_refresh_job, name="core-snapshot-refresh", daemon=True).start()
+
+    def _fetch_core_snapshot_payload(self) -> Dict[str, Any]:
+        """Run blocking HTTP requests away from the Qt GUI thread."""
+        status = self.core_api.get_status()
+        getter_schema = self.core_api.get_getter_schema()
+        executor_schema = self.core_api.get_executor_schema()
+        getters = self.core_api.get_getters()
+        executors = self.core_api.get_executors()
+        return {
+            "status": status,
+            "getter_schema": getter_schema,
+            "executor_schema": executor_schema,
+            "getters": getters,
+            "executors": executors,
+        }
+
+    def _on_core_snapshot_ready(self, payload: Dict[str, Any]):
         try:
-            status = self.core_api.get_status()
+            status = payload.get("status")
             self.display_data_table(tr_key(ServerData.CORE_STATUS), {"status": status.status}, "core_status")
 
-            self._refresh_getter_schema()
+            self.core_getter_schema = payload.get("getter_schema", {})
             self.display_data_table(tr_key(ServerData.GETTER_SCHEMA), self.core_getter_schema, "getter_schema")
 
-            self._refresh_executor_schema()
+            self.core_executor_schema = payload.get("executor_schema", {})
             self.display_data_table(tr_key(ServerData.EXECUTOR_SCHEMA), self.core_executor_schema, "executor_schema")
 
-            self._refresh_getters()
+            self.core_getters = payload.get("getters", [])
             self.display_data_table(tr_key(ServerData.GETTERS), self.core_getters, "getters")
 
-            self._refresh_executors()
+            self.core_executors = payload.get("executors", [])
+            self._update_executor_action_buttons_state()
             self.display_data_table(tr_key(ServerData.EXECUTORS), self.core_executors, "executors")
 
             if hasattr(self, "set_status_state") and callable(self.set_status_state):
@@ -329,6 +370,12 @@ class ServerPanelMixin:
                 self.status_label.setText(tr_key(Status.GREENHOUSE_REFRESHED))
         except Exception as error:
             self._show_core_error("Refresh greenhouse snapshot", error)
+        finally:
+            self._core_snapshot_in_flight = False
+
+    def _on_core_snapshot_error(self, error_message: str):
+        self._core_snapshot_in_flight = False
+        self._show_core_error("Refresh greenhouse snapshot", RuntimeError(error_message))
 
     def view_core_status(self):
         try:

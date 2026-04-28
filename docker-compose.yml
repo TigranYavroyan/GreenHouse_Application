@@ -32,28 +32,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  greenhouse-core-sim:
-    build:
-      context: ./sim
-      dockerfile: Dockerfile
-    container_name: greenhouse-core-sim
-    env_file:
-      - ./.env
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-    volumes:
-      - ./sim/logs:/app/logs
-    networks:
-      - greenhouse-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/metadata/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
   backend:
     build:
       context: ./backend
@@ -67,7 +45,7 @@ services:
       - REDIS_HOST=redis
       - RABBITMQ_HOST=rabbitmq
       - POSTGRES_HOST=postgres
-      - GREENHOUSE_CORE_URL=http://greenhouse-core-sim:3001
+      - GREENHOUSE_CORE_URL=${GREENHOUSE_CORE_URL}
       - GREENHOUSE_CORE_TIMEOUT=10000
       - GREENHOUSE_CORE_RETRIES=2
     depends_on:
@@ -76,8 +54,6 @@ services:
       redis:
         condition: service_healthy
       rabbitmq:
-        condition: service_healthy
-      greenhouse-core-sim:
         condition: service_healthy
     volumes:
       - ./backend/logs:/app/logs
@@ -97,7 +73,8 @@ services:
       dockerfile: Dockerfile
     container_name: greenhouse-frontend
     environment:
-      - DISPLAY=${DISPLAY:-:0}
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=${XAUTHORITY}
       - QT_X11_NO_MITSHM=1
       - ENVIRONMENT=production
       - BACKEND_URL=http://backend:3000
@@ -106,6 +83,7 @@ services:
       - ./.env
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${XAUTHORITY}:${XAUTHORITY}
       - ./frontend:/app
     networks:
       - greenhouse-network

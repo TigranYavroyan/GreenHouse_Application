@@ -70,6 +70,221 @@ class GreenhouseCoreClient {
     throw error;
   }
 
+  sensorUnitsByType(sensorType) {
+    const units = {
+      temperature: 'C',
+      humidity: '%',
+      light: 'lux',
+      co2: 'ppm',
+      soil_moisture: '%',
+      soil_ph: 'pH',
+    };
+    return units[sensorType] || '';
+  }
+
+  sensorTypeFromCommand(command, parameters = {}) {
+    const normalized = String(command || '').trim().toLowerCase();
+    if (normalized === 'read_sensor') {
+      return String(parameters.sensor || 'temperature').trim().toLowerCase() || 'temperature';
+    }
+    if (normalized.startsWith('read_') && normalized.endsWith('_data')) {
+      return normalized.slice(5, -5) || 'temperature';
+    }
+    return 'temperature';
+  }
+
+  sensorOutputKey(sensorType) {
+    const keys = {
+      temperature: 'temperature',
+      humidity: 'humidity',
+      light: 'light',
+      co2: 'co2',
+      soil_moisture: 'soilMoisture',
+      soil_ph: 'soilPH',
+    };
+    return keys[sensorType] || sensorType;
+  }
+
+  sensorGetterAliases(sensorType) {
+    const byType = {
+      temperature: ['temperature', 'temp', 'air_temp', 'temp1', 'inside_temp'],
+      humidity: ['humidity', 'hum', 'air_humidity'],
+      light: ['light', 'lux', 'luminosity'],
+      co2: ['co2', 'co2_ppm'],
+      soil_moisture: ['soil_moisture', 'soilMoisture', 'soil_moist', 'moisture'],
+      soil_ph: ['soil_ph', 'soilPH', 'ph', 'soilPh'],
+    };
+    return byType[sensorType] || [sensorType];
+  }
+
+  normalizeExecutorAlias(value) {
+    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  }
+
+  executorAliases(executorName) {
+    const original = String(executorName || '').trim();
+    const normalized = this.normalizeExecutorAlias(original);
+    return new Set([
+      original,
+      normalized,
+      normalized.replace(/_/g, ''),
+    ]);
+  }
+
+  resolveGetterValue(entry) {
+    if (!entry || typeof entry !== 'object') return null;
+    if (entry.data && typeof entry.data === 'object' && entry.data.value !== undefined) {
+      return entry.data.value;
+    }
+    if (entry.value !== undefined) return entry.value;
+    return null;
+  }
+
+  resolveGetterByAliases(getters, aliases = []) {
+    if (!getters || typeof getters !== 'object') {
+      return { key: '', entry: null };
+    }
+
+    const aliasSet = new Set(aliases.map((x) => String(x || '').trim().toLowerCase()).filter(Boolean));
+    const keys = Object.keys(getters);
+
+    for (const key of keys) {
+      if (aliasSet.has(String(key).toLowerCase())) {
+        return { key, entry: getters[key] };
+      }
+    }
+
+    const normalizedAliasSet = new Set(
+      [...aliasSet].map((x) => x.replace(/[^a-z0-9]+/g, '_'))
+    );
+
+    for (const key of keys) {
+      const normalizedKey = String(key).toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      if (normalizedAliasSet.has(normalizedKey)) {
+        return { key, entry: getters[key] };
+      }
+    }
+
+    return { key: '', entry: null };
+  }
+
+  resolveExecutorByAliases(executors, aliases = []) {
+    const list = Array.isArray(executors) ? executors : [];
+    if (!list.length) return null;
+
+    const aliasSet = new Set();
+    for (const alias of aliases) {
+      for (const token of this.executorAliases(alias)) {
+        aliasSet.add(token);
+      }
+    }
+
+    for (const executor of list) {
+      const name = String(executor?.name || '').trim();
+      if (!name) continue;
+      const tokens = this.executorAliases(name);
+      for (const token of tokens) {
+        if (aliasSet.has(token)) {
+          return executor;
+        }
+      }
+    }
+    return null;
+  }
+
+  async executeReadCommand(command, parameters = {}) {
+    const sensorType = this.sensorTypeFromCommand(command, parameters);
+    const outputKey = this.sensorOutputKey(sensorType);
+    const getters = await this.getGetters();
+    const { key, entry } = this.resolveGetterByAliases(getters, this.sensorGetterAliases(sensorType));
+    if (!entry) {
+      throw new Error(`Getter not found for sensor type: ${sensorType}`);
+    }
+
+    const value = this.resolveGetterValue(entry);
+    if (value === null || value === undefined) {
+      throw new Error(`Getter value is missing for key: ${key}`);
+    }
+
+    const stampMs = Number(entry?.stampMs || Date.now());
+    const timestamp = Number.isFinite(stampMs) ? new Date(stampMs).toISOString() : new Date().toISOString();
+    return {
+      [outputKey]: value,
+      unit: this.sensorUnitsByType(sensorType),
+      timestamp,
+      sensorId: key,
+    };
+  }
+
+  async executeSwitchCommand(command, parameters = {}) {
+    const executors = await this.getExecutors();
+    const defaultsByCommand = {
+      switch_fan: ['LOW_DCM_D_0', 'fan_1', 'fan', 'dcm_d_0'],
+      switch_heater: ['LOW_DCM_D_1', 'heater_1', 'heater', 'dcm_d_1'],
+      switch_actuator: ['LOW_DCM_D_2', 'actuator_1', 'actuator', 'dcm_d_2'],
+      switch_water_canal: ['LOW_DCM_D_3', 'water_canal_1', 'water_canal', 'dcm_d_3'],
+    };
+    const idAliasByCommand = {
+      switch_fan: String(parameters.fanId || '').trim(),
+      switch_heater: String(parameters.heaterId || '').trim(),
+      switch_actuator: String(parameters.actuatorId || '').trim(),
+      switch_water_canal: String(parameters.canalId || parameters.waterCanalId || '').trim(),
+    };
+
+    const aliases = [...(defaultsByCommand[command] || [])];
+    if (idAliasByCommand[command]) {
+      aliases.unshift(idAliasByCommand[command]);
+    }
+
+    const executor = this.resolveExecutorByAliases(executors, aliases);
+    if (!executor || !executor.name) {
+      throw new Error(`Executor not found for command: ${command}`);
+    }
+
+    const executorName = String(executor.name);
+    const currentMode = String(executor.mode || '').toUpperCase();
+    if (currentMode !== 'MANUAL') {
+      await this.setExecutorMode(executorName, 'manual');
+    }
+
+    const requestedAction = String(parameters.action || 'toggle').trim().toLowerCase();
+    let action = requestedAction;
+    if (requestedAction === 'toggle') {
+      const currentValue = Boolean(executor?.data?.value);
+      action = currentValue ? 'off' : 'on';
+    }
+
+    if (action === 'set') {
+      const setValue = parameters.value !== undefined ? parameters.value : 1;
+      await this.executorSet(executorName, setValue);
+      return {
+        actuatorId: executorName,
+        status: String(setValue),
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    if (action === 'on') {
+      await this.executorOn(executorName);
+      return {
+        actuatorId: executorName,
+        status: 'on',
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    if (action === 'off') {
+      await this.executorOff(executorName);
+      return {
+        actuatorId: executorName,
+        status: 'off',
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    throw new Error(`Unsupported switch action: ${requestedAction}`);
+  }
+
   async requestJson(path, options = {}) {
     const {
       method = 'GET',
@@ -252,51 +467,35 @@ class GreenhouseCoreClient {
           await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt)));
         }
 
-        const payload = {
-          command,
-          parameters,
-          commandId,
-          sessionId
-        };
-
-        // Log data being sent to core server
-        SystemLogger.info(`Sending command to greenhouse core server`, {
+        SystemLogger.info('Dispatching command via GreenHouse2 demo HTTP API', {
           commandId,
           sessionId,
           command,
           parameters,
           attempt: attempt + 1,
-          url: `${this.baseUrl}/api/v1/commands/execute`,
-          payload: JSON.stringify(payload)
+          baseUrl: this.baseUrl,
         });
 
-        const response = await this.requestJson('/api/v1/commands/execute', {
-          method: 'POST',
-          body: payload,
-          retries: 0
-        });
-
-        const result = response || {};
+        let data = null;
+        const normalizedCommand = String(command || '').trim().toLowerCase();
+        if (normalizedCommand === 'read_sensor' || normalizedCommand.startsWith('read_')) {
+          data = await this.executeReadCommand(normalizedCommand, parameters);
+        } else if (normalizedCommand.startsWith('switch_')) {
+          data = await this.executeSwitchCommand(normalizedCommand, parameters);
+        } else {
+          throw new Error(`Unsupported greenhouse command: ${command}`);
+        }
 
         // Log response received from core server
-        SystemLogger.info(`Received response from greenhouse core server`, {
+        SystemLogger.info('Received response from greenhouse core server', {
           commandId,
           sessionId,
           command,
           status: 200,
-          success: result.success,
-          hasError: !!result.error,
-          responseData: JSON.stringify(result)
+          success: true,
+          hasError: false,
+          responseData: JSON.stringify(data),
         });
-
-        // Check if the result indicates success
-        if (result.success === false) {
-          SystemLogger.warn(`Command ${command} failed in core server`, {
-            commandId,
-            error: result.error
-          });
-          throw new Error(result.error || 'Command execution failed');
-        }
 
         // Update connection status on success
         this.isConnected = true;
@@ -306,9 +505,9 @@ class GreenhouseCoreClient {
         // Return normalized result
         return {
           success: true,
-          data: result.result || result.data,
-          commandId: result.commandId || commandId,
-          timestamp: result.timestamp || new Date().toISOString()
+          data,
+          commandId: commandId || 'unknown',
+          timestamp: new Date().toISOString(),
         };
 
       } catch (error) {
