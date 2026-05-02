@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 from typing import Any, Dict, Optional
 
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import APIRouter, Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -363,6 +363,87 @@ class CoreSimulator:
         return payload
 
 
+def _truthy_env(name: str, default: bool = True) -> bool:
+    raw = os.getenv(name, "").strip().lower()
+    if raw == "":
+        return default
+    return raw in ("1", "true", "yes", "on")
+
+
+def build_core_router(sim: CoreSimulator, log: logging.Logger, *, commands_path: str) -> APIRouter:
+    """
+    Routes mirror ``backend/clients/greenhouseCoreClient.js`` paths (leading ``/``).
+
+    ``commands_path`` is ``/api/v1/commands/execute`` for the root mount, or
+    ``/commands/execute`` when the router is included with prefix ``/api/v1`` so the
+    final URL stays ``/api/v1/commands/execute``.
+    """
+    router = APIRouter()
+
+    @router.get("/status", tags=["core"])
+    def status() -> Dict[str, Any]:
+        return {"status": "ok"}
+
+    @router.get("/schema/getters", tags=["core"])
+    def getter_schema() -> Dict[str, str]:
+        return sim.getter_schema
+
+    @router.get("/schema/executors", tags=["core"])
+    def executor_schema() -> Dict[str, str]:
+        return sim.executor_schema
+
+    @router.get("/getters", tags=["core"])
+    def getters() -> Dict[str, Any]:
+        return sim.all_getters()
+
+    @router.get("/getters/{key}", tags=["core"])
+    def getter_by_key(key: str) -> Dict[str, Any]:
+        try:
+            return sim.one_getter(key)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail=f"Unknown getter key: {key}") from error
+
+    @router.get("/executors", tags=["core"])
+    def executors() -> Any:
+        return sim.all_executors()
+
+    @router.post("/api/executors/{name}/{action}", tags=["core"])
+    def executor_action(
+        name: str,
+        action: str,
+        payload: Optional[Dict[str, Any]] = Body(default=None),
+    ) -> Dict[str, Any]:
+        return sim.executor_action(name=name, action=action, body=payload)
+
+    @router.get("/api/json/logic/full", tags=["core"])
+    def logic_full() -> Dict[str, Any]:
+        return sim.get_logic_full()
+
+    @router.post("/api/json/logic/upload", tags=["core"])
+    def logic_upload(body: Dict[str, Any]) -> Dict[str, Any]:
+        return sim.upload_logic(body)
+
+    @router.post("/api/json/logic/reload", tags=["core"])
+    def logic_reload() -> Dict[str, Any]:
+        return sim.reload_logic()
+
+    @router.post(commands_path, tags=["core"])
+    def execute_command(payload: CommandRequest) -> Dict[str, Any]:
+        log.info(
+            "Command received: %s",
+            payload.command,
+            extra={
+                "commandId": payload.commandId,
+                "sessionId": payload.sessionId,
+                "command": payload.command,
+                "parameters": payload.parameters,
+            },
+        )
+        return sim.execute_command(payload)
+
+    return router
+
+
 logger = setup_logger()
 app = FastAPI(title="Greenhouse Core Simulator", version="1.0.0")
 sim = CoreSimulator(logger=logger)
@@ -396,74 +477,10 @@ def health() -> Dict[str, Any]:
     }
 
 
-@app.get("/status")
-def status() -> Dict[str, Any]:
-    return {"status": "ok"}
-
-
-@app.get("/schema/getters")
-def getter_schema() -> Dict[str, str]:
-    return sim.getter_schema
-
-
-@app.get("/schema/executors")
-def executor_schema() -> Dict[str, str]:
-    return sim.executor_schema
-
-
-@app.get("/getters")
-def getters() -> Dict[str, Any]:
-    return sim.all_getters()
-
-
-@app.get("/getters/{key}")
-def getter_by_key(key: str) -> Dict[str, Any]:
-    try:
-        return sim.one_getter(key)
-    except KeyError as error:
-        raise HTTPException(status_code=404, detail=f"Unknown getter key: {key}") from error
-
-
-@app.get("/executors")
-def executors() -> Any:
-    return sim.all_executors()
-
-
-@app.post("/api/executors/{name}/{action}")
-def executor_action(
-    name: str,
-    action: str,
-    payload: Optional[Dict[str, Any]] = Body(default=None),
-) -> Dict[str, Any]:
-    return sim.executor_action(name=name, action=action, body=payload)
-
-
-@app.get("/api/json/logic/full")
-def logic_full() -> Dict[str, Any]:
-    return sim.get_logic_full()
-
-
-@app.post("/api/json/logic/upload")
-def logic_upload(body: Dict[str, Any]) -> Dict[str, Any]:
-    return sim.upload_logic(body)
-
-
-@app.post("/api/json/logic/reload")
-def logic_reload() -> Dict[str, Any]:
-    return sim.reload_logic()
-
-
-@app.post("/api/v1/commands/execute")
-def execute_command(payload: CommandRequest) -> Dict[str, Any]:
-    logger.info(
-        "Command received: %s",
-        payload.command,
-        extra={
-            "commandId": payload.commandId,
-            "sessionId": payload.sessionId,
-            "command": payload.command,
-            "parameters": payload.parameters,
-        },
+# Same contract as greenhouseCoreClient + optional /api/v1 mirror for GREENHOUSE_CORE_URL ending in /api/v1
+app.include_router(build_core_router(sim, logger, commands_path="/api/v1/commands/execute"))
+if _truthy_env("CORE_DUPLICATE_ROUTES_UNDER_API_V1", True):
+    app.include_router(
+        build_core_router(sim, logger, commands_path="/commands/execute"),
+        prefix="/api/v1",
     )
-    response = sim.execute_command(payload)
-    return response

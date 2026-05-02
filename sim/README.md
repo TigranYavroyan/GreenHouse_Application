@@ -22,6 +22,8 @@ docker compose up -d greenhouse-core-sim
 
 ## Contract Endpoints
 
+These paths match `backend/clients/greenhouseCoreClient.js` (what the Node backend calls on `GREENHOUSE_CORE_URL`):
+
 - `GET /status`
 - `GET /schema/getters`
 - `GET /schema/executors`
@@ -29,7 +31,16 @@ docker compose up -d greenhouse-core-sim
 - `GET /getters/{key}`
 - `GET /executors`
 - `POST /api/executors/{name}/{action}` where action is `mode|on|off|set`
-- `POST /api/v1/commands/execute`
+- `GET /api/json/logic/full`
+- `POST /api/json/logic/upload`
+- `POST /api/json/logic/reload`
+- `POST /api/v1/commands/execute` (direct HTTP command channel; backend normally uses getters/executors instead)
+
+If `GREENHOUSE_CORE_URL` includes an `/api/v1` base (e.g. `http://core:3001/api/v1`), the same routes are also mounted under that prefix (so `GET /api/v1/status` + `GET /status` both work). Disable the duplicate tree with:
+
+```bash
+CORE_DUPLICATE_ROUTES_UNDER_API_V1=false
+```
 
 Health aliases:
 
