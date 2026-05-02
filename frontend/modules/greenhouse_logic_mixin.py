@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from PyQt5.QtCore import Qt, QMimeData
-from PyQt5.QtGui import QDrag
+from PyQt5.QtCore import QPointF, Qt, QMimeData
+from PyQt5.QtGui import QDrag, QKeySequence
 from PyQt5.QtWidgets import (
     QDialog,
     QFormLayout,
@@ -17,11 +18,14 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QPlainTextEdit,
     QScrollArea,
+    QShortcut,
+    QUndoStack,
     QVBoxLayout,
     QWidget,
 )
 
 from modules.logic_canvas_adapter import LogicCanvasAdapter
+from modules.logic_undo import LogicSnapshot, LogicSnapshotCommand
 from modules.logic_constants import (
     CONDITION_SPECS,
     NODE_KIND_ACTION,
@@ -38,6 +42,11 @@ from modules.logic_graph_mapper import build_document
 from modules.logic_serializer import normalize_existing_logic_payload, to_core_logic_payload
 from modules.logic_validator import validate_logic_document
 from modules.localization import tr_key
+from modules.qt_thread_tasks import (
+    dispatch_thread_failure_to_ui,
+    run_thread_task,
+    unauthorized_message_from_thread_failure,
+)
 from modules.localization.localization_keys import (
     Dialogs,
     Logic,
@@ -82,16 +91,29 @@ class GreenhouseLogicMixin:
     def setup_logic_tab(self):
         self._wrap_logic_tab_in_scroll_area()
 
+        self._logic_undo_stack = QUndoStack(self)
+        self._logic_undo_stack.setUndoLimit(50)
+        self._logic_undo_restoring = False
+        self._logic_drag_before: Optional[LogicSnapshot] = None
+
         self.logic_canvas_adapter = LogicCanvasAdapter()
         self.logic_node_metadata: Dict[str, Dict] = {}
         self.logic_selected_node_id: Optional[str] = None
         self._logic_bulk_loading = False
+        self._logic_io_request_gen = 0
+
+        self.logic_canvas_adapter.view.add_node_at_cb = self._logic_drop_add_node_at
+        self.logic_canvas_adapter.set_drag_undo_callbacks(
+            self._logic_drag_undo_press,
+            self._logic_drag_undo_release,
+        )
 
         self._setup_logic_palette()
         self._setup_logic_property_controls()
         self._embed_logic_canvas_widget()
         self._bind_logic_buttons()
         self._seed_logic_validation_panel()
+        self._setup_logic_undo_shortcuts()
 
         self.logic_canvas_adapter.set_selection_changed_callback(self._on_logic_selection_changed)
         self.logic_canvas_adapter.set_graph_changed_callback(self._on_logic_graph_changed)
@@ -179,7 +201,73 @@ class GreenhouseLogicMixin:
         outer_layout.addWidget(scroll_area)
 
         self.logicTabScrollArea = scroll_area
+        self._logic_tab_content_widget = content
         self._logic_tab_scroll_wrapped = True
+
+    def _setup_logic_undo_shortcuts(self) -> None:
+        parent = getattr(self, "_logic_tab_content_widget", None) or self
+        undo_sc = QShortcut(QKeySequence.Undo, parent)
+        undo_sc.setContext(Qt.WidgetWithChildrenShortcut)
+        undo_sc.activated.connect(self._logic_undo_stack.undo)
+        redo_y = QShortcut(QKeySequence("Ctrl+Y"), parent)
+        redo_y.setContext(Qt.WidgetWithChildrenShortcut)
+        redo_y.activated.connect(self._logic_undo_stack.redo)
+        redo_shift_z = QShortcut(QKeySequence.Redo, parent)
+        redo_shift_z.setContext(Qt.WidgetWithChildrenShortcut)
+        redo_shift_z.activated.connect(self._logic_undo_stack.redo)
+
+    def _capture_logic_snapshot(self) -> LogicSnapshot:
+        return LogicSnapshot(
+            nodes=list(self.logic_canvas_adapter.node_snapshot()),
+            edges=list(self.logic_canvas_adapter.edge_snapshot()),
+            metadata=copy.deepcopy(self.logic_node_metadata),
+            selected_ids=tuple(self.logic_canvas_adapter.selected_node_ids()),
+        )
+
+    def _push_logic_undo_if_needed(self, before: LogicSnapshot, after: LogicSnapshot) -> None:
+        if self._logic_undo_restoring or self._logic_bulk_loading:
+            return
+        if before.equivalent(after):
+            return
+        self._logic_undo_stack.push(LogicSnapshotCommand(self, before, after))
+
+    def _restore_logic_snapshot(self, snap: LogicSnapshot) -> None:
+        self._logic_undo_restoring = True
+        self._logic_bulk_loading = True
+        try:
+            self.logic_canvas_adapter.restore_from_snapshots(
+                list(snap.nodes), list(snap.edges), notify=False
+            )
+            self.logic_node_metadata = copy.deepcopy(snap.metadata)
+        finally:
+            self._logic_bulk_loading = False
+            self._logic_undo_restoring = False
+        self.logic_canvas_adapter.set_selected_node_ids(list(snap.selected_ids))
+        selected = self.logic_canvas_adapter.selected_node_ids()
+        self._on_logic_selection_changed(selected[0] if selected else None)
+        self._on_logic_graph_changed()
+
+    def _logic_drop_add_node_at(self, kind: str, pos: QPointF) -> Optional[str]:
+        before = self._capture_logic_snapshot()
+        node_id = self.logic_canvas_adapter.add_node(kind=kind, x=pos.x(), y=pos.y())
+        after = self._capture_logic_snapshot()
+        self._push_logic_undo_if_needed(before, after)
+        return node_id
+
+    def _logic_drag_undo_press(self) -> None:
+        if self._logic_undo_restoring or self._logic_bulk_loading:
+            return
+        self._logic_drag_before = self._capture_logic_snapshot()
+
+    def _logic_drag_undo_release(self) -> None:
+        if self._logic_undo_restoring or self._logic_bulk_loading:
+            return
+        before = self._logic_drag_before
+        self._logic_drag_before = None
+        if before is None:
+            return
+        after = self._capture_logic_snapshot()
+        self._push_logic_undo_if_needed(before, after)
 
     def _embed_logic_canvas_widget(self):
         if not hasattr(self, "logicCanvasContainerLayout"):
@@ -340,11 +428,14 @@ class GreenhouseLogicMixin:
             self.logicValidationList.addItem(tr_key(Logic.SEED_INFO))
 
     def _create_logic_node(self, kind: str):
+        before = self._capture_logic_snapshot()
         node_id = self.logic_canvas_adapter.add_node(kind=kind)
         if not node_id:
             return
         self.logic_node_metadata[node_id] = self._default_node_meta(kind)
         self._on_logic_graph_changed()
+        after = self._capture_logic_snapshot()
+        self._push_logic_undo_if_needed(before, after)
 
     def _default_node_meta(self, kind: str) -> Dict:
         if kind == NODE_KIND_ACTION:
@@ -362,12 +453,15 @@ class GreenhouseLogicMixin:
         return {"condition": "always", "args": []}
 
     def _delete_selected_logic_nodes(self):
+        before = self._capture_logic_snapshot()
         selected = self.logic_canvas_adapter.selected_node_ids()
         count = self.logic_canvas_adapter.delete_selected_nodes()
         for node_id in selected:
             self.logic_node_metadata.pop(node_id, None)
         self._set_logic_canvas_status(Logic.DELETED_COUNT, count=count)
         self._on_logic_graph_changed()
+        after = self._capture_logic_snapshot()
+        self._push_logic_undo_if_needed(before, after)
 
     def _connect_selected_logic_nodes(self):
         selected = self.logic_canvas_adapter.selected_node_ids()
@@ -375,11 +469,14 @@ class GreenhouseLogicMixin:
             self._set_logic_canvas_status(Logic.SELECT_TWO_NODES)
             return
         source_id, target_id = selected[0], selected[1]
+        before = self._capture_logic_snapshot()
         ok, message = self._connect_with_rules(source_id, target_id)
         if not ok:
             self._set_logic_canvas_status(message)
         if ok:
             self._on_logic_graph_changed()
+            after = self._capture_logic_snapshot()
+            self._push_logic_undo_if_needed(before, after)
 
     def _connect_with_rules(self, source_id: str, target_id: str):
         source = self.logic_canvas_adapter.nodes.get(source_id)
@@ -436,6 +533,7 @@ class GreenhouseLogicMixin:
         if not node:
             return
 
+        before = self._capture_logic_snapshot()
         title = self.logicPropertyTitleEdit.text().strip() or node.title
         args = self._collect_condition_args_from_editor()
         if not args and self.logicPropertyArgsEdit.text().strip():
@@ -454,6 +552,8 @@ class GreenhouseLogicMixin:
         self.logic_canvas_adapter.update_node(node_id=node_id, title=title)
         self._set_logic_canvas_status(Logic.UPDATED_NODE, title=title)
         self._on_logic_graph_changed()
+        after = self._capture_logic_snapshot()
+        self._push_logic_undo_if_needed(before, after)
 
     def _on_logic_graph_changed(self):
         if self._logic_bulk_loading:
@@ -551,6 +651,8 @@ class GreenhouseLogicMixin:
         if not isinstance(root, dict):
             raise ValueError("Payload root must be object.")
 
+        self._logic_undo_stack.clear()
+        self._logic_drag_before = None
         self._logic_bulk_loading = True
         try:
             self.logic_canvas_adapter.clear()
@@ -633,21 +735,42 @@ class GreenhouseLogicMixin:
 
     def load_logic_from_core(self, show_preview: bool = True):
         """Fetch current logic config from core API and render into canvas."""
-        try:
-            raw_payload = self.core_api.get_logic_full()
-            normalized_payload = normalize_existing_logic_payload(raw_payload)
-            payload_text = json.dumps(normalized_payload, indent=2, ensure_ascii=True)
+        self._logic_io_request_gen += 1
+        io_gen = self._logic_io_request_gen
 
-            out_path = Path(__file__).resolve().parents[1] / "generated_logic_from_core_preview.json"
-            out_path.write_text(payload_text + "\n", encoding="utf-8")
+        def fetch():
+            return self.core_api.get_logic_full()
 
-            self._build_graph_from_payload(normalized_payload)
+        def on_ok(raw_payload):
+            if io_gen != self._logic_io_request_gen:
+                return
+            try:
+                normalized_payload = normalize_existing_logic_payload(raw_payload)
+                payload_text = json.dumps(normalized_payload, indent=2, ensure_ascii=True)
 
-            if show_preview:
-                self._show_json_dialog(tr_key(Dialogs.CONFIG_PREVIEW_TITLE), payload_text)
-            self._set_logic_canvas_status(Logic.LOAD_CONFIG_DONE)
-        except Exception as exc:
-            self._set_logic_canvas_status(Logic.LOAD_CONFIG_FAILED, error=str(exc))
+                out_path = Path(__file__).resolve().parents[1] / "generated_logic_from_core_preview.json"
+                out_path.write_text(payload_text + "\n", encoding="utf-8")
+
+                self._build_graph_from_payload(normalized_payload)
+
+                if show_preview:
+                    self._show_json_dialog(tr_key(Dialogs.CONFIG_PREVIEW_TITLE), payload_text)
+                self._set_logic_canvas_status(Logic.LOAD_CONFIG_DONE)
+            except Exception as exc:
+                self._set_logic_canvas_status(Logic.LOAD_CONFIG_FAILED, error=str(exc))
+
+        def on_err(message: str):
+            if io_gen != self._logic_io_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Logic load"):
+                self._set_logic_canvas_status(
+                    Logic.LOAD_CONFIG_FAILED,
+                    error=unauthorized_message_from_thread_failure(message),
+                )
+                return
+            self._set_logic_canvas_status(Logic.LOAD_CONFIG_FAILED, error=message)
+
+        run_thread_task(self, fetch, on_ok, on_err, thread_name="logic-load-full")
 
     def upload_logic_to_core(self):
         """Validate current block-scheme and upload resulting JSON to core API."""
@@ -662,16 +785,66 @@ class GreenhouseLogicMixin:
                 return
 
             payload = to_core_logic_payload(document)
-            self.core_api.upload_logic(payload)
-            self._set_logic_canvas_status(Logic.UPLOAD_DONE)
         except Exception as exc:
             self._set_logic_canvas_status(Logic.UPLOAD_FAILED, error=str(exc))
+            return
+
+        self._logic_io_request_gen += 1
+        io_gen = self._logic_io_request_gen
+
+        def push():
+            self.core_api.upload_logic(payload)
+            return None
+
+        def on_ok(_result):
+            if io_gen != self._logic_io_request_gen:
+                return
+            self._set_logic_canvas_status(Logic.UPLOAD_DONE)
+
+        def on_err(message: str):
+            if io_gen != self._logic_io_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Logic upload"):
+                self._set_logic_canvas_status(
+                    Logic.UPLOAD_FAILED,
+                    error=unauthorized_message_from_thread_failure(message),
+                )
+                return
+            self._set_logic_canvas_status(Logic.UPLOAD_FAILED, error=message)
+
+        run_thread_task(self, push, on_ok, on_err, thread_name="logic-upload")
 
     def reload_logic_from_core(self):
         """Trigger core logic reload and refresh canvas from current core config."""
-        try:
+        self._logic_io_request_gen += 1
+        io_gen = self._logic_io_request_gen
+
+        def reload_and_fetch():
             self.core_api.reload_logic()
-            self.load_logic_from_core(show_preview=False)
-            self._set_logic_canvas_status(Logic.RELOAD_DONE)
-        except Exception as exc:
-            self._set_logic_canvas_status(Logic.RELOAD_FAILED, error=str(exc))
+            return self.core_api.get_logic_full()
+
+        def on_ok(raw_payload):
+            if io_gen != self._logic_io_request_gen:
+                return
+            try:
+                normalized_payload = normalize_existing_logic_payload(raw_payload)
+                payload_text = json.dumps(normalized_payload, indent=2, ensure_ascii=True)
+                out_path = Path(__file__).resolve().parents[1] / "generated_logic_from_core_preview.json"
+                out_path.write_text(payload_text + "\n", encoding="utf-8")
+                self._build_graph_from_payload(normalized_payload)
+                self._set_logic_canvas_status(Logic.RELOAD_DONE)
+            except Exception as exc:
+                self._set_logic_canvas_status(Logic.RELOAD_FAILED, error=str(exc))
+
+        def on_err(message: str):
+            if io_gen != self._logic_io_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Logic reload"):
+                self._set_logic_canvas_status(
+                    Logic.RELOAD_FAILED,
+                    error=unauthorized_message_from_thread_failure(message),
+                )
+                return
+            self._set_logic_canvas_status(Logic.RELOAD_FAILED, error=message)
+
+        run_thread_task(self, reload_and_fetch, on_ok, on_err, thread_name="logic-reload")

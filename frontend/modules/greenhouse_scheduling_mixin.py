@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from PyQt5.QtCore import QTimer
 
-from modules.core_api_client import UnauthorizedError
+from modules.qt_thread_tasks import dispatch_thread_failure_to_ui, run_thread_task
 from modules.ui_dialogs import StyledMessageDialog
 from modules.localization import tr_key
 from modules.localization.localization_keys import (
@@ -33,6 +33,12 @@ class GreenhouseSchedulingMixin:
         if not hasattr(self, "scheduleTargetCombo") or not hasattr(self, "scheduleDelayPresetCombo"):
             self.logger.warning("Scheduling controls not present in UI")
             return
+
+        self._schedule_targets_request_gen = 0
+        self._schedule_table_request_gen = 0
+        self._schedule_mutate_in_flight = False
+        self._schedule_cancel_in_flight = False
+        self._schedule_bulk_in_flight = False
 
         self._refresh_schedule_targets()
 
@@ -68,26 +74,11 @@ class GreenhouseSchedulingMixin:
         """Refresh delay preset visible labels (called by retranslate_ui)."""
         self._populate_schedule_delay_presets()
 
-    def _refresh_schedule_targets(self):
-        """
-        Keep scheduling targets aligned with currently available executors/devices.
-        Only device control actions are schedulable from this tab.
-        """
-        if not hasattr(self, "scheduleTargetCombo") or not hasattr(self, "core_api"):
-            return
-
-        try:
-            executors = self.core_api.get_executors()
-        except Exception as error:
-            if isinstance(error, UnauthorizedError):
-                self.handle_unauthorized_error(str(error))
-                return
-            self.logger.warning(f"Failed to refresh schedule targets: {error}")
-            executors = []
-
+    def _build_schedule_target_entries(self, executors):
+        """Build combo entries from executor snapshots (any thread)."""
         options = []
         seen = set()
-        for executor in executors:
+        for executor in executors or []:
             name = str(getattr(executor, "name", "")).strip()
             if not name:
                 continue
@@ -95,7 +86,6 @@ class GreenhouseSchedulingMixin:
             lowered = name.lower()
             command = None
             parameters = {"action": "toggle"}
-            label_prefix = None
 
             icon_prefix = ""
             if "water" in lowered and "canal" in lowered:
@@ -149,7 +139,11 @@ class GreenhouseSchedulingMixin:
                     "switch_actuator:actuator_1",
                 ),
             ]
+        return options
 
+    def _apply_schedule_target_entries(self, executors):
+        """Populate target combo from executor list (main thread)."""
+        options = self._build_schedule_target_entries(executors)
         new_keys = [item[2] for item in options]
         if new_keys == self.schedule_target_keys:
             return
@@ -161,6 +155,41 @@ class GreenhouseSchedulingMixin:
 
         if not options:
             self.scheduleTargetCombo.addItem(tr_key(Schedule.NO_DEVICES), None)
+
+    def _refresh_schedule_targets(self):
+        """
+        Keep scheduling targets aligned with currently available executors/devices.
+        Only device control actions are schedulable from this tab.
+        """
+        if not hasattr(self, "scheduleTargetCombo") or not hasattr(self, "core_api"):
+            return
+
+        self._schedule_targets_request_gen += 1
+        request_gen = self._schedule_targets_request_gen
+
+        def work():
+            return self.core_api.get_executors()
+
+        def on_ok(executors):
+            if request_gen != self._schedule_targets_request_gen:
+                return
+            if not isinstance(executors, list):
+                executors = []
+            try:
+                self._apply_schedule_target_entries(executors)
+            except Exception as error:
+                self.logger.warning("Failed to apply schedule targets: %s", error)
+                self._apply_schedule_target_entries([])
+
+        def on_err(message: str):
+            if request_gen != self._schedule_targets_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Schedule targets"):
+                return
+            self.logger.warning("Failed to refresh schedule targets: %s", message)
+            self._apply_schedule_target_entries([])
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="schedule-targets")
 
     def update_schedule_live_time(self):
         """Update live time UI elements in scheduling tab."""
@@ -285,13 +314,13 @@ class GreenhouseSchedulingMixin:
             f"{run_at_local.month} *"
         )
 
-    def _get_or_resolve_schedule_device_id(self, preferred_name="Scheduled Device"):
+    def _core_resolve_schedule_device_id(self, preferred_name, cached_device_id):
+        """Resolve or create scheduling device id using HTTP only (worker thread)."""
         if not hasattr(self, "core_api"):
             return None
 
         devices = self.core_api.list_devices()
         if not devices:
-            # Scheduling requires a backend device record; auto-create one if absent.
             created_device = self.core_api.create_device(
                 name=preferred_name,
                 metadata={"createdFrom": "frontend-scheduling-tab"},
@@ -303,11 +332,7 @@ class GreenhouseSchedulingMixin:
                     nested = created_device.get("data")
                     if isinstance(nested, dict):
                         created_id = str(nested.get("id", "")).strip()
-            if created_id:
-                self.schedule_device_id = created_id
-                return self.schedule_device_id
-            self.schedule_device_id = None
-            return None
+            return created_id or None
 
         device_ids = []
         for device in devices:
@@ -319,15 +344,13 @@ class GreenhouseSchedulingMixin:
             device_ids.append(str(candidate))
 
         if not device_ids:
-            self.schedule_device_id = None
             return None
 
-        # Keep cached device only while it's still present for this user.
-        if self.schedule_device_id and self.schedule_device_id in device_ids:
-            return self.schedule_device_id
+        cached = str(cached_device_id or "").strip()
+        if cached and cached in device_ids:
+            return cached
 
-        self.schedule_device_id = device_ids[0]
-        return self.schedule_device_id
+        return device_ids[0]
 
     def schedule_selected_task(self):
         """Create one-time backend-persisted schedule for the selected action."""
@@ -357,22 +380,24 @@ class GreenhouseSchedulingMixin:
             )
             return
 
-        try:
-            device_id = self._get_or_resolve_schedule_device_id(preferred_name=target_label)
+        if self._schedule_mutate_in_flight:
+            return
+        self._schedule_mutate_in_flight = True
+
+        cached_device_id = self.schedule_device_id
+        session_id = self.session_id
+
+        def work():
+            device_id = self._core_resolve_schedule_device_id(target_label, cached_device_id)
             if not device_id:
-                self.show_error(
-                    tr_key(Dialogs.SCHEDULING_ERROR_TITLE),
-                    tr_key(Dialogs.SCHEDULING_ERROR_NO_DEVICE),
-                )
-                return
+                return {"ok": False, "reason": "no_device"}
 
             run_at_local = datetime.now().astimezone() + timedelta(seconds=interval_seconds)
             cron_expression = self._build_one_time_cron_expression(run_at_local)
-            now_text = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             schedule_name = f"{target_label} at {run_at_local.strftime('%Y-%m-%d %H:%M:%S')}"[:120]
             payload = dict(parameters) if isinstance(parameters, dict) else {}
             metadata = {
-                "sessionId": self.session_id,
+                "sessionId": session_id,
                 "createdFrom": "frontend-scheduling-tab",
                 "intervalSeconds": interval_seconds,
                 "runAt": run_at_local.isoformat(),
@@ -399,17 +424,42 @@ class GreenhouseSchedulingMixin:
                     if isinstance(nested, dict):
                         schedule_id = str(nested.get("id", "")).strip()[:8]
             schedule_label = schedule_id or "created"
+            return {
+                "ok": True,
+                "device_id": device_id,
+                "schedule_label": schedule_label,
+                "target_label": target_label,
+            }
+
+        def on_ok(result):
+            self._schedule_mutate_in_flight = False
+            if not isinstance(result, dict) or not result.get("ok"):
+                if isinstance(result, dict) and result.get("reason") == "no_device":
+                    self.show_error(
+                        tr_key(Dialogs.SCHEDULING_ERROR_TITLE),
+                        tr_key(Dialogs.SCHEDULING_ERROR_NO_DEVICE),
+                    )
+                return
+            self.schedule_device_id = result.get("device_id")
+            schedule_label = result.get("schedule_label", "created")
+            target_lbl = result.get("target_label", "")
             if hasattr(self, "set_status_state") and callable(self.set_status_state):
                 self.set_status_state(
-                    Status.SCHEDULE_CREATED, label=schedule_label, target=target_label
+                    Status.SCHEDULE_CREATED, label=schedule_label, target=target_lbl
                 )
             else:
                 self.status_label.setText(
-                    tr_key(Status.SCHEDULE_CREATED, label=schedule_label, target=target_label)
+                    tr_key(Status.SCHEDULE_CREATED, label=schedule_label, target=target_lbl)
                 )
             self.refresh_schedule_table()
-        except Exception as error:
-            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), error)
+
+        def on_err(message: str):
+            self._schedule_mutate_in_flight = False
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Schedule create"):
+                return
+            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="schedule-create")
 
     def _get_selected_schedule_id(self):
         if not self.schedule_table:
@@ -445,26 +495,39 @@ class GreenhouseSchedulingMixin:
             )
             return
 
-        try:
-            schedule = self._get_schedule_by_id(schedule_id) or {}
-            metadata = dict(schedule.get("metadata") or {})
-            metadata["scheduleStatus"] = "canceled"
-            metadata["canceledAt"] = datetime.now(timezone.utc).isoformat()
-            self.core_api.update_schedule(
-                schedule_id,
-                {
-                    "enabled": False,
-                    "metadata": metadata,
-                },
-            )
+        schedule = self._get_schedule_by_id(schedule_id) or {}
+        metadata = dict(schedule.get("metadata") or {})
+        metadata["scheduleStatus"] = "canceled"
+        metadata["canceledAt"] = datetime.now(timezone.utc).isoformat()
+        body = {
+            "enabled": False,
+            "metadata": metadata,
+        }
+        short_id = str(schedule_id)[:8]
+
+        if self._schedule_cancel_in_flight:
+            return
+        self._schedule_cancel_in_flight = True
+
+        def work():
+            self.core_api.update_schedule(schedule_id, body)
+            return None
+
+        def on_ok(_result):
+            self._schedule_cancel_in_flight = False
             self.refresh_schedule_table()
-            short_id = str(schedule_id)[:8]
             if hasattr(self, "set_status_state") and callable(self.set_status_state):
                 self.set_status_state(Status.SCHEDULE_CANCELED, id=short_id)
             else:
                 self.status_label.setText(tr_key(Status.SCHEDULE_CANCELED, id=short_id))
-        except Exception as error:
-            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), error)
+
+        def on_err(message: str):
+            self._schedule_cancel_in_flight = False
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Schedule cancel"):
+                return
+            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="schedule-cancel")
 
     def clear_all_schedules(self):
         """Cancel all pending schedules visible to current user context."""
@@ -485,11 +548,15 @@ class GreenhouseSchedulingMixin:
         if not confirmation:
             return
 
-        try:
+        if self._schedule_bulk_in_flight:
+            return
+        self._schedule_bulk_in_flight = True
+
+        def work():
             schedules = self.core_api.list_schedules()
             schedule_ids = []
             schedule_map = {}
-            for schedule in schedules:
+            for schedule in schedules if isinstance(schedules, list) else []:
                 if not isinstance(schedule, dict):
                     continue
                 sid = str(schedule.get("id", "")).strip()
@@ -503,22 +570,18 @@ class GreenhouseSchedulingMixin:
                     schedule_map[sid] = schedule
 
             if not schedule_ids:
-                if hasattr(self, "set_status_state") and callable(self.set_status_state):
-                    self.set_status_state(Status.NO_PENDING_TO_CANCEL)
-                else:
-                    self.status_label.setText(tr_key(Status.NO_PENDING_TO_CANCEL))
-                return
+                return {"empty": True, "canceled": 0, "errors": []}
 
             canceled = 0
             errors = []
-            for schedule_id in schedule_ids:
+            for sid in schedule_ids:
                 try:
-                    schedule = schedule_map.get(schedule_id) or {}
+                    schedule = schedule_map.get(sid) or {}
                     metadata = dict(schedule.get("metadata") or {})
                     metadata["scheduleStatus"] = "canceled"
                     metadata["canceledAt"] = datetime.now(timezone.utc).isoformat()
                     self.core_api.update_schedule(
-                        schedule_id,
+                        sid,
                         {
                             "enabled": False,
                             "metadata": metadata,
@@ -526,11 +589,24 @@ class GreenhouseSchedulingMixin:
                     )
                     canceled += 1
                 except Exception as error:
-                    errors.append(f"{schedule_id[:8]}: {error}")
+                    errors.append(f"{sid[:8]}: {error}")
+            return {"empty": False, "canceled": canceled, "errors": errors}
 
+        def on_ok(result):
+            self._schedule_bulk_in_flight = False
+            if not isinstance(result, dict):
+                return
+            if result.get("empty"):
+                if hasattr(self, "set_status_state") and callable(self.set_status_state):
+                    self.set_status_state(Status.NO_PENDING_TO_CANCEL)
+                else:
+                    self.status_label.setText(tr_key(Status.NO_PENDING_TO_CANCEL))
+                return
+            errors = result.get("errors") or []
+            canceled = int(result.get("canceled") or 0)
             self.refresh_schedule_table()
             if errors:
-                summary = "\n".join(errors[:5])
+                summary = "\n".join(str(e) for e in errors[:5])
                 self.show_error(
                     tr_key(Dialogs.SCHEDULE_PARTIAL_FAIL_TITLE),
                     tr_key(
@@ -544,30 +620,45 @@ class GreenhouseSchedulingMixin:
                     self.set_status_state(Status.BULK_CANCELED, count=canceled)
                 else:
                     self.status_label.setText(tr_key(Status.BULK_CANCELED, count=canceled))
-        except Exception as error:
-            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), error)
+
+        def on_err(message: str):
+            self._schedule_bulk_in_flight = False
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Schedule bulk cancel"):
+                return
+            self._handle_api_exception(tr_key(Dialogs.SCHEDULING_ERROR_TITLE), RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="schedule-bulk-cancel")
 
     def refresh_schedule_table(self):
         """Render backend schedules into the schedule table."""
         if not self.schedule_table or not hasattr(self, "core_api"):
             return
 
+        self._schedule_table_request_gen += 1
+        table_gen = self._schedule_table_request_gen
+
         selected_row = self.schedule_table.table.currentRow()
         selected_schedule_id = None
         if 0 <= selected_row < len(self.schedule_table_rows):
             selected_schedule_id = self.schedule_table_rows[selected_row]
 
-        try:
-            schedules = self.core_api.list_schedules()
-        except Exception as error:
-            if isinstance(error, UnauthorizedError):
-                self.handle_unauthorized_error(str(error))
-                return
-            self.logger.error(f"Failed to refresh schedules: {error}")
-            return
+        def work():
+            return self.core_api.list_schedules()
 
-        self.schedule_rows = schedules
-        self._render_schedule_rows(preferred_selected_id=selected_schedule_id)
+        def on_ok(schedules):
+            if table_gen != self._schedule_table_request_gen:
+                return
+            self.schedule_rows = schedules if isinstance(schedules, list) else []
+            self._render_schedule_rows(preferred_selected_id=selected_schedule_id)
+
+        def on_err(message: str):
+            if table_gen != self._schedule_table_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Schedule list"):
+                return
+            self.logger.error("Failed to refresh schedules: %s", message)
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="schedule-list")
 
     def _render_schedule_rows(self, preferred_selected_id=None):
         """Render cached schedules into the user-friendly one-time schedule table."""

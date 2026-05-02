@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -56,10 +56,24 @@ class CommandRequest(BaseModel):
     sessionId: str
 
 
+def default_logic_document() -> Dict[str, Any]:
+    """Minimal tree matching frontend `normalize_existing_logic_payload` / upload shape."""
+    return {
+        "root": {
+            "title": "root",
+            "condition": "always",
+            "args": [],
+            "actions": [],
+            "children": [],
+        }
+    }
+
+
 class CoreSimulator:
     def __init__(self, logger: logging.Logger):
         self.logger = logger
         self.rng = random.Random(42)
+        self._logic_document: Dict[str, Any] = deepcopy(default_logic_document())
 
         self.getter_schema = {
             "air_temp": "float",
@@ -230,6 +244,23 @@ class CoreSimulator:
 
         raise HTTPException(status_code=400, detail=f"Unsupported executor action: {action}")
 
+    def get_logic_full(self) -> Dict[str, Any]:
+        return deepcopy(self._logic_document)
+
+    def upload_logic(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        if not isinstance(payload, dict):
+            raise HTTPException(status_code=400, detail="Logic upload body must be a JSON object")
+        root = payload.get("root")
+        if not isinstance(root, dict):
+            raise HTTPException(status_code=400, detail='Logic payload must contain an object "root"')
+        self._logic_document = deepcopy(payload)
+        self.logger.info("Logic configuration uploaded (root title=%s)", root.get("title", ""))
+        return {"ok": True}
+
+    def reload_logic(self) -> Dict[str, Any]:
+        self.logger.info("Logic reload requested (simulator uses in-memory config)")
+        return {"ok": True, "reloadedAt": now_iso()}
+
     def execute_command(self, payload: CommandRequest) -> Dict[str, Any]:
         command = payload.command
         params = payload.parameters or {}
@@ -399,8 +430,27 @@ def executors() -> Any:
 
 
 @app.post("/api/executors/{name}/{action}")
-def executor_action(name: str, action: str, body: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    return sim.executor_action(name=name, action=action, body=body)
+def executor_action(
+    name: str,
+    action: str,
+    payload: Optional[Dict[str, Any]] = Body(default=None),
+) -> Dict[str, Any]:
+    return sim.executor_action(name=name, action=action, body=payload)
+
+
+@app.get("/api/json/logic/full")
+def logic_full() -> Dict[str, Any]:
+    return sim.get_logic_full()
+
+
+@app.post("/api/json/logic/upload")
+def logic_upload(body: Dict[str, Any]) -> Dict[str, Any]:
+    return sim.upload_logic(body)
+
+
+@app.post("/api/json/logic/reload")
+def logic_reload() -> Dict[str, Any]:
+    return sim.reload_logic()
 
 
 @app.post("/api/v1/commands/execute")

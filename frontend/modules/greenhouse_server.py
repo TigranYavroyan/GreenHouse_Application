@@ -2,7 +2,7 @@ import threading
 from typing import Any, Dict, List, Optional
 from copy import deepcopy
 
-from PyQt5.QtCore import QDateTime, QObject, pyqtSignal
+from PyQt5.QtCore import QDateTime, QEventLoop, QObject, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 from modules.table_widget import SimpleDataTable
@@ -18,11 +18,14 @@ from modules.localization.localization_keys import (
     Status,
     Tables,
 )
+from modules.qt_thread_tasks import dispatch_thread_failure_to_ui, run_thread_task
 
 
 class _CoreSnapshotSignalBridge(QObject):
-    snapshot_ready = pyqtSignal(dict)
-    snapshot_error = pyqtSignal(str)
+    """Payload is ``(request_generation: int, data)`` so stale snapshot work is ignored."""
+
+    snapshot_ready = pyqtSignal(object)
+    snapshot_error = pyqtSignal(object)
 
 
 class ServerPanelMixin:
@@ -49,7 +52,7 @@ class ServerPanelMixin:
         self.core_executor_schema: Dict[str, str] = {}
         self.core_getters: List[GetterSnapshotDto] = []
         self.core_executors: List[ExecutorSnapshotDto] = []
-        self._core_snapshot_in_flight = False
+        self._core_snapshot_request_gen = 0
         self._core_snapshot_signals = _CoreSnapshotSignalBridge()
         self._core_snapshot_signals.snapshot_ready.connect(self._on_core_snapshot_ready)
         self._core_snapshot_signals.snapshot_error.connect(self._on_core_snapshot_error)
@@ -148,7 +151,6 @@ class ServerPanelMixin:
             for r in rows:
                 details_table.add_row(r)
 
-            dialog.setLayout(layout)
             dialog.exec_()
         except Exception as e:
             self.logger.error(f"Error showing server details dialog: {e}", exc_info=True)
@@ -235,16 +237,56 @@ class ServerPanelMixin:
                 else tr_key(Dialogs.EXECUTORS_NONE_MANUAL)
             )
 
+    def _sync_refresh_executor_caches_blocking(self):
+        """Fetch executors + schema off the GUI thread; block with a local event loop until done.
+
+        Returns:
+            (True, False) on success
+            (False, True) if unauthorized (handler already notified)
+            (False, False) on other failure
+        """
+        loop = QEventLoop(self)
+        state = {"ok": False, "unauthorized": False}
+
+        def work():
+            return self.core_api.get_executors(), self.core_api.get_executor_schema()
+
+        def on_ok(data):
+            executors, schema = data
+            self.core_executors = list(executors) if isinstance(executors, list) else []
+            self.core_executor_schema = dict(schema) if isinstance(schema, dict) else {}
+            self._update_executor_action_buttons_state()
+            state["ok"] = True
+            loop.quit()
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Executor cache"):
+                state["unauthorized"] = True
+            else:
+                self.logger.warning("Executor cache refresh failed: %s", message)
+            state["ok"] = False
+            loop.quit()
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="executor-cache-sync")
+        loop.exec_()
+        return state["ok"], state["unauthorized"]
+
     def _pick_executor_name(
         self,
         title: str,
         for_kind: Optional[str] = None,
         manual_only: bool = False,
     ) -> Optional[str]:
-        if not self.core_executors:
-            self._refresh_executors()
-        if not self.core_executor_schema:
-            self._refresh_executor_schema()
+        if not self.core_executors or not self.core_executor_schema:
+            ok, unauthorized = self._sync_refresh_executor_caches_blocking()
+            if not ok and not unauthorized:
+                self._show_core_error(
+                    "Refresh executors",
+                    RuntimeError(tr_key(Errors.UNKNOWN)),
+                )
+                return None
+            if not ok:
+                return None
 
         candidates = []
         for executor in self.core_executors:
@@ -282,7 +324,15 @@ class ServerPanelMixin:
     def ensure_executor_manual(self, executor_name: str) -> bool:
         """Validate executor mode is MANUAL before on/off/set commands."""
         try:
-            self._refresh_executors()
+            ok, unauthorized = self._sync_refresh_executor_caches_blocking()
+            if not ok and not unauthorized:
+                self._show_core_error(
+                    "Ensure MANUAL mode",
+                    RuntimeError(tr_key(Errors.UNKNOWN)),
+                )
+                return False
+            if not ok:
+                return False
             target = self._find_executor(executor_name)
             if not target:
                 raise RuntimeError(tr_key(Errors.EXECUTOR_NOT_FOUND, name=executor_name))
@@ -317,17 +367,17 @@ class ServerPanelMixin:
 
     def refresh_core_snapshot(self):
         """Poll greenhouse status/schemas/data in a worker thread and display them."""
-        if self._core_snapshot_in_flight:
-            self.logger.debug("Core snapshot refresh skipped: previous request still running")
-            return
-        self._core_snapshot_in_flight = True
+        self._core_snapshot_request_gen += 1
+        gen = self._core_snapshot_request_gen
 
         def _refresh_job():
             try:
                 payload = self._fetch_core_snapshot_payload()
-                self._core_snapshot_signals.snapshot_ready.emit(payload)
+                self._core_snapshot_signals.snapshot_ready.emit((gen, payload))
             except Exception as error:
-                self._core_snapshot_signals.snapshot_error.emit(str(error) or "Unknown core refresh error")
+                self._core_snapshot_signals.snapshot_error.emit(
+                    (gen, str(error) or "Unknown core refresh error")
+                )
 
         threading.Thread(target=_refresh_job, name="core-snapshot-refresh", daemon=True).start()
 
@@ -346,8 +396,11 @@ class ServerPanelMixin:
             "executors": executors,
         }
 
-    def _on_core_snapshot_ready(self, payload: Dict[str, Any]):
+    def _on_core_snapshot_ready(self, packed):
         try:
+            gen, payload = packed
+            if gen != self._core_snapshot_request_gen:
+                return
             status = payload.get("status")
             self.display_data_table(tr_key(ServerData.CORE_STATUS), {"status": status.status}, "core_status")
 
@@ -370,47 +423,89 @@ class ServerPanelMixin:
                 self.status_label.setText(tr_key(Status.GREENHOUSE_REFRESHED))
         except Exception as error:
             self._show_core_error("Refresh greenhouse snapshot", error)
-        finally:
-            self._core_snapshot_in_flight = False
 
-    def _on_core_snapshot_error(self, error_message: str):
-        self._core_snapshot_in_flight = False
+    def _on_core_snapshot_error(self, packed):
+        gen, error_message = packed
+        if gen != self._core_snapshot_request_gen:
+            return
         self._show_core_error("Refresh greenhouse snapshot", RuntimeError(error_message))
 
     def view_core_status(self):
-        try:
-            status = self.core_api.get_status()
+        def work():
+            return self.core_api.get_status()
+
+        def on_ok(status):
             self.display_data_table(tr_key(ServerData.CORE_STATUS), {"status": status.status}, "core_status")
-        except Exception as error:
-            self._show_core_error("Core status", error)
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Core status"):
+                return
+            self._show_core_error("Core status", RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="core-status")
 
     def view_getter_schema(self):
-        try:
-            self._refresh_getter_schema()
+        def work():
+            return self.core_api.get_getter_schema()
+
+        def on_ok(schema):
+            self.core_getter_schema = schema
             self.display_data_table(tr_key(ServerData.GETTER_SCHEMA), self.core_getter_schema, "getter_schema")
-        except Exception as error:
-            self._show_core_error("Getter schema", error)
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Getter schema"):
+                return
+            self._show_core_error("Getter schema", RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="getter-schema")
 
     def view_executor_schema(self):
-        try:
-            self._refresh_executor_schema()
+        def work():
+            return self.core_api.get_executor_schema()
+
+        def on_ok(schema):
+            self.core_executor_schema = schema
             self.display_data_table(tr_key(ServerData.EXECUTOR_SCHEMA), self.core_executor_schema, "executor_schema")
-        except Exception as error:
-            self._show_core_error("Executor schema", error)
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Executor schema"):
+                return
+            self._show_core_error("Executor schema", RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="executor-schema")
 
     def view_getters(self):
-        try:
-            self._refresh_getters()
+        def work():
+            return self.core_api.get_getters()
+
+        def on_ok(getters):
+            self.core_getters = getters
+            self.logger.info(f"Fetched getters snapshot count: {len(self.core_getters)}")
             self.display_data_table(tr_key(ServerData.GETTERS), self.core_getters, "getters")
-        except Exception as error:
-            self._show_core_error("Getters", error)
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Getters"):
+                return
+            self._show_core_error("Getters", RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="getters")
 
     def view_executors(self):
-        try:
-            self._refresh_executors()
+        def work():
+            return self.core_api.get_executors()
+
+        def on_ok(executors):
+            self.core_executors = executors
+            self.logger.info(f"Fetched executors snapshot count: {len(self.core_executors)}")
+            self._update_executor_action_buttons_state()
             self.display_data_table(tr_key(ServerData.EXECUTORS), self.core_executors, "executors")
-        except Exception as error:
-            self._show_core_error("Executors", error)
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Executors"):
+                return
+            self._show_core_error("Executors", RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="executors")
 
     def prompt_switch_executor_mode(self):
         try:
@@ -437,11 +532,23 @@ class ServerPanelMixin:
             elif mode_value == auto_label:
                 mode_value = "auto"
 
-            result = self.core_api.set_executor_mode(name, mode_value)
-            self.display_data_table(
-                tr_key(ServerData.SET_MODE, name=name), result, "core_action"
-            )
-            self.refresh_core_snapshot()
+            def work():
+                return self.core_api.set_executor_mode(name, mode_value)
+
+            def on_ok(result):
+                self.display_data_table(
+                    tr_key(ServerData.SET_MODE, name=name), result, "core_action"
+                )
+                self.refresh_core_snapshot()
+
+            def on_err(message: str):
+                if dispatch_thread_failure_to_ui(
+                    self, message, logger=self.logger, log_label="Set executor mode"
+                ):
+                    return
+                self._show_core_error("Set executor mode", RuntimeError(message))
+
+            run_thread_task(self, work, on_ok, on_err, thread_name="executor-set-mode")
         except Exception as error:
             self._show_core_error("Set executor mode", error)
 
@@ -458,11 +565,21 @@ class ServerPanelMixin:
             if not self.ensure_executor_manual(name):
                 return
 
-            result = self.core_api.executor_on(name)
-            self.display_data_table(
-                tr_key(ServerData.EXECUTOR_ON, name=name), result, "core_action"
-            )
-            self.refresh_core_snapshot()
+            def work():
+                return self.core_api.executor_on(name)
+
+            def on_ok(result):
+                self.display_data_table(
+                    tr_key(ServerData.EXECUTOR_ON, name=name), result, "core_action"
+                )
+                self.refresh_core_snapshot()
+
+            def on_err(message: str):
+                if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Executor ON"):
+                    return
+                self._show_core_error("Executor ON", RuntimeError(message))
+
+            run_thread_task(self, work, on_ok, on_err, thread_name="executor-on")
         except Exception as error:
             self._show_core_error("Executor ON", error)
 
@@ -479,11 +596,21 @@ class ServerPanelMixin:
             if not self.ensure_executor_manual(name):
                 return
 
-            result = self.core_api.executor_off(name)
-            self.display_data_table(
-                tr_key(ServerData.EXECUTOR_OFF, name=name), result, "core_action"
-            )
-            self.refresh_core_snapshot()
+            def work():
+                return self.core_api.executor_off(name)
+
+            def on_ok(result):
+                self.display_data_table(
+                    tr_key(ServerData.EXECUTOR_OFF, name=name), result, "core_action"
+                )
+                self.refresh_core_snapshot()
+
+            def on_err(message: str):
+                if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Executor OFF"):
+                    return
+                self._show_core_error("Executor OFF", RuntimeError(message))
+
+            run_thread_task(self, work, on_ok, on_err, thread_name="executor-off")
         except Exception as error:
             self._show_core_error("Executor OFF", error)
 
@@ -516,11 +643,21 @@ class ServerPanelMixin:
                 )
                 return
 
-            result = self.core_api.executor_set(name, value)
-            self.display_data_table(
-                tr_key(ServerData.EXECUTOR_SET, name=name), result, "core_action"
-            )
-            self.refresh_core_snapshot()
+            def work():
+                return self.core_api.executor_set(name, value)
+
+            def on_ok(result):
+                self.display_data_table(
+                    tr_key(ServerData.EXECUTOR_SET, name=name), result, "core_action"
+                )
+                self.refresh_core_snapshot()
+
+            def on_err(message: str):
+                if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Executor SET"):
+                    return
+                self._show_core_error("Executor SET", RuntimeError(message))
+
+            run_thread_task(self, work, on_ok, on_err, thread_name="executor-set")
         except Exception as error:
             self._show_core_error("Executor SET", error)
 

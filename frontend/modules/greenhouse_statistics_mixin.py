@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 import pyqtgraph as pg
 from PyQt5.QtCore import QDateTime, QTimer
 
-from modules.core_api_client import UnauthorizedError
+from modules.qt_thread_tasks import dispatch_thread_failure_to_ui, run_thread_task
 from modules.ui_dialogs import StyledMessageDialog
 from modules.localization import tr_key
 from modules.localization.localization_keys import (
@@ -83,6 +83,9 @@ class GreenhouseStatisticsMixin:
         self._ensure_statistics_auto_reload_timer()
         self._ensure_statistics_poll_timer()
         self._connect_statistics_runtime_signals()
+        self._statistics_devices_request_gen = 0
+        self._statistics_plot_request_gen = 0
+        self._user_logs_request_gen = 0
         self.refresh_statistics_devices()
         self._apply_statistics_refresh_interval(reload_immediately=False)
         self._schedule_statistics_auto_reload()
@@ -234,52 +237,65 @@ class GreenhouseStatisticsMixin:
         if not hasattr(self, "statisticsDeviceCombo") or not hasattr(self, "core_api"):
             return
 
+        self._statistics_devices_request_gen += 1
+        request_gen = self._statistics_devices_request_gen
+
         self.logger.info("Refreshing statistics sensor sources")
         selected_key = self._statistics_selection_key(self.statisticsDeviceCombo.currentData())
-        self.statisticsDeviceCombo.clear()
 
-        try:
-            sensors = self.core_api.list_sensors()
-        except UnauthorizedError as error:
-            self.handle_unauthorized_error(str(error))
-            return
-        except Exception as error:
-            self.logger.warning("Failed to fetch sensors for statistics: %s", error)
-            sensors = []
+        def work():
+            return self.core_api.list_sensors()
 
-        seen_ids = set()
-        for sensor in sensors if isinstance(sensors, list) else []:
-            if not isinstance(sensor, dict):
-                continue
-            sensor_id = str(sensor.get("id", "")).strip()
-            sensor_name = str(sensor.get("name", "")).strip()
-            sensor_type = str(sensor.get("type", "")).strip()
-            if not sensor_id or sensor_id in seen_ids:
-                continue
-            seen_ids.add(sensor_id)
-            display_name = sensor_name or sensor_type or sensor_id[:8]
-            self.statisticsDeviceCombo.addItem(
-                display_name,
-                {
-                    "sensor_id": sensor_id,
-                    "sensor_name": sensor_name,
-                    "sensor_type": sensor_type,
-                },
+        def on_ok(sensors):
+            if request_gen != self._statistics_devices_request_gen:
+                return
+            if not isinstance(sensors, list):
+                sensors = []
+            self.statisticsDeviceCombo.clear()
+            seen_ids = set()
+            for sensor in sensors:
+                if not isinstance(sensor, dict):
+                    continue
+                sensor_id = str(sensor.get("id", "")).strip()
+                sensor_name = str(sensor.get("name", "")).strip()
+                sensor_type = str(sensor.get("type", "")).strip()
+                if not sensor_id or sensor_id in seen_ids:
+                    continue
+                seen_ids.add(sensor_id)
+                display_name = sensor_name or sensor_type or sensor_id[:8]
+                self.statisticsDeviceCombo.addItem(
+                    display_name,
+                    {
+                        "sensor_id": sensor_id,
+                        "sensor_name": sensor_name,
+                        "sensor_type": sensor_type,
+                    },
+                )
+
+            if self.statisticsDeviceCombo.count() == 0:
+                self.statisticsDeviceCombo.addItem(tr_key(Statistics.NO_SENSORS), "")
+                return
+
+            self.logger.info(
+                "Statistics combo populated with %d sensor(s)",
+                self.statisticsDeviceCombo.count(),
             )
 
-        if self.statisticsDeviceCombo.count() == 0:
+            if selected_key:
+                index = self._find_statistics_selection_index(selected_key)
+                if index >= 0:
+                    self.statisticsDeviceCombo.setCurrentIndex(index)
+
+        def on_err(message: str):
+            if request_gen != self._statistics_devices_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Statistics sensors"):
+                return
+            self.logger.warning("Failed to fetch sensors for statistics: %s", message)
+            self.statisticsDeviceCombo.clear()
             self.statisticsDeviceCombo.addItem(tr_key(Statistics.NO_SENSORS), "")
-            return
 
-        self.logger.info(
-            "Statistics combo populated with %d sensor(s)",
-            self.statisticsDeviceCombo.count(),
-        )
-
-        if selected_key:
-            index = self._find_statistics_selection_index(selected_key)
-            if index >= 0:
-                self.statisticsDeviceCombo.setCurrentIndex(index)
+        run_thread_task(self, work, on_ok, on_err, thread_name="statistics-sensors")
 
     def _parse_reading_timestamp(self, value):
         text = str(value or "").strip()
@@ -679,7 +695,9 @@ class GreenhouseStatisticsMixin:
             fields["device_name"],
         )
 
-        try:
+        session_id = self.session_id
+
+        def work():
             device_id = self._ensure_persistence_device(
                 device_name=fields["device_name"],
                 sensor_type=fields["sensor_type"],
@@ -687,13 +705,12 @@ class GreenhouseStatisticsMixin:
                 core_sensor_id=fields.get("core_sensor_id", ""),
             )
             if not device_id:
-                self.logger.warning(
-                    "Sensor persistence skipped: unresolved DB device for command=%s sensorType=%s sensorName=%s",
-                    command_name,
-                    fields["sensor_type"],
-                    fields["sensor_name"],
-                )
-                return
+                return {
+                    "status": "skip",
+                    "reason": "no_device",
+                    "command_name": command_name,
+                    "fields": fields,
+                }
 
             sensor_id = self._ensure_persistence_sensor(
                 device_id=device_id,
@@ -703,7 +720,7 @@ class GreenhouseStatisticsMixin:
                 core_sensor_id=fields["core_sensor_id"],
             )
             if not sensor_id:
-                return
+                return {"status": "skip", "reason": "no_sensor"}
 
             created = self.core_api.create_sensor_reading(
                 sensor_id=sensor_id,
@@ -712,7 +729,7 @@ class GreenhouseStatisticsMixin:
                 metadata={
                     "createdFrom": "frontend-sensor-reading-persistence",
                     "command": str(command_name or "").strip(),
-                    "sessionId": self.session_id,
+                    "sessionId": session_id,
                     "location": fields["location"],
                     "coreSensorId": fields["core_sensor_id"],
                     "commandId": fields.get("command_id", ""),
@@ -723,16 +740,49 @@ class GreenhouseStatisticsMixin:
                 },
             )
             if isinstance(created, dict):
+                return {
+                    "status": "saved",
+                    "device_id": device_id,
+                    "sensor_id": sensor_id,
+                    "value": fields["value"],
+                    "timestamp_iso": fields["timestamp_iso"],
+                }
+            return {"status": "skip", "reason": "no_response"}
+
+        def on_ok(result):
+            if not isinstance(result, dict):
+                return
+            if result.get("status") == "skip":
+                if result.get("reason") == "no_device":
+                    f = result.get("fields") or {}
+                    self.logger.warning(
+                        "Sensor persistence skipped: unresolved DB device for command=%s sensorType=%s sensorName=%s",
+                        result.get("command_name"),
+                        f.get("sensor_type"),
+                        f.get("sensor_name"),
+                    )
+                return
+            if result.get("status") == "saved":
                 self.logger.info(
                     "Sensor persistence saved reading: deviceId=%s sensorId=%s value=%s timestamp=%s",
-                    device_id,
-                    sensor_id,
-                    fields["value"],
-                    fields["timestamp_iso"],
+                    result.get("device_id"),
+                    result.get("sensor_id"),
+                    result.get("value"),
+                    result.get("timestamp_iso"),
                 )
-                self._after_sensor_reading_persisted(device_id=device_id, sensor_id=sensor_id)
-        except Exception as error:
-            self.logger.warning(f"Failed to persist sensor reading from command: {error}")
+                self._after_sensor_reading_persisted(
+                    device_id=str(result.get("device_id", "")),
+                    sensor_id=str(result.get("sensor_id", "")),
+                )
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(
+                self, message, logger=self.logger, log_label="Sensor persistence"
+            ):
+                return
+            self.logger.warning("Failed to persist sensor reading from command: %s", message)
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="sensor-persist-reading")
 
     def _after_sensor_reading_persisted(self, *, device_id="", sensor_id=""):
         if not hasattr(self, "statisticsDeviceCombo"):
@@ -853,6 +903,34 @@ class GreenhouseStatisticsMixin:
         points.sort(key=lambda item: item[0])
         return points
 
+    def _apply_statistics_plot_empty(self, *, display_name: str, use_all_data: bool, sensor: dict) -> None:
+        self.statistics_curve.setData([], [])
+        empty_key = Statistics.NO_READINGS if use_all_data else Statistics.NO_READINGS_IN_RANGE
+        if hasattr(self, "set_status_state") and callable(self.set_status_state):
+            self.set_status_state(empty_key, name=display_name)
+        else:
+            self.status_label.setText(tr_key(empty_key, name=display_name))
+
+    def _apply_statistics_plot_data(
+        self, *, x_values: list, y_values: list, display_name: str, sensor: dict
+    ) -> None:
+        self.statistics_curve.setData(x_values, y_values)
+        unit = str(sensor.get("sensor_type", "")).strip()
+        if unit:
+            title = tr_key(Charts.TITLE_SENSOR, name=display_name, unit=unit)
+        else:
+            title = display_name
+        self._statistics_chart_state = {"title_name": display_name, "title_unit": unit}
+        self.statistics_plot_widget.getPlotItem().setTitle(title)
+        self.statistics_plot_widget.enableAutoRange(axis="xy", enable=True)
+        if hasattr(self, "set_status_state") and callable(self.set_status_state):
+            self.set_status_state(Statistics.LOADED_COUNT, count=len(x_values), name=display_name)
+        else:
+            self.status_label.setText(
+                tr_key(Statistics.LOADED_COUNT, count=len(x_values), name=display_name)
+            )
+        self.logger.info("Statistics plot updated: sensor=%s points=%d", display_name, len(x_values))
+
     def load_statistics_plot(self, suppress_missing_device_warning=False):
         """Fetch sensor readings for the selected sensor and render interactive plot."""
         if not self.statistics_plot_widget or not self.statistics_curve:
@@ -896,73 +974,74 @@ class GreenhouseStatisticsMixin:
         if to_dt:
             query_kwargs["to_iso"] = to_dt.isoformat()
 
-        try:
-            self.logger.info("Statistics query: %s", query_kwargs)
-            readings = self.core_api.list_sensor_readings(**query_kwargs)
-        except Exception as error:
-            self._handle_api_exception(tr_key(Dialogs.STATISTICS_ERROR_TITLE), error)
-            return
+        self._statistics_plot_request_gen += 1
+        plot_gen = self._statistics_plot_request_gen
+        self.logger.info("Statistics query: %s", query_kwargs)
 
-        self.logger.info("Statistics readings fetched: count=%d", len(readings))
-        points = self._readings_to_points(readings)
-        x_values = [p[0] for p in points]
-        y_values = [p[1] for p in points]
+        def work():
+            return self.core_api.list_sensor_readings(**query_kwargs)
 
-        if not x_values:
-            self.statistics_curve.setData([], [])
-            empty_key = (
-                Statistics.NO_READINGS if use_all_data else Statistics.NO_READINGS_IN_RANGE
+        def on_ok(readings):
+            if plot_gen != self._statistics_plot_request_gen:
+                return
+            self.logger.info("Statistics readings fetched: count=%d", len(readings))
+            points = self._readings_to_points(readings)
+            x_values = [p[0] for p in points]
+            y_values = [p[1] for p in points]
+
+            if not x_values:
+                self._apply_statistics_plot_empty(
+                    display_name=display_name,
+                    use_all_data=use_all_data,
+                    sensor=sensor,
+                )
+                return
+
+            self._apply_statistics_plot_data(
+                x_values=x_values,
+                y_values=y_values,
+                display_name=display_name,
+                sensor=sensor,
             )
-            if hasattr(self, "set_status_state") and callable(self.set_status_state):
-                self.set_status_state(empty_key, name=display_name)
-            else:
-                self.status_label.setText(tr_key(empty_key, name=display_name))
-            return
 
-        self.statistics_curve.setData(x_values, y_values)
-        unit = str(sensor.get("sensor_type", "")).strip()
-        if unit:
-            title = tr_key(Charts.TITLE_SENSOR, name=display_name, unit=unit)
-        else:
-            title = display_name
-        self._statistics_chart_state = {"title_name": display_name, "title_unit": unit}
-        self.statistics_plot_widget.getPlotItem().setTitle(title)
-        self.statistics_plot_widget.enableAutoRange(axis="xy", enable=True)
-        if hasattr(self, "set_status_state") and callable(self.set_status_state):
-            self.set_status_state(Statistics.LOADED_COUNT, count=len(x_values), name=display_name)
-        else:
-            self.status_label.setText(
-                tr_key(Statistics.LOADED_COUNT, count=len(x_values), name=display_name)
-            )
-        self.logger.info("Statistics plot updated: sensor=%s points=%d", display_name, len(x_values))
+        def on_err(message: str):
+            if plot_gen != self._statistics_plot_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="Statistics plot"):
+                return
+            self._handle_api_exception(tr_key(Dialogs.STATISTICS_ERROR_TITLE), RuntimeError(message))
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="statistics-readings")
 
     def persist_user_log(self, category, title, payload, metadata=None):
         """Persist user-visible event to backend database (best effort)."""
         if not hasattr(self, "core_api"):
             return
-        try:
-            self.core_api.create_user_log(
-                category=str(category or "control"),
-                title=str(title or "Event"),
-                payload=payload if isinstance(payload, dict) else {"value": str(payload)},
-                metadata=metadata if isinstance(metadata, dict) else {},
-            )
-        except Exception as error:
-            self.logger.warning(f"Failed to persist user log: {error}")
+        cat = str(category or "control")
+        ttl = str(title or "Event")
+        pay = payload if isinstance(payload, dict) else {"value": str(payload)}
+        meta = metadata if isinstance(metadata, dict) else {}
 
-    def load_user_logs_from_database(self):
-        """Load persisted logs from database into control table only."""
-        if not hasattr(self, "core_api"):
-            return
+        def work():
+            self.core_api.create_user_log(
+                category=cat,
+                title=ttl,
+                payload=pay,
+                metadata=meta,
+            )
+            return None
+
+        def on_err(message: str):
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="User log create"):
+                return
+            self.logger.warning("Failed to persist user log: %s", message)
+
+        run_thread_task(self, work, lambda _r: None, on_err, thread_name="user-log-create")
+
+    def _populate_control_table_from_user_log_entries(self, entries):
+        """Fill control table + history from raw log entries (main thread)."""
         if not self.control_table:
             return
-
-        try:
-            entries = self.core_api.list_user_logs()
-        except Exception as error:
-            self.logger.warning(f"Failed to load user logs: {error}")
-            return
-
         self.control_table.clear_data()
         self.control_history = []
         restored_count = 0
@@ -1009,7 +1088,6 @@ class GreenhouseStatisticsMixin:
                     "error": payload.get("error"),
                 }
             )
-            # Keep control table non-technical: details are available on double-click.
             self.control_table.add_row([display_time, command_display, status])
             restored_count += 1
         if hasattr(self, "_on_control_table_selection_changed"):
@@ -1019,4 +1097,32 @@ class GreenhouseStatisticsMixin:
                 self.set_status_state(Status.RESTORED_PREVIOUS, count=restored_count)
             else:
                 self.status_label.setText(tr_key(Status.RESTORED_PREVIOUS, count=restored_count))
+
+    def load_user_logs_from_database(self):
+        """Load persisted logs from database into control table only."""
+        if not hasattr(self, "core_api"):
+            return
+        if not self.control_table:
+            return
+        self._user_logs_request_gen += 1
+        log_gen = self._user_logs_request_gen
+
+        def work():
+            return self.core_api.list_user_logs()
+
+        def on_ok(entries):
+            if log_gen != self._user_logs_request_gen:
+                return
+            if not isinstance(entries, list):
+                entries = []
+            self._populate_control_table_from_user_log_entries(entries)
+
+        def on_err(message: str):
+            if log_gen != self._user_logs_request_gen:
+                return
+            if dispatch_thread_failure_to_ui(self, message, logger=self.logger, log_label="User logs load"):
+                return
+            self.logger.warning("Failed to load user logs: %s", message)
+
+        run_thread_task(self, work, on_ok, on_err, thread_name="user-logs-load")
 

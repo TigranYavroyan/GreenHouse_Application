@@ -298,29 +298,27 @@ class GreenhouseDesktop(
             self.logger.error("user_output_container not found in UI!")
 
     def _ensure_layouts_initialized(self):
-        if hasattr(self, 'user_output_container') and self.user_output_container:
-            if not self.user_output_container.layout():
+        """Ensure tab containers have a zero-margin column layout (front.ui usually provides one)."""
+        for attr in (
+            "user_output_container",
+            "server_info_container",
+            "schedule_output_container",
+        ):
+            if not hasattr(self, attr):
+                continue
+            widget = getattr(self, attr)
+            if not widget:
+                continue
+            layout = widget.layout()
+            if layout is None:
                 layout = QVBoxLayout()
                 layout.setContentsMargins(0, 0, 0, 0)
                 layout.setSpacing(0)
-                self.user_output_container.setLayout(layout)
-            self.user_output_container.setVisible(True)
-
-        if hasattr(self, 'server_info_container') and self.server_info_container:
-            if not self.server_info_container.layout():
-                layout = QVBoxLayout()
+                widget.setLayout(layout)
+            else:
                 layout.setContentsMargins(0, 0, 0, 0)
                 layout.setSpacing(0)
-                self.server_info_container.setLayout(layout)
-            self.server_info_container.setVisible(True)
-
-        if hasattr(self, 'schedule_output_container') and self.schedule_output_container:
-            if not self.schedule_output_container.layout():
-                layout = QVBoxLayout()
-                layout.setContentsMargins(0, 0, 0, 0)
-                layout.setSpacing(0)
-                self.schedule_output_container.setLayout(layout)
-            self.schedule_output_container.setVisible(True)
+            widget.setVisible(True)
 
     def setup_tables(self):
         """Initialize simple table widgets for displaying RabbitMQ + server data"""

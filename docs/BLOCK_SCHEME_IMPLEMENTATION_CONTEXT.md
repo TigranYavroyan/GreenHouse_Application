@@ -261,6 +261,7 @@ Also available:
 - User can reload logic from file via API.
 - Generated JSON is accepted by `LogicJsonController` without manual patching.
 - Behavior in runtime matches Composite semantics (parent gating, triggers, manual override guard).
+- Logic Builder supports undo/redo: **Ctrl+Z** / **Ctrl+Y** (and **Ctrl+Shift+Z** where the platform maps redo); moving nodes records a single undo step per completed drag; loading or rebuilding logic from core clears the undo stack.
 
 ---
 

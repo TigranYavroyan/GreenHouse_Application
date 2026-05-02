@@ -115,6 +115,20 @@ class LogicNodeItem(QGraphicsRectItem):
         self._title = title
         self.title_item.setText(title)
 
+    def mousePressEvent(self, event):  # noqa: N802
+        super().mousePressEvent(event)
+        scene = self.scene()
+        adapter = getattr(scene, "logic_adapter", None) if scene else None
+        if adapter:
+            adapter.on_node_mouse_press(self)
+
+    def mouseReleaseEvent(self, event):  # noqa: N802
+        super().mouseReleaseEvent(event)
+        scene = self.scene()
+        adapter = getattr(scene, "logic_adapter", None) if scene else None
+        if adapter:
+            adapter.on_node_mouse_release(self)
+
     def itemChange(self, change, value):  # noqa: N802
         if change == QGraphicsItem.ItemPositionHasChanged:
             for edge in self.connections:
@@ -173,10 +187,13 @@ class LogicCanvasAdapter:
     def __init__(self):
         self.backend_name = "nodegraphqt" if NODEGRAPHQT_AVAILABLE else "custom_qgraphics"
         self.scene = LogicCanvasScene()
+        self.scene.logic_adapter = self
         self.view = LogicCanvasView(self.scene, self.add_node_at)
         self.nodes: Dict[str, LogicNodeItem] = {}
         self.edges: List[LogicConnectionItem] = []
         self.selection_changed_cb: Optional[Callable[[Optional[str]], None]] = None
+        self._drag_undo_press_cb: Optional[Callable[[], None]] = None
+        self._drag_undo_release_cb: Optional[Callable[[], None]] = None
         self.scene.selectionChanged.connect(self._handle_selection_changed)
 
     @property
@@ -189,22 +206,50 @@ class LogicCanvasAdapter:
     def set_graph_changed_callback(self, callback: Callable[[], None]) -> None:
         self.scene.graph_changed_cb = callback
 
+    def set_drag_undo_callbacks(
+        self,
+        on_press: Optional[Callable[[], None]],
+        on_release: Optional[Callable[[], None]],
+    ) -> None:
+        self._drag_undo_press_cb = on_press
+        self._drag_undo_release_cb = on_release
+
+    def on_node_mouse_press(self, item: LogicNodeItem) -> None:
+        if self._drag_undo_press_cb:
+            self._drag_undo_press_cb()
+
+    def on_node_mouse_release(self, item: LogicNodeItem) -> None:
+        if self._drag_undo_release_cb:
+            self._drag_undo_release_cb()
+
     def _handle_selection_changed(self) -> None:
         selected = self.selected_node_ids()
         if callable(self.selection_changed_cb):
             self.selection_changed_cb(selected[0] if selected else None)
 
-    def add_node(self, kind: str, title: str = "", x: float = 40.0, y: float = 40.0) -> Optional[str]:
+    def add_node(
+        self,
+        kind: str,
+        title: str = "",
+        x: float = 40.0,
+        y: float = 40.0,
+        *,
+        node_id: Optional[str] = None,
+        notify: bool = True,
+    ) -> Optional[str]:
         if kind not in NODE_KINDS:
             return None
-        node_id = str(uuid.uuid4())
+        nid = node_id or str(uuid.uuid4())
+        if nid in self.nodes:
+            return None
         label = title.strip() if title else NODE_DEFAULT_TITLES.get(kind, "Node")
-        item = LogicNodeItem(node_id=node_id, kind=kind, title=label)
+        item = LogicNodeItem(node_id=nid, kind=kind, title=label)
         item.setPos(x, y)
         self.scene.addItem(item)
-        self.nodes[node_id] = item
-        self.scene.notify_graph_changed()
-        return node_id
+        self.nodes[nid] = item
+        if notify:
+            self.scene.notify_graph_changed()
+        return nid
 
     def add_node_at(self, kind: str, pos: QPointF) -> Optional[str]:
         return self.add_node(kind=kind, x=pos.x(), y=pos.y())
@@ -227,10 +272,11 @@ class LogicCanvasAdapter:
         self.scene.removeItem(item)
         self.nodes.pop(node_id, None)
 
-    def clear(self) -> None:
+    def clear(self, notify: bool = True) -> None:
         for node_id in list(self.nodes.keys()):
             self.remove_node(node_id)
-        self.scene.notify_graph_changed()
+        if notify:
+            self.scene.notify_graph_changed()
 
     def remove_edge(self, edge: LogicConnectionItem) -> None:
         if edge in edge.source_item.connections:
@@ -268,7 +314,7 @@ class LogicCanvasAdapter:
                 return True
         return False
 
-    def connect_nodes(self, source_id: str, target_id: str) -> Tuple[bool, str]:
+    def connect_nodes(self, source_id: str, target_id: str, notify: bool = True) -> Tuple[bool, str]:
         if source_id == target_id:
             return False, "Cannot connect a node to itself."
         source = self.nodes.get(source_id)
@@ -291,17 +337,48 @@ class LogicCanvasAdapter:
         source.connections.append(edge)
         target.connections.append(edge)
         edge.refresh_path()
-        self.scene.notify_graph_changed()
+        if notify:
+            self.scene.notify_graph_changed()
         return True, "Nodes connected."
 
-    def update_node(self, node_id: str, *, title: str = "") -> bool:
+    def update_node(self, node_id: str, *, title: str = "", notify: bool = True) -> bool:
         item = self.nodes.get(node_id)
         if not item:
             return False
         if title.strip():
             item.set_title(title.strip())
-        self.scene.notify_graph_changed()
+        if notify:
+            self.scene.notify_graph_changed()
         return True
+
+    def restore_from_snapshots(
+        self,
+        nodes: List[CanvasNodeState],
+        edges: List[CanvasEdgeState],
+        *,
+        notify: bool = True,
+    ) -> None:
+        self.clear(notify=False)
+        for n in sorted(nodes, key=lambda s: s.node_id):
+            self.add_node(
+                n.kind,
+                n.title,
+                n.x,
+                n.y,
+                node_id=n.node_id,
+                notify=False,
+            )
+        for e in edges:
+            self.connect_nodes(e.source_id, e.target_id, notify=False)
+        if notify:
+            self.scene.notify_graph_changed()
+
+    def set_selected_node_ids(self, node_ids: List[str]) -> None:
+        self.scene.clearSelection()
+        for nid in node_ids:
+            item = self.nodes.get(nid)
+            if item:
+                item.setSelected(True)
 
     def node_snapshot(self) -> List[CanvasNodeState]:
         out: List[CanvasNodeState] = []

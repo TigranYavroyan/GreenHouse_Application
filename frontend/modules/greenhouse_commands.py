@@ -212,7 +212,6 @@ class CommandPanelMixin:
             for r in rows:
                 details_table.add_row(r)
 
-            dialog.setLayout(layout)
             dialog.exec_()
         except Exception as e:
             self.logger.error(f"Error showing control details dialog: {e}", exc_info=True)
