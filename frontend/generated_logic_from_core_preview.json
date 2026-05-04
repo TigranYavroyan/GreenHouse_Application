@@ -1,45 +1,193 @@
 {
   "root": {
-    "title": "main",
+    "title": "Greenhouse root",
     "condition": "always",
     "args": [],
-    "actions": [],
+    "actions": [
+      {
+        "target": "fan_1",
+        "valueType": "bool",
+        "value": "true",
+        "trigger": "on_enter",
+        "enabled": true
+      }
+    ],
     "children": [
       {
-        "title": "Cooler1On",
+        "title": "Rule 02",
         "condition": "gt",
         "args": [
-          "temp",
-          "30"
+          "air_temp",
+          "26.0"
         ],
-        "actions": [
+        "actions": [],
+        "children": [
           {
-            "target": "LOW_DCM_D_0",
-            "valueType": "bool",
-            "value": "true",
-            "trigger": "on_enter",
-            "enabled": true
+            "title": "Rule 03",
+            "condition": "lt",
+            "args": [
+              "humidity",
+              "75.0"
+            ],
+            "actions": [],
+            "children": [
+              {
+                "title": "Rule 04",
+                "condition": "in_range",
+                "args": [
+                  "soil_moisture",
+                  "20.0",
+                  "80.0"
+                ],
+                "actions": [],
+                "children": [
+                  {
+                    "title": "Rule 05",
+                    "condition": "gte",
+                    "args": [
+                      "light",
+                      "300.0"
+                    ],
+                    "actions": [
+                      {
+                        "target": "heater_1",
+                        "valueType": "bool",
+                        "value": "false",
+                        "trigger": "while_true",
+                        "enabled": true
+                      }
+                    ],
+                    "children": [
+                      {
+                        "title": "Rule 06",
+                        "condition": "eq",
+                        "args": [
+                          "co2",
+                          "400.0"
+                        ],
+                        "actions": [],
+                        "children": [
+                          {
+                            "title": "Rule 07",
+                            "condition": "always_i64",
+                            "args": [],
+                            "actions": [],
+                            "children": [
+                              {
+                                "title": "Rule 08",
+                                "condition": "gte_i64",
+                                "args": [
+                                  "light",
+                                  "100"
+                                ],
+                                "actions": [],
+                                "children": [
+                                  {
+                                    "title": "Rule 09",
+                                    "condition": "is_true",
+                                    "args": [
+                                      "true"
+                                    ],
+                                    "actions": [
+                                      {
+                                        "target": "water_canal_1",
+                                        "valueType": "bool",
+                                        "value": "true",
+                                        "trigger": "on_enter",
+                                        "enabled": true
+                                      }
+                                    ],
+                                    "children": [
+                                      {
+                                        "title": "Rule 10",
+                                        "condition": "is_false",
+                                        "args": [
+                                          "false"
+                                        ],
+                                        "actions": [],
+                                        "children": [
+                                          {
+                                            "title": "Rule 11",
+                                            "condition": "mod_lt",
+                                            "args": [
+                                              "time",
+                                              "3600",
+                                              "1800"
+                                            ],
+                                            "actions": [],
+                                            "children": [
+                                              {
+                                                "title": "Rule 12",
+                                                "condition": "never_bool",
+                                                "args": [],
+                                                "actions": [],
+                                                "children": [
+                                                  {
+                                                    "title": "Rule 13",
+                                                    "condition": "always_bool",
+                                                    "args": [],
+                                                    "actions": [
+                                                      {
+                                                        "target": "pump_pwm_1",
+                                                        "valueType": "int",
+                                                        "value": "64",
+                                                        "trigger": "on_enter",
+                                                        "enabled": true
+                                                      }
+                                                    ],
+                                                    "children": [
+                                                      {
+                                                        "title": "Rule 14",
+                                                        "condition": "lte",
+                                                        "args": [
+                                                          "air_temp",
+                                                          "32.0"
+                                                        ],
+                                                        "actions": [],
+                                                        "children": [
+                                                          {
+                                                            "title": "Rule 15",
+                                                            "condition": "neq",
+                                                            "args": [
+                                                              "humidity",
+                                                              "99.0"
+                                                            ],
+                                                            "actions": [],
+                                                            "children": [
+                                                              {
+                                                                "title": "Rule 16",
+                                                                "condition": "always",
+                                                                "args": [],
+                                                                "actions": [],
+                                                                "children": []
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
-        ],
-        "children": []
-      },
-      {
-        "title": "Cooler1Off",
-        "condition": "lt",
-        "args": [
-          "temp",
-          "30"
-        ],
-        "actions": [
-          {
-            "target": "LOW_DCM_D_0",
-            "valueType": "bool",
-            "value": "false",
-            "trigger": "on_enter",
-            "enabled": true
-          }
-        ],
-        "children": []
+        ]
       }
     ]
   }

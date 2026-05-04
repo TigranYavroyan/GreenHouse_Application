@@ -1,7 +1,8 @@
 """Scheduling tab: targets, one-off schedules, and table rendering."""
 from datetime import datetime, timedelta, timezone
 
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QAbstractItemView, QAction, QComboBox, QMenu, QToolButton
 
 from modules.qt_thread_tasks import dispatch_thread_failure_to_ui, run_thread_task
 from modules.ui_dialogs import StyledMessageDialog
@@ -23,14 +24,38 @@ _DELAY_PRESETS = (
     (ScheduleDelay.AFTER_15M, 15 * 60),
     (ScheduleDelay.AFTER_30M, 30 * 60),
     (ScheduleDelay.AFTER_1H, 60 * 60),
-    (ScheduleDelay.CUSTOM, -1),
+    (ScheduleDelay.CUSTOM, None),
 )
+
+# Sentinel: use h/m/s spin boxes (tuple value ``None`` for the Custom row — detected by combo index).
+_CUSTOM_DELAY_PRESET_SECONDS = -1
+
+# English defaults if i18n JSON is missing or tr_key fails (Docker/bind-mount layouts).
+_DELAY_PRESET_FALLBACK_LABELS = {
+    ScheduleDelay.AFTER_1M: "After 1 minute",
+    ScheduleDelay.AFTER_15M: "After 15 minutes",
+    ScheduleDelay.AFTER_30M: "After 30 minutes",
+    ScheduleDelay.AFTER_1H: "After 1 hour",
+    ScheduleDelay.CUSTOM: "Custom delay (hh:mm:ss)",
+}
+
+
+def _delay_preset_label(tr_resolution_key: str) -> str:
+    text = tr_key(tr_resolution_key)
+    # Missing i18n keys look like [[schedule.delay_preset...]]
+    if text.startswith("[[") and text.endswith("]]"):
+        text = ""
+    if text and text.strip():
+        return text.strip()
+    return _DELAY_PRESET_FALLBACK_LABELS.get(
+        tr_resolution_key, tr_resolution_key.split(".")[-1].replace("_", " ")
+    )
 
 
 class GreenhouseSchedulingMixin:
     def setup_scheduler(self):
         """Initialize scheduling controls backed by persistent backend schedules."""
-        if not hasattr(self, "scheduleTargetCombo") or not hasattr(self, "scheduleDelayPresetCombo"):
+        if not hasattr(self, "scheduleTargetCombo") or not hasattr(self, "scheduleDelayPresetButton"):
             self.logger.warning("Scheduling controls not present in UI")
             return
 
@@ -39,40 +64,119 @@ class GreenhouseSchedulingMixin:
         self._schedule_mutate_in_flight = False
         self._schedule_cancel_in_flight = False
         self._schedule_bulk_in_flight = False
+        self._schedule_delay_preset_idx = len(_DELAY_PRESETS) - 1
+        self._schedule_delay_menu = None
 
         self._refresh_schedule_targets()
 
-        self._populate_schedule_delay_presets()
-        self.scheduleDelayPresetCombo.setCurrentIndex(0)
+        self._rebuild_schedule_delay_preset_menu()
+        self._configure_schedule_combo_interaction(getattr(self, "scheduleTargetCombo", None))
+
+        if hasattr(self, "scheduleRunAtDateTime") and self.scheduleRunAtDateTime:
+            from PyQt5.QtCore import QDateTime
+
+            self.scheduleRunAtDateTime.setCalendarPopup(True)
+            self.scheduleRunAtDateTime.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
+            self.scheduleRunAtDateTime.setDateTime(QDateTime.currentDateTime().addSecs(300))
+            self.scheduleRunAtDateTime.setEnabled(False)
 
         self.schedule_clock_timer = QTimer(self)
         self.schedule_clock_timer.timeout.connect(self.update_schedule_live_time)
         self.schedule_clock_timer.start(1000)
 
-        self.update_custom_delay_enabled()
+        self.update_schedule_timing_controls()
+        self._prepare_schedule_spin_boxes()
         self.update_schedule_live_time()
         self.refresh_schedule_table()
 
-    def _populate_schedule_delay_presets(self):
-        """Re-populate delay presets in the active language."""
-        if not hasattr(self, "scheduleDelayPresetCombo") or not self.scheduleDelayPresetCombo:
+    def _prepare_schedule_spin_boxes(self):
+        """Ensure duration spin boxes accept edits (some themes leave them non-interactive)."""
+        for spin_name in ("scheduleHoursSpin", "scheduleMinutesSpin", "scheduleSecondsSpin"):
+            if hasattr(self, spin_name):
+                spin = getattr(self, spin_name)
+                spin.setReadOnly(False)
+                spin.setFocusPolicy(Qt.StrongFocus)
+
+    def finalize_schedule_delay_after_localization(self):
+        """Called at end of retranslate_ui: preset menu labels are already rebuilt — sync UX state."""
+        self._schedule_delay_preset_idx = len(_DELAY_PRESETS) - 1
+        self._rebuild_schedule_delay_preset_menu()
+        self.update_schedule_timing_controls()
+        self._prepare_schedule_spin_boxes()
+
+    def _schedule_delay_preset_seconds(self) -> int:
+        """Selected preset length in seconds, or ``_CUSTOM_DELAY_PRESET_SECONDS`` for Custom."""
+        idx = getattr(self, "_schedule_delay_preset_idx", len(_DELAY_PRESETS) - 1)
+        if 0 <= idx < len(_DELAY_PRESETS):
+            val = _DELAY_PRESETS[idx][1]
+            if val is None:
+                return _CUSTOM_DELAY_PRESET_SECONDS
+            return int(val)
+        return 60
+
+    def _on_schedule_delay_menu_triggered(self, action: QAction):
+        data = action.data()
+        if data is None:
             return
-        combo = self.scheduleDelayPresetCombo
-        previous_data = combo.currentData()
-        combo.blockSignals(True)
-        combo.clear()
-        for key, value in _DELAY_PRESETS:
-            combo.addItem(tr_key(key), value)
-        if previous_data is not None:
-            for index in range(combo.count()):
-                if combo.itemData(index) == previous_data:
-                    combo.setCurrentIndex(index)
-                    break
-        combo.blockSignals(False)
+        self._schedule_delay_preset_idx = int(data)
+        self._update_schedule_delay_button_label()
+        self.update_schedule_timing_controls()
+
+    def _update_schedule_delay_button_label(self):
+        btn = getattr(self, "scheduleDelayPresetButton", None)
+        if btn is None:
+            return
+        idx = getattr(self, "_schedule_delay_preset_idx", len(_DELAY_PRESETS) - 1)
+        if not (0 <= idx < len(_DELAY_PRESETS)):
+            idx = len(_DELAY_PRESETS) - 1
+            self._schedule_delay_preset_idx = idx
+        key = _DELAY_PRESETS[idx][0]
+        text = _delay_preset_label(key)
+        if not text:
+            text = _DELAY_PRESET_FALLBACK_LABELS.get(key, key)
+        btn.setText(text)
+
+    def _rebuild_schedule_delay_preset_menu(self):
+        """Fill delay preset menu (QMenu avoids broken QComboBox popups on some Linux/Qt styles)."""
+        if not hasattr(self, "scheduleDelayPresetButton") or not self.scheduleDelayPresetButton:
+            return
+        btn = self.scheduleDelayPresetButton
+        if self._schedule_delay_menu is None:
+            self._schedule_delay_menu = QMenu(btn)
+            btn.setMenu(self._schedule_delay_menu)
+            btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
+            btn.setPopupMode(QToolButton.InstantPopup)
+            self._schedule_delay_menu.triggered.connect(self._on_schedule_delay_menu_triggered)
+        menu = self._schedule_delay_menu
+        menu.clear()
+        for idx, (key, _sec) in enumerate(_DELAY_PRESETS):
+            label = _delay_preset_label(key)
+            if not label:
+                label = _DELAY_PRESET_FALLBACK_LABELS.get(key, str(key))
+            act = QAction(label, self)
+            act.setData(idx)
+            menu.addAction(act)
+        self._update_schedule_delay_button_label()
+
+    def _configure_schedule_combo_interaction(self, combo):
+        """Make schedule target combo reliably clickable/openable (styled QComboBox issues on some Linux/Qt builds)."""
+        if combo is None:
+            return
+        combo.setFocusPolicy(Qt.StrongFocus)
+        combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        try:
+            view = combo.view()
+            view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            view.setTextElideMode(Qt.ElideRight)
+            view.setFocusPolicy(Qt.NoFocus)
+            view.setSelectionMode(QAbstractItemView.SingleSelection)
+        except Exception:
+            pass
 
     def _refresh_schedule_delay_preset_labels(self):
-        """Refresh delay preset visible labels (called by retranslate_ui)."""
-        self._populate_schedule_delay_presets()
+        """Refresh delay preset menu entries (called by retranslate_ui)."""
+        self._rebuild_schedule_delay_preset_menu()
 
     def _build_schedule_target_entries(self, executors):
         """Build combo entries from executor snapshots (any thread)."""
@@ -155,6 +259,7 @@ class GreenhouseSchedulingMixin:
 
         if not options:
             self.scheduleTargetCombo.addItem(tr_key(Schedule.NO_DEVICES), None)
+        self._configure_schedule_combo_interaction(self.scheduleTargetCombo)
 
     def _refresh_schedule_targets(self):
         """
@@ -280,29 +385,67 @@ class GreenhouseSchedulingMixin:
         if hasattr(self, "_update_server_empty_state"):
             self._update_server_empty_state()
 
-    def update_custom_delay_enabled(self):
-        """Enable custom delay controls only for custom preset."""
-        is_custom = False
-        if hasattr(self, "scheduleDelayPresetCombo"):
-            is_custom = self.scheduleDelayPresetCombo.currentData() == -1
+    def update_schedule_timing_controls(self):
+        """Enable either fixed date/time or relative delay controls (mutually exclusive)."""
+        fixed = bool(
+            hasattr(self, "scheduleFixedTimeCheck")
+            and self.scheduleFixedTimeCheck
+            and self.scheduleFixedTimeCheck.isChecked()
+        )
+        if hasattr(self, "scheduleRunAtDateTime") and self.scheduleRunAtDateTime:
+            self.scheduleRunAtDateTime.setEnabled(fixed)
+        if fixed:
+            if hasattr(self, "scheduleDelayCheck"):
+                self.scheduleDelayCheck.setEnabled(False)
+            if hasattr(self, "scheduleDelayPresetButton"):
+                self.scheduleDelayPresetButton.setEnabled(False)
+            for spin_name in ("scheduleHoursSpin", "scheduleMinutesSpin", "scheduleSecondsSpin"):
+                if hasattr(self, spin_name):
+                    getattr(self, spin_name).setEnabled(False)
+            return
+        if hasattr(self, "scheduleDelayCheck"):
+            self.scheduleDelayCheck.setEnabled(True)
+        self._update_relative_delay_widgets()
+
+    def _delay_ui_is_custom_duration(self) -> bool:
+        """True when h/m/s edits apply (Custom preset)."""
+        idx = getattr(self, "_schedule_delay_preset_idx", len(_DELAY_PRESETS) - 1)
+        return idx == len(_DELAY_PRESETS) - 1
+
+    def _update_relative_delay_widgets(self):
+        """Enable preset button/menu and custom h/m/s based on Delay checkbox and Custom preset."""
+        delay_enabled = True
+        if hasattr(self, "scheduleDelayCheck"):
+            delay_enabled = self.scheduleDelayCheck.isChecked()
+
+        if hasattr(self, "scheduleDelayPresetButton"):
+            self.scheduleDelayPresetButton.setEnabled(delay_enabled)
+
+        use_spin_duration = delay_enabled and self._delay_ui_is_custom_duration()
 
         for spin_name in ("scheduleHoursSpin", "scheduleMinutesSpin", "scheduleSecondsSpin"):
             if hasattr(self, spin_name):
-                getattr(self, spin_name).setEnabled(is_custom)
+                getattr(self, spin_name).setEnabled(use_spin_duration)
 
     def get_selected_interval_seconds(self):
         """Resolve one-time delay interval from preset/custom controls."""
-        if not hasattr(self, "scheduleDelayPresetCombo"):
-            return 60
-
-        preset_value = self.scheduleDelayPresetCombo.currentData()
-        if preset_value != -1:
-            return int(preset_value or 60)
+        if hasattr(self, "scheduleDelayCheck") and not self.scheduleDelayCheck.isChecked():
+            # Minimal delay so the one-time cron still fires immediately.
+            return 1
 
         hours = self.scheduleHoursSpin.value() if hasattr(self, "scheduleHoursSpin") else 0
         minutes = self.scheduleMinutesSpin.value() if hasattr(self, "scheduleMinutesSpin") else 0
         seconds = self.scheduleSecondsSpin.value() if hasattr(self, "scheduleSecondsSpin") else 0
-        return int(hours * 3600 + minutes * 60 + seconds)
+        spin_total = int(hours * 3600 + minutes * 60 + seconds)
+
+        if not hasattr(self, "scheduleDelayPresetButton"):
+            return max(1, spin_total or 60)
+
+        if self._delay_ui_is_custom_duration():
+            return max(1, spin_total)
+
+        preset_value = self._schedule_delay_preset_seconds()
+        return int(preset_value or 60)
 
     def _build_one_time_cron_expression(self, run_at_local):
         """Build cron expression for a single planned timestamp."""
@@ -372,13 +515,60 @@ class GreenhouseSchedulingMixin:
 
         command, parameters = selected_data
         target_label = str(self.scheduleTargetCombo.currentText())
-        interval_seconds = self.get_selected_interval_seconds()
-        if interval_seconds <= 0:
-            self.show_error(
-                tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL_TITLE),
-                tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL),
-            )
-            return
+
+        use_fixed_time = bool(
+            hasattr(self, "scheduleFixedTimeCheck")
+            and self.scheduleFixedTimeCheck
+            and self.scheduleFixedTimeCheck.isChecked()
+            and hasattr(self, "scheduleRunAtDateTime")
+            and self.scheduleRunAtDateTime
+        )
+        if use_fixed_time:
+            qdt = self.scheduleRunAtDateTime.dateTime()
+            if not qdt.isValid():
+                self.show_error(
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL_TITLE),
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL),
+                )
+                return
+            if hasattr(qdt, "toPyDateTime"):
+                naive_local = qdt.toPyDateTime()
+            elif hasattr(qdt, "toPython"):
+                naive_local = qdt.toPython()
+            else:
+                self.show_error(
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL_TITLE),
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL),
+                )
+                return
+            if naive_local is None:
+                self.show_error(
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL_TITLE),
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL),
+                )
+                return
+            tz = datetime.now().astimezone().tzinfo
+            run_at_local = naive_local.replace(tzinfo=tz)
+            now_local = datetime.now(tz)
+            delta_sec = (run_at_local - now_local).total_seconds()
+            if delta_sec <= 0:
+                self.show_error(
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL_TITLE),
+                    tr_key(Dialogs.SCHEDULING_ERROR_RUN_AT_PAST),
+                )
+                return
+            interval_seconds = max(1, int(delta_sec))
+            timing_mode = "fixed_clock"
+        else:
+            interval_seconds = self.get_selected_interval_seconds()
+            if interval_seconds <= 0:
+                self.show_error(
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL_TITLE),
+                    tr_key(Dialogs.SCHEDULING_ERROR_INTERVAL),
+                )
+                return
+            run_at_local = datetime.now().astimezone() + timedelta(seconds=interval_seconds)
+            timing_mode = "relative_delay"
 
         if self._schedule_mutate_in_flight:
             return
@@ -392,7 +582,6 @@ class GreenhouseSchedulingMixin:
             if not device_id:
                 return {"ok": False, "reason": "no_device"}
 
-            run_at_local = datetime.now().astimezone() + timedelta(seconds=interval_seconds)
             cron_expression = self._build_one_time_cron_expression(run_at_local)
             schedule_name = f"{target_label} at {run_at_local.strftime('%Y-%m-%d %H:%M:%S')}"[:120]
             payload = dict(parameters) if isinstance(parameters, dict) else {}
@@ -405,6 +594,7 @@ class GreenhouseSchedulingMixin:
                 "scheduleStatus": "pending",
                 "scheduleMode": "one_time",
                 "oneTime": True,
+                "timingMode": timing_mode,
             }
             created = self.core_api.create_schedule(
                 device_id=device_id,

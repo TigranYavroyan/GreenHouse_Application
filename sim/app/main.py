@@ -4,7 +4,7 @@ import random
 from copy import deepcopy
 from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,17 +56,95 @@ class CommandRequest(BaseModel):
     sessionId: str
 
 
-def default_logic_document() -> Dict[str, Any]:
-    """Minimal tree matching frontend `normalize_existing_logic_payload` / upload shape."""
-    return {
-        "root": {
-            "title": "root",
-            "condition": "always",
-            "args": [],
-            "actions": [],
+def _sim_sample_rule_chain() -> Dict[str, Any]:
+    """Build a ~20-node canvas sample: 16 rule nodes + 4 actions (for Logic Builder editing).
+
+    Shape matches desktop `normalize_existing_logic_payload` / upload contract.
+    Conditions and arg counts align with `frontend/modules/logic_constants.py` CONDITION_SPECS.
+    Action targets use simulator executor names from `CoreSimulator.executor_schema`.
+    """
+    # One entry per rule node in the chain (root first). Args must match condition arity.
+    rule_specs: List[Tuple[str, List[str]]] = [
+        ("always", []),
+        ("gt", ["air_temp", "26.0"]),
+        ("lt", ["humidity", "75.0"]),
+        ("in_range", ["soil_moisture", "20.0", "80.0"]),
+        ("gte", ["light", "300.0"]),
+        ("eq", ["co2", "400.0"]),
+        ("always_i64", []),
+        ("gte_i64", ["light", "100"]),
+        ("is_true", ["true"]),
+        ("is_false", ["false"]),
+        ("mod_lt", ["time", "3600", "1800"]),
+        ("never_bool", []),
+        ("always_bool", []),
+        ("lte", ["air_temp", "32.0"]),
+        ("neq", ["humidity", "99.0"]),
+        ("always", []),
+    ]
+
+    # Four actions on distinct rules → +4 canvas nodes (16 + 4 ≈ 20).
+    action_templates: Dict[int, List[Dict[str, Any]]] = {
+        0: [
+            {
+                "target": "fan_1",
+                "valueType": "bool",
+                "value": "true",
+                "trigger": "on_enter",
+                "enabled": True,
+            }
+        ],
+        4: [
+            {
+                "target": "heater_1",
+                "valueType": "bool",
+                "value": "false",
+                "trigger": "while_true",
+                "enabled": True,
+            }
+        ],
+        8: [
+            {
+                "target": "water_canal_1",
+                "valueType": "bool",
+                "value": "true",
+                "trigger": "on_enter",
+                "enabled": True,
+            }
+        ],
+        12: [
+            {
+                "target": "pump_pwm_1",
+                "valueType": "int",
+                "value": "64",
+                "trigger": "on_enter",
+                "enabled": True,
+            }
+        ],
+    }
+
+    def build(index: int) -> Dict[str, Any]:
+        if index >= len(rule_specs):
+            raise ValueError("chain index out of range")
+        cond, args = rule_specs[index]
+        title = "Greenhouse root" if index == 0 else f"Rule {index + 1:02d}"
+        node: Dict[str, Any] = {
+            "title": title,
+            "condition": cond,
+            "args": list(args),
+            "actions": list(action_templates.get(index, [])),
             "children": [],
         }
-    }
+        if index + 1 < len(rule_specs):
+            node["children"] = [build(index + 1)]
+        return node
+
+    return build(0)
+
+
+def default_logic_document() -> Dict[str, Any]:
+    """Default logic returned by GET logic/full (rich sample for desktop Logic Builder)."""
+    return {"root": _sim_sample_rule_chain()}
 
 
 class CoreSimulator:

@@ -1,3 +1,12 @@
+# Full Linux stack including the in-container core simulator (same layout as docker-compose.yml).
+#
+# Always stop with the same project file so every container — including greenhouse-core-sim — is removed:
+#   docker compose -f docker-compose.linux.sim.yml down
+#
+# If you sometimes use `docker compose` without `-f …linux.sim.yml`, leftover containers can remain.
+# Clean them with:
+#   docker compose -f docker-compose.linux.sim.yml down --remove-orphans
+
 services:
   redis:
     image: redis:7-alpine
@@ -49,6 +58,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    restart: "no"
+    stop_grace_period: 20s
 
   backend:
     build:
@@ -86,7 +97,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-  
+
   frontend:
     build:
       context: ./frontend

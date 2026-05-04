@@ -34,6 +34,8 @@ These paths match `backend/clients/greenhouseCoreClient.js` (what the Node backe
 - `GET /api/json/logic/full`
 - `POST /api/json/logic/upload`
 - `POST /api/json/logic/reload`
+
+The simulator seeds **`GET /api/json/logic/full`** with a sample rule tree (~16 rule nodes plus four executor actions, ~20 block-scheme nodes total) so the desktop **Logic Builder** tab has a non-empty graph to edit after **Get config** against this core.
 - `POST /api/v1/commands/execute` (direct HTTP command channel; backend normally uses getters/executors instead)
 
 If `GREENHOUSE_CORE_URL` includes an `/api/v1` base (e.g. `http://core:3001/api/v1`), the same routes are also mounted under that prefix (so `GET /api/v1/status` + `GET /status` both work). Disable the duplicate tree with:

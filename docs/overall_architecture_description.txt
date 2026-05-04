@@ -21,7 +21,7 @@
 
 ### B. Scheduling flow
 
-1. Desktop writes schedules via REST `/schedules`.
+1. Desktop writes schedules via REST `/schedules` (Scheduling tab: **Delay** supports fixed presets, custom duration, or optional **Run at date & time**; if Delay is off, a minimal delay is used; wall-clock time uses the datetime picker when enabled).
 2. Backend `SchedulesRuntime` loads enabled schedules and uses cron dispatch.
 3. Runtime publishes command envelopes to `greenhouse_commands`.
 4. One-time and recurring schedules update metadata/state differently (`completed`/`not_done` vs ongoing dispatch status).

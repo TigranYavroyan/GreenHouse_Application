@@ -240,8 +240,10 @@ class GreenhouseDesktop(
             self.cancelScheduledButton.clicked.connect(self.cancel_selected_schedule)
         if hasattr(self, "clearScheduledButton"):
             self.clearScheduledButton.clicked.connect(self.clear_all_schedules)
-        if hasattr(self, "scheduleDelayPresetCombo"):
-            self.scheduleDelayPresetCombo.currentIndexChanged.connect(self.update_custom_delay_enabled)
+        if hasattr(self, "scheduleDelayCheck"):
+            self.scheduleDelayCheck.toggled.connect(self.update_schedule_timing_controls)
+        if hasattr(self, "scheduleFixedTimeCheck"):
+            self.scheduleFixedTimeCheck.toggled.connect(self.update_schedule_timing_controls)
         if hasattr(self, "statisticsAllDataCheck"):
             self.statisticsAllDataCheck.toggled.connect(self._update_statistics_time_filters_enabled)
             self.statisticsAllDataCheck.toggled.connect(
@@ -598,8 +600,12 @@ class GreenhouseDesktop(
             if hasattr(table, "retranslate_ui"):
                 table.retranslate_ui()
 
-        if hasattr(self, "scheduleDelayPresetCombo") and self.scheduleDelayPresetCombo:
+        if hasattr(self, "scheduleDelayPresetButton") and self.scheduleDelayPresetButton:
             self._refresh_schedule_delay_preset_labels()
+        if hasattr(self, "update_schedule_timing_controls"):
+            self.update_schedule_timing_controls()
+        if hasattr(self, "finalize_schedule_delay_after_localization"):
+            self.finalize_schedule_delay_after_localization()
 
         if hasattr(self, "logicNodePaletteList") and self.logicNodePaletteList:
             self._refresh_logic_palette_labels()
